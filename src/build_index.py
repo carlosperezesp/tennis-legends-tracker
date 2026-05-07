@@ -13,6 +13,7 @@ GS trajectory, profile stats, and projections vs the legend benchmark.
 """
 
 import argparse
+import csv
 import json
 import math
 import sys
@@ -312,9 +313,44 @@ def _rank_color(rank: int) -> str:
 
 # ── HTML generation ───────────────────────────────────────────────────────────
 
-def render_index(players_data: list, legend_datasets: list) -> str:
+def _recent_matches() -> list:
+    """Read most recent notable ATP matches (GS/Masters/500/250/Davis)."""
+    seen: set = set()
+    matches = []
+    cache_dir = DATA_DIR / "_csv_cache"
+    for path in sorted(cache_dir.glob("atp_matches_*.csv"))[-3:]:
+        try:
+            with open(path, encoding="utf-8", newline="") as fh:
+                for row in csv.DictReader(fh):
+                    d = (row.get("tourney_date") or "").strip()
+                    if not d:
+                        continue
+                    lvl = (row.get("tourney_level") or "").strip()
+                    if lvl not in ("G", "M", "F", "A", "D"):
+                        continue
+                    key = d + row.get("tourney_id", "") + row.get("match_num", "")
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    matches.append({
+                        "date":       d,
+                        "tournament": row.get("tourney_name", "").title(),
+                        "level":      lvl,
+                        "round":      row.get("round", ""),
+                        "winner":     row.get("winner_name", ""),
+                        "loser":      row.get("loser_name", ""),
+                        "score":      row.get("score", ""),
+                    })
+        except Exception:
+            continue
+    matches.sort(key=lambda x: x["date"], reverse=True)
+    return matches[:200]
+
+
+def render_index(players_data: list, legend_datasets: list, recent_matches: list) -> str:
     legend_datasets_json = json.dumps(legend_datasets, ensure_ascii=False)
     players_json         = json.dumps(players_data,    ensure_ascii=False)
+    matches_json         = json.dumps(recent_matches,  ensure_ascii=False)
     legend_names_json    = json.dumps(BACKGROUND_LEGENDS)
 
     return f"""<!DOCTYPE html>
@@ -338,12 +374,16 @@ def render_index(players_data: list, legend_datasets: list) -> str:
       --text:   #00234B; --muted:  #64748b; --border: #e2e8f0;
     }}
 
-    body {{ font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }}
+    body {{ font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); }}
 
-    /* Layout */
-    .app {{ display: grid; grid-template-columns: 290px 1fr; height: 100vh; }}
+    /* ── Desktop layout ──────────────────────────────────────────────── */
+    @media (min-width: 769px) {{
+      body {{ height: 100vh; overflow: hidden; }}
+      #screens-track {{ display: grid; grid-template-columns: 290px 1fr; height: 100vh; }}
+      #screen-3, .mobile-topbar, #search-overlay {{ display: none !important; }}
+    }}
 
-    /* Sidebar */
+    /* Sidebar (screen-1) */
     .sidebar {{ background: var(--teal); color: #c4dcf4; display: flex; flex-direction: column; overflow: hidden; }}
     .sidebar-header {{ padding: 20px 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.1); }}
     .sidebar-header h1 {{ font-family: 'Lexend', sans-serif; font-size: 1rem; font-weight: 700; color: var(--lime); letter-spacing: 0.01em; margin-bottom: 12px; }}
@@ -462,60 +502,128 @@ def render_index(players_data: list, legend_datasets: list) -> str:
     .no-player {{ color: var(--muted); text-align: center; padding: 60px 20px; font-size: 1rem; font-family: 'Lexend', sans-serif; }}
     .data-note {{ font-size: 0.68rem; color: #9ca3af; margin-top: 10px; font-style: italic; font-family: 'Inter', sans-serif; }}
 
-    /* ── Mobile ──────────────────────────────────────────────────────────── */
-    .sidebar-toggle {{
-      display: none; position: fixed; bottom: 22px; right: 20px; z-index: 200;
-      background: var(--teal); color: var(--lime); border: none; border-radius: 50%;
-      width: 52px; height: 52px; font-size: 1.2rem; cursor: pointer;
-      box-shadow: 0 4px 20px rgba(0,35,75,0.5); align-items: center; justify-content: center;
-    }}
-    .sidebar-overlay {{
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90;
-    }}
-    @media (max-width: 680px) {{
-      body {{ overflow: auto; height: auto; }}
-      .app {{ grid-template-columns: 1fr; height: auto; overflow: visible; }}
-      .sidebar {{
-        position: fixed; left: -310px; top: 0; height: 100dvh;
-        width: 300px; z-index: 100; transition: left 0.22s ease;
+    /* ── Mobile: 3-screen swipe layout ─────────────────────────────── */
+    @media (max-width: 768px) {{
+      body {{ overflow: hidden; height: 100dvh; }}
+      #screens-track {{
+        display: flex; width: 300vw; height: 100dvh;
+        transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
       }}
-      .sidebar.open {{ left: 0; box-shadow: 4px 0 32px rgba(0,0,0,0.5); }}
-      .sidebar-overlay.visible {{ display: block; }}
-      .sidebar-toggle {{ display: flex; }}
-      .main {{ height: auto; overflow: visible; padding: 12px 12px 80px; gap: 12px; }}
-      .panels-row {{ grid-template-columns: 1fr; }}
+      .screen {{
+        width: 100vw; height: 100dvh; flex-shrink: 0;
+        display: flex; flex-direction: column; overflow: hidden;
+      }}
+      #screen-2 {{ background: var(--bg); }}
+      #screen-3 {{ background: var(--bg); display: flex; flex-direction: column; }}
+
+      /* Top nav bar (screens 2 & 3) */
+      .mobile-topbar {{
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 14px; background: var(--teal);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        flex-shrink: 0; position: sticky; top: 0; z-index: 10;
+      }}
+      .topbar-btn {{
+        background: none; border: none; color: #c4dcf4; font-size: 1.2rem;
+        cursor: pointer; padding: 6px 10px; border-radius: 8px;
+        transition: background 0.12s;
+      }}
+      .topbar-btn:active {{ background: rgba(255,255,255,0.15); }}
+      .topbar-title {{
+        font-family: 'Lexend', sans-serif; font-size: 0.9rem; font-weight: 700;
+        color: var(--lime);
+      }}
+      .topbar-search-btn {{
+        background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 50%; width: 38px; height: 38px; display: flex;
+        align-items: center; justify-content: center; font-size: 1rem;
+        color: #c4dcf4; cursor: pointer;
+      }}
+
+      /* Scrollable content areas */
+      .main {{ flex: 1; overflow-y: auto; padding: 12px 12px 30px; gap: 12px; height: auto; }}
+      .matches-content {{ flex: 1; overflow-y: auto; padding: 12px; }}
+
+      /* Screen 1: sidebar keeps its flex layout */
+      #screen-1 {{ height: 100dvh; overflow: hidden; }}
+      .sidebar-header {{ position: sticky; top: 0; z-index: 5; background: var(--teal); padding: 14px 14px 10px; }}
+      .player-list {{ flex: 1; overflow-y: auto; }}
+
+      /* Cards */
       .card {{ padding: 14px; border-radius: 12px; }}
-      .panel {{ padding: 12px; border-radius: 12px; }}
-
-      /* Projection cards */
-      .proj-value {{ font-size: 1.4rem; }}
-      .proj-label {{ font-size: 0.58rem; }}
-      .proj-item {{ padding: 10px 4px; }}
-
-      /* Two metrics — scale down rings on mobile */
-      .two-metrics {{ gap: 12px; }}
-      .metric-hero svg {{ width: 72px; height: 72px; }}
+      .panels-row {{ grid-template-columns: 1fr; }}
+      .two-metrics {{ gap: 10px; }}
+      .metric-hero svg {{ width: 70px; height: 70px; }}
       .metric-desc {{ display: none; }}
       .elo-badge-card {{ padding: 8px 12px; }}
       .elo-num-lg {{ font-size: 1.2rem; }}
-
-      .chart-wrap {{ height: 240px; }}
-      .stat-bar-row {{ grid-template-columns: 90px 1fr 54px; gap: 6px; }}
-      .stat-bar-label {{ font-size: 0.68rem; }}
-      .player-header h2 {{ font-size: 1.1rem; }}
-      .badge {{ font-size: 0.68rem; padding: 3px 8px; }}
+      .proj-value {{ font-size: 1.4rem; }}
+      .chart-wrap {{ height: 230px; }}
+      .stat-bar-row {{ grid-template-columns: 88px 1fr 52px; gap: 6px; }}
+      .stat-bar-label {{ font-size: 0.67rem; }}
+      .player-header h2 {{ font-size: 1.05rem; }}
+      .badge {{ font-size: 0.67rem; padding: 3px 7px; }}
     }}
+
+    /* ── Search overlay (mobile) ─────────────────────────────────── */
+    #search-overlay {{
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 500; align-items: flex-start; justify-content: center; padding-top: 60px;
+    }}
+    #search-overlay.open {{ display: flex; }}
+    .search-overlay-box {{
+      background: var(--white); border-radius: 14px; width: calc(100vw - 32px);
+      max-width: 420px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+    }}
+    .search-overlay-input {{
+      width: 100%; padding: 14px 16px; border: none; border-bottom: 1px solid var(--border);
+      font-size: 1rem; font-family: 'Inter', sans-serif; color: var(--text);
+      background: var(--white); outline: none;
+    }}
+    .search-overlay-results {{ max-height: 55vh; overflow-y: auto; }}
+    .search-result-item {{
+      padding: 10px 16px; cursor: pointer; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }}
+    .search-result-item:hover {{ background: var(--bg); }}
+    .search-result-item:active {{ background: rgba(163,230,53,0.1); }}
+    .sri-rank {{ font-size: 0.68rem; color: var(--muted); min-width: 28px; }}
+    .sri-name {{ font-size: 0.9rem; color: var(--text); }}
+    .sri-badge {{
+      margin-left: auto; font-size: 0.68rem; font-weight: 700; font-family: 'Lexend', sans-serif;
+      padding: 2px 6px; border-radius: 10px; border: 1px solid;
+    }}
+
+    /* ── Matches screen ──────────────────────────────────────────── */
+    .match-group {{ margin-bottom: 20px; }}
+    .match-group-title {{
+      font-family: 'Lexend', sans-serif; font-size: 0.70rem; font-weight: 700;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em;
+      padding: 6px 0 8px; border-bottom: 2px solid var(--teal); margin-bottom: 8px;
+    }}
+    .match-card {{
+      background: var(--white); border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 12px; margin-bottom: 6px;
+    }}
+    .match-player {{ display: flex; align-items: center; gap: 8px; padding: 4px 0; }}
+    .match-player.loser .match-pname {{ color: var(--muted); }}
+    .match-player.clickable {{ cursor: pointer; }}
+    .match-player.clickable:active {{ background: rgba(163,230,53,0.08); border-radius: 6px; }}
+    .match-pname {{ font-size: 0.85rem; font-weight: 500; flex: 1; }}
+    .match-pbadge {{
+      font-size: 0.68rem; font-weight: 700; font-family: 'Lexend', sans-serif;
+      padding: 2px 6px; border-radius: 8px; border: 1px solid currentColor;
+    }}
+    .match-score {{ font-size: 0.70rem; color: var(--muted); padding: 2px 0 4px; font-family: 'Lexend', sans-serif; }}
   </style>
 </head>
 <body>
-<button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" aria-label="Lista de jugadores">☰</button>
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
-<div class="app">
+<div id="screens-track">
 
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
+  <!-- Screen 1: Rankings -->
+  <div class="screen sidebar" id="screen-1">
     <div class="sidebar-header">
-      <h1>🎾 Legend Trajectory</h1>
+      <h1>🎾 Legend Tracker</h1>
       <input class="search-box" id="search" type="text" placeholder="Buscar jugador…" oninput="filterPlayers(this.value)"/>
       <div class="sort-controls">
         <button class="sort-btn active" id="sort-rank"     onclick="setSort('rank')">Ranking ↑</button>
@@ -527,13 +635,39 @@ def render_index(players_data: list, legend_datasets: list) -> str:
       <div class="player-count" id="player-count"></div>
     </div>
     <div class="player-list" id="player-list"></div>
-  </aside>
+  </div>
 
-  <!-- Main panel -->
-  <main class="main" id="main-panel">
-    <div class="no-player">← Selecciona un jugador</div>
-  </main>
+  <!-- Screen 2: Player detail -->
+  <div class="screen" id="screen-2">
+    <div class="mobile-topbar">
+      <button class="topbar-btn" onclick="goTo(1)" aria-label="Rankings">☰</button>
+      <button class="topbar-search-btn" onclick="openSearch()" aria-label="Buscar">&#9906;</button>
+      <button class="topbar-btn" onclick="goTo(3)" aria-label="Partidos">&#128197;</button>
+    </div>
+    <main class="main" id="main-panel">
+      <div class="no-player">Selecciona un jugador del ranking</div>
+    </main>
+  </div>
 
+  <!-- Screen 3: Recent matches -->
+  <div class="screen" id="screen-3">
+    <div class="mobile-topbar">
+      <button class="topbar-btn" onclick="goTo(2)" aria-label="Jugador">&#8592;</button>
+      <span class="topbar-title">Partidos recientes</span>
+      <span style="width:44px"></span>
+    </div>
+    <div id="matches-panel" class="matches-content"></div>
+  </div>
+
+</div>
+
+<!-- Search overlay (mobile) -->
+<div id="search-overlay" onclick="if(event.target===this)closeSearch()">
+  <div class="search-overlay-box">
+    <input class="search-overlay-input" id="search-overlay-input" type="text"
+      placeholder="Buscar jugador…" oninput="searchOverlayFilter(this.value)" autocomplete="off"/>
+    <div class="search-overlay-results" id="search-overlay-results"></div>
+  </div>
 </div>
 
 <script>
@@ -545,10 +679,122 @@ const N_LEG           = LEGEND_DATASETS.length;
 
 let activePlayer = null;
 
-window.toggleSidebar = function() {{
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('visible');
+// ── Screen navigation ─────────────────────────────────────────────────────────
+const RECENT_MATCHES = {matches_json};
+let currentScreen = 1;
+
+window.goTo = function(n) {{
+  if (window.innerWidth > 768) return;
+  currentScreen = Math.max(1, Math.min(3, n));
+  document.getElementById('screens-track').style.transform =
+    'translateX(-' + (currentScreen - 1) + '00vw)';
+  if (currentScreen === 3) renderMatches();
 }};
+
+// Swipe detection
+(function() {{
+  let sx = 0, sy = 0;
+  document.addEventListener('touchstart', e => {{
+    sx = e.changedTouches[0].clientX;
+    sy = e.changedTouches[0].clientY;
+  }}, {{passive: true}});
+  document.addEventListener('touchend', e => {{
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
+    if (dx < 0 && currentScreen < 3) goTo(currentScreen + 1);
+    if (dx > 0 && currentScreen > 1) goTo(currentScreen - 1);
+  }}, {{passive: true}});
+}})();
+
+// ── Search overlay ────────────────────────────────────────────────────────────
+window.openSearch = function() {{
+  document.getElementById('search-overlay').classList.add('open');
+  const inp = document.getElementById('search-overlay-input');
+  inp.value = '';
+  searchOverlayFilter('');
+  setTimeout(() => inp.focus(), 80);
+}};
+
+window.closeSearch = function() {{
+  document.getElementById('search-overlay').classList.remove('open');
+}};
+
+window.searchOverlayFilter = function(q) {{
+  const qn = q.toLowerCase().trim();
+  const list = qn ? ALL_PLAYERS.filter(p => p.name.toLowerCase().includes(qn))
+                  : sortPlayers(ALL_PLAYERS).slice(0, 30);
+  const el = document.getElementById('search-overlay-results');
+  el.innerHTML = list.map(p => {{
+    const v = p.tourPct ?? p.sim;
+    const c = simColor(v);
+    return '<div class="search-result-item" onclick="searchSelect(\'' + p.name.replace(/'/g, "\\'") + '\')">'
+      + '<span class="sri-rank">#' + p.rank + '</span>'
+      + '<span class="sri-name">' + p.name + '</span>'
+      + '<span class="sri-badge" style="color:' + c + ';border-color:' + c + '">' + (v != null ? v.toFixed(0) : '—') + '</span>'
+      + '</div>';
+  }}).join('');
+}};
+
+window.searchSelect = function(name) {{
+  closeSearch();
+  selectPlayer(name);
+}};
+
+// ── Matches rendering ─────────────────────────────────────────────────────────
+let matchesRendered = false;
+
+function renderMatches() {{
+  if (matchesRendered) return;
+  matchesRendered = true;
+  const el = document.getElementById('matches-panel');
+  if (!RECENT_MATCHES || !RECENT_MATCHES.length) {{
+    el.innerHTML = '<div style="padding:24px;color:var(--muted)">Sin partidos en el periodo.<br><small>Los datos se actualizan semanalmente.</small></div>';
+    return;
+  }}
+  const levelLabel = {{ G: 'Grand Slam', M: 'Masters 1000', F: 'ATP Finals', A: 'ATP 500 / 250', D: 'Davis Cup' }};
+  const groups = {{}};
+  RECENT_MATCHES.forEach(m => {{
+    const d = m.date;
+    const dStr = d.slice(0,4) + '-' + d.slice(4,6) + '-' + d.slice(6,8);
+    const key = (levelLabel[m.level] || 'ATP') + ' · ' + m.tournament + ' · ' + dStr;
+    if (!groups[key]) groups[key] = {{ level: m.level, rows: [] }};
+    groups[key].rows.push(m);
+  }});
+  let html = '';
+  for (const [gname, g] of Object.entries(groups)) {{
+    html += '<div class="match-group"><div class="match-group-title">' + gname + '</div>';
+    g.rows.forEach(m => {{
+      const wp = ALL_PLAYERS.find(p => p.name === m.winner);
+      const lp = ALL_PLAYERS.find(p => p.name === m.loser);
+      const wv = wp ? (wp.tourPct ?? wp.sim) : null;
+      const lv = lp ? (lp.tourPct ?? lp.sim) : null;
+      const wc = simColor(wv);
+      const lc = simColor(lv);
+      const wClick = wp ? ' onclick="selectAndGo(\'' + m.winner.replace(/'/g,"\\'") + '\')"' : '';
+      const lClick = lp ? ' onclick="selectAndGo(\'' + m.loser.replace(/'/g,"\\'") + '\')"' : '';
+      html += '<div class="match-card">'
+        + '<div class="match-player' + (wp ? ' clickable' : '') + '"' + wClick + '>'
+        + '<span class="match-pname"><b>' + m.winner + '</b></span>'
+        + (wv != null ? '<span class="match-pbadge" style="color:' + wc + ';border-color:' + wc + '">' + wv.toFixed(0) + '</span>' : '')
+        + '</div>'
+        + '<div class="match-score">' + (m.round || '') + (m.score ? ' · ' + m.score : '') + '</div>'
+        + '<div class="match-player loser' + (lp ? ' clickable' : '') + '"' + lClick + '>'
+        + '<span class="match-pname">' + m.loser + '</span>'
+        + (lv != null ? '<span class="match-pbadge" style="color:' + lc + ';border-color:' + lc + '">' + lv.toFixed(0) + '</span>' : '')
+        + '</div>'
+        + '</div>';
+    }});
+    html += '</div>';
+  }}
+  el.innerHTML = html;
+}}
+
+window.selectAndGo = function(name) {{
+  selectPlayer(name);
+  goTo(2);
+}};
+
 let legendsVisible = true;
 let projVisible    = true;
 let chart = null;
@@ -964,15 +1210,16 @@ function selectPlayer(name) {{
   if (!legendsVisible) for (let i = 0; i < N_LEG; i++) chart.getDatasetMeta(i).hidden = true;
   if (!projVisible)    for (let i = N_LEG+1; i < N_LEG+4; i++) if (chart.data.datasets[i]) chart.getDatasetMeta(i).hidden = true;
   if (!legendsVisible || !projVisible) chart.update();
-  // Auto-close sidebar on mobile
-  if (window.innerWidth <= 680 && document.getElementById('sidebar').classList.contains('open')) {{
-    toggleSidebar();
-  }}
+  // On mobile: navigate to player screen
+  if (window.innerWidth <= 768) goTo(2);
 }}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 buildSidebar(sortPlayers(ALL_PLAYERS));
-if (ALL_PLAYERS.length > 0) selectPlayer(sortPlayers(ALL_PLAYERS)[0].name);
+// Desktop: auto-select first player. Mobile: stay on screen 1 (rankings).
+if (ALL_PLAYERS.length > 0 && window.innerWidth > 768) {{
+  selectPlayer(sortPlayers(ALL_PLAYERS)[0].name);
+}}
 </script>
 </body>
 </html>"""
@@ -1106,9 +1353,14 @@ def main():
             "tension": 0.35, "fill": False, "order": 5,
         })
 
-    # 8. Render and save
+    # 8. Collect recent notable matches (screen 3)
+    print("Reading recent matches...")
+    recent_matches = _recent_matches()
+    print(f"  {len(recent_matches)} recent matches (GS/Masters/500/250/Davis)")
+
+    # 9. Render and save
     EXAMPLES_DIR.mkdir(parents=True, exist_ok=True)
-    html = render_index(players_data, legend_datasets)
+    html = render_index(players_data, legend_datasets, recent_matches)
     out_path = Path(args.output)
     out_path.write_text(html, encoding="utf-8")
     print(f"\nDone! → {out_path}")
