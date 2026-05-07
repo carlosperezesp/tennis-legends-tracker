@@ -647,6 +647,53 @@ def _performance_metrics_for_players(players: list, years_range, use_cache: bool
     return result
 
 
+def _annotate_performance_context(players_data: list) -> None:
+    """Attach current-tour percentile context to each available player metric."""
+    import bisect
+
+    surface_keys = ("All", "Hard", "Clay", "Grass")
+    value_keys_by_surface = {surf: {} for surf in surface_keys}
+
+    def iter_metric_rows(record: dict, surf: str):
+        metrics = (record.get("performanceBySurface") or {}).get(surf)
+        if not metrics:
+            return
+        for row in metrics.get("rows") or []:
+            yield row
+        for group in metrics.get("groups") or []:
+            for row in group.get("rows") or []:
+                yield row
+
+    for surf in surface_keys:
+        for record in players_data:
+            seen = set()
+            for row in iter_metric_rows(record, surf) or []:
+                key = row.get("key")
+                value = row.get("actual")
+                if key in seen or value is None or not isinstance(value, (int, float)) or not math.isfinite(value):
+                    continue
+                seen.add(key)
+                value_keys_by_surface[surf].setdefault(key, []).append(value)
+
+    distributions = {
+        surf: {key: sorted(values) for key, values in value_map.items() if len(values) >= 8}
+        for surf, value_map in value_keys_by_surface.items()
+    }
+
+    for surf in surface_keys:
+        for record in players_data:
+            for row in iter_metric_rows(record, surf) or []:
+                key = row.get("key")
+                value = row.get("actual")
+                values = distributions.get(surf, {}).get(key)
+                if value is None or not values:
+                    continue
+                pct = bisect.bisect_right(values, value) / len(values) * 100
+                row["tourPct"] = round(pct)
+                row["tourSample"] = len(values)
+                row["tourMedian"] = round(values[len(values) // 2], 1)
+
+
 # ── Build player record ───────────────────────────────────────────────────────
 
 def build_player_record(p: dict, stats_by_year: dict, benchmark: dict,
@@ -851,6 +898,28 @@ def _load_live_schedule() -> dict:
         return {"asOf": date.today().isoformat(), "days": []}
 
 
+def _next_matches_from_schedule(live_schedule: dict) -> dict:
+    result = {}
+    for day in live_schedule.get("days", []):
+        for idx, match in enumerate(day.get("matches", [])):
+            match_ref = f"match-{day.get('date', 'tbd')}-{idx}"
+            for side in ("player1", "player2"):
+                player_name = (match.get(side) or "").strip()
+                if not player_name or "/" in player_name or player_name.lower().startswith("atp "):
+                    continue
+                result.setdefault(player_name, {
+                    "status": match.get("status", "scheduled"),
+                    "tournament": match.get("tournament", "Torneo TBD"),
+                    "round": match.get("round", "TBD"),
+                    "opponent": match.get("player2") if side == "player1" else match.get("player1"),
+                    "surface": match.get("surface", "TBD"),
+                    "time": match.get("time", "TBD"),
+                    "asOf": live_schedule.get("asOf"),
+                    "matchRef": match_ref,
+                })
+    return result
+
+
 def render_index(players_data: list, legend_datasets: list, recent_matches: list, live_schedule: dict) -> str:
     players_json = json.dumps(players_data, ensure_ascii=False)
     live_schedule_json = json.dumps(live_schedule, ensure_ascii=False)
@@ -977,7 +1046,10 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       width: 100%; border: 1px solid var(--slate-medium, #3d3d3a); background: rgba(250,249,245,0.06);
       color: var(--ivory-light); padding: 14px 16px; text-align: left;
       display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center;
+      font: inherit;
     }}
+    button.next-match-chip {{ cursor: pointer; }}
+    button.next-match-chip:hover {{ background: rgba(250,249,245,0.11); }}
     .next-match-kicker {{
       font-family: 'JetBrains Mono', monospace; color: var(--ivory-dark);
       font-size: 11px; text-transform: uppercase; margin-bottom: 5px;
@@ -1038,6 +1110,23 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       font-size: 11px; text-transform: uppercase;
     }}
     .metric-name {{ color: var(--ivory-light); font-size: 15px; line-height: 1.25; }}
+    .metric-context {{
+      display: block; margin-top: 5px; font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; text-transform: uppercase; color: var(--ivory-dark);
+    }}
+    .metric-context.elite, .metric-actual.elite {{ color: var(--olive); }}
+    .metric-context.good, .metric-actual.good {{ color: #d7e789; }}
+    .metric-context.weak, .metric-actual.weak {{ color: #e19b71; }}
+    .metric-context.low, .metric-actual.low {{ color: var(--clay); }}
+    .metric-bar {{
+      display: block; width: min(132px, 100%); height: 4px; margin-top: 7px;
+      background: rgba(250,249,245,0.14); overflow: hidden;
+    }}
+    .metric-bar span {{ display: block; height: 100%; background: var(--ivory-dark); }}
+    .metric-bar span.elite {{ background: var(--olive); }}
+    .metric-bar span.good {{ background: #d7e789; }}
+    .metric-bar span.weak {{ background: #e19b71; }}
+    .metric-bar span.low {{ background: var(--clay); }}
     .metric-val {{
       font-family: 'JetBrains Mono', monospace; color: var(--ivory-light);
       font-size: 14px; font-variant-numeric: tabular-nums; text-align: right;
@@ -1384,14 +1473,16 @@ function renderNextMatch(p) {{
   const round = match.round ? match.round + ' · ' : '';
   const surface = match.surface ? ' · ' + match.surface : '';
   const time = match.time || 'TBD';
-  return '<div class="next-match-chip">' +
+  const tag = match.matchRef ? 'button' : 'div';
+  const action = match.matchRef ? ' type="button" onclick="goToMatch(\\'' + match.matchRef + '\\')"' : '';
+  return '<' + tag + ' class="next-match-chip"' + action + '>' +
     '<div>' +
       '<div class="next-match-kicker">Siguiente partido</div>' +
       '<div class="next-match-main">vs ' + opponent + '</div>' +
       '<div class="next-match-meta">' + round + tournament + surface + '</div>' +
     '</div>' +
     '<div class="next-match-time">' + time + '</div>' +
-  '</div>';
+  '</' + tag + '>';
 }}
 
 function renderPerformanceMetrics(p) {{
@@ -1402,14 +1493,30 @@ function renderPerformanceMetrics(p) {{
       '<div class="metric-table"><div class="metric-row"><div class="metric-name">Sin datos suficientes para esta superficie</div><div></div><div></div><div></div></div></div>' +
     '</section>';
   }}
+  const tourContext = row => {{
+    if (row.tourPct == null || !Number.isFinite(row.tourPct)) {{
+      return {{ cls: 'flat', label: 'Sin contexto ATP', width: 0 }};
+    }}
+    const pct = Math.max(0, Math.min(100, Math.round(row.tourPct)));
+    let cls = 'flat';
+    if (pct >= 85) cls = 'elite';
+    else if (pct >= 65) cls = 'good';
+    else if (pct <= 20) cls = 'low';
+    else if (pct <= 40) cls = 'weak';
+    return {{ cls, label: 'Mejor que ' + pct + '% ATP', width: pct }};
+  }};
   const rows = metrics.rows.map(r => {{
     const cls = r.diff > 0 ? 'up' : r.diff < 0 ? 'down' : 'flat';
     const sign = r.diff > 0 ? '+' : '';
     const mark = r.diff > 0 ? '&#9650;' : r.diff < 0 ? '&#9660;' : '&#8212;';
+    const ctx = tourContext(r);
     return '<div class="metric-row">' +
-      '<div class="metric-name">' + r.label + '</div>' +
+      '<div class="metric-name">' + r.label +
+        '<span class="metric-context ' + ctx.cls + '">' + ctx.label + '</span>' +
+        '<span class="metric-bar" aria-hidden="true"><span class="' + ctx.cls + '" style="width:' + ctx.width + '%"></span></span>' +
+      '</div>' +
       '<div class="metric-val">' + r.career + '%</div>' +
-      '<div class="metric-val">' + r.actual + '%</div>' +
+      '<div class="metric-val metric-actual ' + ctx.cls + '">' + r.actual + '%</div>' +
       '<div class="metric-val metric-diff ' + cls + '">' + mark + ' ' + sign + r.diff + '</div>' +
     '</div>';
   }}).join('');
@@ -1588,10 +1695,11 @@ function renderSchedule() {{
   wrap.innerHTML = days.map(day => {{
     const matches = day.matches || [];
     const body = matches.length
-      ? '<div class="match-list">' + matches.map(match => {{
+      ? '<div class="match-list">' + matches.map((match, idx) => {{
+          const ref = 'match-' + (day.date || 'tbd') + '-' + idx;
           const names = (match.player1 || 'TBD') + ' <span style="color:var(--cloud-dark)">vs</span> ' + (match.player2 || 'TBD');
           const info = [match.round, match.tournament, match.surface].filter(Boolean).join(' · ');
-          return '<details class="match-card">' +
+          return '<details class="match-card" id="' + ref + '" data-match-ref="' + ref + '">' +
             '<summary>' +
               '<div class="match-time">' + (match.time || 'TBD') + '</div>' +
               '<div><div class="match-names">' + names + '</div><div class="match-info">' + info + '</div></div>' +
@@ -1719,6 +1827,16 @@ function renderMatchComparison(match) {{
       rows +
     '</div>' +
   '</div>';
+}}
+
+function goToMatch(ref) {{
+  document.getElementById('schedule-tab')?.scrollIntoView({{ behavior: 'smooth', inline: 'start', block: 'nearest' }});
+  window.setTimeout(() => {{
+    const el = document.querySelector('[data-match-ref="' + ref + '"]');
+    if (!el) return;
+    el.open = true;
+    el.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+  }}, 280);
 }}
 
 function goToPlayerTab() {{
@@ -1868,7 +1986,17 @@ def main():
         players, range(1991, current_year + 1), use_cache=use_cache
     )
     print(f"  Performance metrics for {len(performance_metrics)} players")
-    next_matches = _load_next_matches()
+    live_schedule = _load_live_schedule()
+    schedule_next_matches = _next_matches_from_schedule(live_schedule)
+    manual_next_matches = _load_next_matches()
+    next_matches = {
+        **schedule_next_matches,
+        **manual_next_matches,
+    }
+    for name, match in manual_next_matches.items():
+        schedule_match = schedule_next_matches.get(name, {})
+        if schedule_match.get("matchRef") and not match.get("matchRef"):
+            next_matches[name]["matchRef"] = schedule_match["matchRef"]
     print(f"  Live next-match chips: {len(next_matches)}")
 
     # 6. Build player records
@@ -1913,6 +2041,8 @@ def main():
         r["tourPctBySurface"] = pct_by_surface
         r["tourPct"] = pct_by_surface.get("All")
 
+    _annotate_performance_context(players_data)
+
     # 7. Build legend background datasets
     legend_datasets = []
     for name in BACKGROUND_LEGENDS:
@@ -1930,7 +2060,6 @@ def main():
     print("Reading recent matches...")
     recent_matches = _recent_matches()
     print(f"  {len(recent_matches)} recent matches (GS/Masters/500/250/Davis)")
-    live_schedule = _load_live_schedule()
     live_match_count = sum(len(day.get("matches", [])) for day in live_schedule.get("days", []))
     print(f"  Live schedule matches: {live_match_count}")
 
