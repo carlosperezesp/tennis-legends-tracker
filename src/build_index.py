@@ -447,15 +447,17 @@ def render_index(players_data: list, legend_datasets: list) -> str:
     .stat-bar-fill {{ height: 100%; border-radius: 6px; transition: width 0.4s; }}
     .stat-bar-bench {{ position: absolute; top: -4px; width: 2px; height: 16px; background: var(--text); border-radius: 1px; opacity: 0.5; }}
     .stat-bar-val {{ font-size: 0.74rem; font-weight: 600; text-align: right; white-space: nowrap; font-family: 'Lexend', sans-serif; }}
-    /* Score rings */
-    .scores-section {{ display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; padding: 16px 12px; background: var(--bg); border-radius: 14px; }}
-    .score-ring-item {{ display: flex; flex-direction: column; align-items: center; gap: 6px; }}
-    .ring-label {{ font-family: 'Lexend', sans-serif; font-size: 0.66rem; font-weight: 700; color: var(--text); text-align: center; text-transform: uppercase; letter-spacing: 0.05em; }}
-    .ring-sub {{ font-size: 0.58rem; color: var(--muted); text-align: center; line-height: 1.3; }}
-    .elo-badge-card {{ display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 8px 14px; background: var(--teal); border-radius: 12px; align-self: center; }}
-    .elo-num-lg {{ font-family: 'Lexend', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--lime); line-height: 1; }}
+    /* Two main metrics */
+    .two-metrics {{ display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }}
+    .metric-hero {{ display: flex; flex-direction: column; align-items: center; gap: 7px; }}
+    .metric-name {{ font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 0.75rem; color: var(--text); text-align: center; }}
+    .metric-desc {{ font-size: 0.60rem; color: var(--muted); text-align: center; line-height: 1.4; max-width: 100px; }}
+    .elo-badge-card {{ display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 10px 16px; background: var(--teal); border-radius: 12px; align-self: center; }}
+    .elo-num-lg {{ font-family: 'Lexend', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--lime); line-height: 1; }}
     .elo-sub {{ font-size: 0.55rem; color: rgba(196,220,244,0.7); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }}
-    .data-years-note {{ font-size: 0.66rem; color: var(--muted); align-self: flex-end; margin-left: auto; line-height: 1.5; }}
+    .proj-strip {{ margin-top: 10px; font-size: 0.76rem; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }}
+    .proj-chip {{ padding: 3px 10px; border-radius: 20px; background: var(--bg); border: 1px solid var(--border); font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 0.76rem; }}
+    .proj-chip.cons {{ color: var(--sky); }} .proj-chip.med {{ color: var(--orange); }} .proj-chip.agr {{ color: var(--green); }}
 
     .no-player {{ color: var(--muted); text-align: center; padding: 60px 20px; font-size: 1rem; font-family: 'Lexend', sans-serif; }}
     .data-note {{ font-size: 0.68rem; color: #9ca3af; margin-top: 10px; font-style: italic; font-family: 'Inter', sans-serif; }}
@@ -490,13 +492,12 @@ def render_index(players_data: list, legend_datasets: list) -> str:
       .proj-label {{ font-size: 0.58rem; }}
       .proj-item {{ padding: 10px 4px; }}
 
-      /* Score rings — scale down SVGs via CSS */
-      .scores-section {{ gap: 8px; padding: 12px 8px; justify-content: space-around; }}
-      .score-ring-item svg {{ width: 62px; height: 62px; }}
-      .ring-sub {{ display: none; }}
-      .elo-badge-card {{ padding: 6px 10px; }}
-      .elo-num-lg {{ font-size: 1.15rem; }}
-      .data-years-note {{ display: none; }}
+      /* Two metrics — scale down rings on mobile */
+      .two-metrics {{ gap: 12px; }}
+      .metric-hero svg {{ width: 72px; height: 72px; }}
+      .metric-desc {{ display: none; }}
+      .elo-badge-card {{ padding: 8px 12px; }}
+      .elo-num-lg {{ font-size: 1.2rem; }}
 
       .chart-wrap {{ height: 240px; }}
       .stat-bar-row {{ grid-template-columns: 90px 1fr 54px; gap: 6px; }}
@@ -808,34 +809,27 @@ function renderGameStats(p) {{
   const capiStr = isLegend ? '∞' : (capi != null ? capi.toFixed(1) : '—');
   const ntStr   = isLegend ? '∞' : (nt   != null ? nt.toFixed(1)   : '—');
 
-  const tourVal = isLegend ? sim : tourPct;
-  const tourC   = isLegend ? sc : tc;
+  // Metric 2: for legends show sim (achievement); for active players show capi (potential)
+  const m2val   = isLegend ? sim   : capi;
+  const m2color = isLegend ? sc    : cc;
+  const m2name  = isLegend ? 'Score leyenda'        : 'Trayectoria leyenda';
+  const m2desc  = isLegend ? 'vs benchmark a esa edad' : 'Ajustado por edad y GS ganados';
+
   let html = `
-    <div class="scores-section">
-      <div class="score-ring-item">
-        ${{ringHTML(tourVal, tourC)}}
-        <div class="ring-label">${{isLegend ? 'Leyenda' : 'Circuito'}}</div>
-        <div class="ring-sub">${{isLegend ? 'score vs benchmark' : 'percentil top 200'}}</div>
+    <div class="two-metrics">
+      <div class="metric-hero">
+        ${{ringHTML(isLegend ? sim : tourPct, isLegend ? sc : tc, 88)}}
+        <div class="metric-name">Nivel actual</div>
+        <div class="metric-desc">Percentil entre los top 200 de hoy</div>
       </div>
-      <div class="score-ring-item">
-        ${{ringHTML(sim, sc)}}
-        <div class="ring-label">vs Leyendas</div>
-        <div class="ring-sub">79–87 = leyenda</div>
-      </div>
-      <div class="score-ring-item">
-        ${{ringHTML(isLegend ? null : capi, cc)}}
-        <div class="ring-label">Potencial</div>
-        <div class="ring-sub">carrera restante</div>
-      </div>
-      <div class="score-ring-item">
-        ${{ringHTML(isLegend ? null : nt, ntc)}}
-        <div class="ring-label">Próximo GS</div>
-        <div class="ring-sub">próx. 3 años</div>
+      <div class="metric-hero">
+        ${{ringHTML(m2val, m2color, 88)}}
+        <div class="metric-name">${{m2name}}</div>
+        <div class="metric-desc">${{m2desc}}</div>
       </div>
       ${{elo != null ? '<div class="elo-badge-card"><span class="elo-num-lg">' + elo + '</span><span class="elo-sub">Elo · top ~2275</span></div>' : ''}}
-      <div class="data-years-note">${{p.yearsOfData}}a · ${{p.latestYear}}</div>
     </div>
-    ${{p.phrase ? '<p style="font-size:0.82rem;color:#334155;line-height:1.75;margin:0 0 14px;padding:11px 14px;background:rgba(0,35,75,0.04);border-radius:10px;border-left:3px solid var(--teal)">' + p.phrase + '</p>' : ''}}
+    ${{p.phrase ? '<p style="font-size:0.82rem;color:#334155;line-height:1.75;margin:0 0 16px;padding:11px 14px;background:rgba(0,35,75,0.04);border-radius:10px;border-left:3px solid var(--teal)">' + p.phrase + '</p>' : ''}}
     <div class="stat-bar-grid">`;
 
   for (const [key, label] of Object.entries(STAT_LABELS)) {{
@@ -891,6 +885,29 @@ function renderGameStats(p) {{
     </div>`;
   }}
 
+  // Comparison vs legends at same age
+  if (p.comparison && p.comparison.length > 0) {{
+    html += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">';
+    html += '<div style="font-size:0.68rem;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.07em;font-family:Lexend,sans-serif">A la misma edad · leyendas históricas</div>';
+    html += '<div style="overflow-x:auto"><table style="min-width:280px"><thead><tr><th>Jugador</th><th class="td-c">GS</th><th class="td-c">Dif.</th><th class="td-c">Score</th></tr></thead><tbody>';
+    p.comparison.forEach(c => {{
+      const dc      = c.diff > 0 ? 'diff-pos' : c.diff < 0 ? 'diff-neg' : '';
+      const ds      = c.diff > 0 ? '+' + c.diff : String(c.diff);
+      const rawDiff = c.simAtAge != null ? (p.sim - c.simAtAge) : null;
+      const stxt    = c.simAtAge != null ? c.simAtAge.toFixed(1) : '—';
+      const dtxt    = rawDiff != null ? (rawDiff >= 0 ? '+' + rawDiff.toFixed(1) : rawDiff.toFixed(1)) : '';
+      const dcol    = rawDiff == null ? '#888' : rawDiff >= 0 ? '#119822' : '#e63946';
+      html += '<tr>'
+        + '<td><span class="color-dot" style="background:' + c.color + '"></span>' + c.name + '</td>'
+        + '<td class="td-c">' + c.gs + '</td>'
+        + '<td class="td-c ' + dc + '">' + ds + '</td>'
+        + '<td class="td-c" style="font-size:0.78rem;white-space:nowrap"><span style="color:#888">' + stxt + '</span>'
+        + (dtxt ? '<span style="color:' + dcol + ';margin-left:3px;font-weight:600">' + dtxt + '</span>' : '')
+        + '</td></tr>';
+    }});
+    html += '</tbody></table></div></div>';
+  }}
+
   el.innerHTML = html;
 }}
 
@@ -907,23 +924,6 @@ function selectPlayer(name) {{
 
   // Build main panel HTML
   const simC = simColor(p.sim);
-  const compRows = p.comparison.map(c => {{
-    const dc       = c.diff > 0 ? 'diff-pos' : c.diff < 0 ? 'diff-neg' : '';
-    const ds       = c.diff > 0 ? `+${{c.diff}}` : String(c.diff);
-    const rawDiff  = c.simAtAge != null ? (p.sim - c.simAtAge) : null;
-    const scoreTxt = c.simAtAge != null ? c.simAtAge.toFixed(1) : '—';
-    const diffTxt  = rawDiff != null ? (rawDiff >= 0 ? `+${{rawDiff.toFixed(1)}}` : rawDiff.toFixed(1)) : '';
-    const diffCol  = rawDiff == null ? '#888' : rawDiff >= 0 ? '#119822' : '#e63946';
-    return `<tr>
-      <td><span class="color-dot" style="background:${{c.color}}"></span>${{c.name}}</td>
-      <td class="td-c">${{c.gs}}</td>
-      <td class="td-c ${{dc}}">${{ds}}</td>
-      <td class="td-c" style="font-size:0.78rem;white-space:nowrap">
-        <span style="color:#888">${{scoreTxt}}</span>
-        ${{diffTxt ? `<span style="color:${{diffCol}};margin-left:3px;font-weight:600">${{diffTxt}}</span>` : ''}}
-      </td>
-    </tr>`;
-  }}).join('');
 
   document.getElementById('main-panel').innerHTML = `
     <div class="card">
@@ -933,35 +933,20 @@ function selectPlayer(name) {{
         <span class="badge badge-gs">${{p.gs}} GS · Edad ${{p.age}}</span>
         <span class="badge badge-sim" style="background:${{p.isLegend ? 'var(--teal)' : simC}};border:${{p.isLegend ? '2px solid var(--lime)' : 'none'}}">${{p.isLegend ? '∞ Leyenda' : (p.sim != null ? p.sim.toFixed(1) + '/100' : '?')}}</span>
       </div>
-    </div>
-
-    <div class="panels-row">
-      <div class="panel">
-        <h3>Proyección Grand Slams</h3>
-        <div class="proj-grid">
-          <div class="proj-item"><span class="proj-label">Conservadora</span><span class="proj-value blue">${{p.proj.c}}</span></div>
-          <div class="proj-item"><span class="proj-label">Media</span><span class="proj-value orange">${{p.proj.m}}</span></div>
-          <div class="proj-item"><span class="proj-label">Agresiva</span><span class="proj-value green">${{p.proj.a}}</span></div>
-        </div>
-      </div>
-      <div class="panel">
-        <h3>A la misma edad — leyendas históricas</h3>
-        <div style="overflow-x:auto">
-          <table style="min-width:280px">
-            <thead><tr><th>Jugador</th><th class="td-c">GS</th><th class="td-c">Dif.</th><th class="td-c">Score</th></tr></thead>
-            <tbody>${{compRows || '<tr><td colspan="4" style="color:#aaa">Sin datos</td></tr>'}}</tbody>
-          </table>
-        </div>
+      <div class="proj-strip">
+        <span style="color:var(--muted)">GS proyectados:</span>
+        <span class="proj-chip cons">${{p.proj.c}} cons.</span>
+        <span class="proj-chip med">${{p.proj.m}} media</span>
+        <span class="proj-chip agr">${{p.proj.a}} agr.</span>
       </div>
     </div>
 
     <div class="card">
-      <h3 style="font-size:0.88rem;color:#555;margin-bottom:12px">Perfil de juego vs benchmark de leyenda</h3>
       <div id="game-stats-content"></div>
     </div>
 
     <div class="chart-panel card" style="padding:16px">
-      <h3 style="font-size:0.88rem;color:#555;margin-bottom:4px">Trayectoria por edad</h3>
+      <h3>Trayectoria por edad</h3>
       <p class="chart-sub">Leyendas como referencia. Proyecciones punteadas basadas en el Potential Score.</p>
       <div class="chart-controls">
         <button class="ctrl-btn active" id="btn-legends" onclick="toggleGroup(this,'legends')">Leyendas</button>
