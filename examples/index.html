@@ -12,11 +12,11 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --lime:   #D6FF00; --teal:   #08605F; --teal2:  #0a7a79;
+      --lime:   #A3E635; --teal:   #00234B; --teal2:  #003070;
       --green:  #119822; --sky:    #00ABE7; --aqua:   #2DC7FF;
       --red:    #e63946; --orange: #f59e0b;
-      --bg:     #f3f6f9; --white:  #ffffff;
-      --text:   #111827; --muted:  #6b7280; --border: #e5e7eb;
+      --bg:     #F8F9FA; --white:  #ffffff;
+      --text:   #00234B; --muted:  #64748b; --border: #e2e8f0;
     }
 
     body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
@@ -25,13 +25,13 @@
     .app { display: grid; grid-template-columns: 290px 1fr; height: 100vh; }
 
     /* Sidebar */
-    .sidebar { background: var(--teal); color: #d4f0ef; display: flex; flex-direction: column; overflow: hidden; }
+    .sidebar { background: var(--teal); color: #c4dcf4; display: flex; flex-direction: column; overflow: hidden; }
     .sidebar-header { padding: 20px 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.1); }
     .sidebar-header h1 { font-family: 'Lexend', sans-serif; font-size: 1rem; font-weight: 700; color: var(--lime); letter-spacing: 0.01em; margin-bottom: 12px; }
     .search-box {
       width: 100%; padding: 8px 12px; border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.08); color: #d4f0ef;
+      background: rgba(255,255,255,0.08); color: #c4dcf4;
       font-size: 0.85rem; outline: none; font-family: 'Inter', sans-serif;
     }
     .search-box::placeholder { color: rgba(255,255,255,0.35); }
@@ -58,9 +58,9 @@
       border-left: 3px solid transparent; transition: all 0.12s;
     }
     .player-item:hover { background: rgba(255,255,255,0.07); }
-    .player-item.active { background: rgba(214,255,0,0.08); border-left-color: var(--lime); }
+    .player-item.active { background: rgba(163,230,53,0.12); border-left-color: var(--lime); }
     .p-rank { font-size: 0.70rem; color: rgba(255,255,255,0.38); text-align: right; font-family: 'Lexend', sans-serif; }
-    .p-name { font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #d4f0ef; }
+    .p-name { font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #c4dcf4; }
     .p-age  { font-size: 0.67rem; color: rgba(255,255,255,0.42); }
     .p-sim  {
       font-size: 0.70rem; font-weight: 700; padding: 2px 7px;
@@ -128,22 +128,28 @@
     .stat-bar-fill { height: 100%; border-radius: 6px; transition: width 0.4s; }
     .stat-bar-bench { position: absolute; top: -4px; width: 2px; height: 16px; background: var(--text); border-radius: 1px; opacity: 0.5; }
     .stat-bar-val { font-size: 0.74rem; font-weight: 600; text-align: right; white-space: nowrap; font-family: 'Lexend', sans-serif; }
-    .potential-row { display: flex; align-items: flex-start; gap: 0; margin-bottom: 16px; }
-    .potential-score { font-family: 'Lexend', sans-serif; font-size: 2rem; font-weight: 800; line-height: 1.1; }
-    .potential-label { font-size: 0.70rem; color: var(--muted); line-height: 1.5; margin-top: 3px; font-family: 'Inter', sans-serif; font-weight: 500; }
+    /* Score rings */
+    .scores-section { display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; padding: 16px 12px; background: var(--bg); border-radius: 14px; }
+    .score-ring-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .ring-label { font-family: 'Lexend', sans-serif; font-size: 0.66rem; font-weight: 700; color: var(--text); text-align: center; text-transform: uppercase; letter-spacing: 0.05em; }
+    .ring-sub { font-size: 0.58rem; color: var(--muted); text-align: center; line-height: 1.3; }
+    .elo-badge-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 8px 14px; background: var(--teal); border-radius: 12px; align-self: center; }
+    .elo-num-lg { font-family: 'Lexend', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--lime); line-height: 1; }
+    .elo-sub { font-size: 0.55rem; color: rgba(196,220,244,0.7); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+    .data-years-note { font-size: 0.66rem; color: var(--muted); align-self: flex-end; margin-left: auto; line-height: 1.5; }
 
     .no-player { color: var(--muted); text-align: center; padding: 60px 20px; font-size: 1rem; font-family: 'Lexend', sans-serif; }
     .data-note { font-size: 0.68rem; color: #9ca3af; margin-top: 10px; font-style: italic; font-family: 'Inter', sans-serif; }
 
     /* ── Mobile ──────────────────────────────────────────────────────────── */
     .sidebar-toggle {
-      display: none; position: fixed; bottom: 20px; left: 20px; z-index: 200;
+      display: none; position: fixed; bottom: 22px; right: 20px; z-index: 200;
       background: var(--teal); color: var(--lime); border: none; border-radius: 50%;
-      width: 54px; height: 54px; font-size: 1.3rem; cursor: pointer;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.45); align-items: center; justify-content: center;
+      width: 52px; height: 52px; font-size: 1.2rem; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,35,75,0.5); align-items: center; justify-content: center;
     }
     .sidebar-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 90;
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90;
     }
     @media (max-width: 680px) {
       body { overflow: auto; height: auto; }
@@ -152,38 +158,32 @@
         position: fixed; left: -310px; top: 0; height: 100dvh;
         width: 300px; z-index: 100; transition: left 0.22s ease;
       }
-      .sidebar.open { left: 0; box-shadow: 4px 0 28px rgba(0,0,0,0.4); }
+      .sidebar.open { left: 0; box-shadow: 4px 0 32px rgba(0,0,0,0.5); }
       .sidebar-overlay.visible { display: block; }
       .sidebar-toggle { display: flex; }
-      .main { height: auto; overflow: visible; padding: 12px 12px 80px; }
+      .main { height: auto; overflow: visible; padding: 12px 12px 80px; gap: 12px; }
       .panels-row { grid-template-columns: 1fr; }
+      .card { padding: 14px; border-radius: 12px; }
+      .panel { padding: 12px; border-radius: 12px; }
 
-      /* Projection cards — 3 equal columns, smaller font */
-      .proj-value { font-size: 1.3rem; }
-      .proj-label { font-size: 0.60rem; }
+      /* Projection cards */
+      .proj-value { font-size: 1.4rem; }
+      .proj-label { font-size: 0.58rem; }
+      .proj-item { padding: 10px 4px; }
 
-      /* Metrics row — 2-column grid instead of horizontal scroll */
-      .potential-row {
-        display: grid; grid-template-columns: 1fr 1fr;
-        overflow: visible; flex-wrap: unset; gap: 10px;
-      }
-      .potential-row > div {
-        border-left: none !important; padding-left: 0 !important;
-        border-top: 1px solid var(--border); padding-top: 8px; min-width: unset;
-      }
-      .potential-row > div:nth-child(-n+2) { border-top: none; padding-top: 0; }
-      /* Last child (data note) spans full width */
-      .potential-row > div:last-child { grid-column: 1 / -1; border-top: 1px solid var(--border); padding-top: 8px; }
-      .potential-score { font-size: 1.55rem; }
-      /* Hide multi-line subtitles — just keep the main label */
-      .potential-label > span { display: none; }
-      .potential-label { font-size: 0.72rem; }
+      /* Score rings — scale down SVGs via CSS */
+      .scores-section { gap: 8px; padding: 12px 8px; justify-content: space-around; }
+      .score-ring-item svg { width: 62px; height: 62px; }
+      .ring-sub { display: none; }
+      .elo-badge-card { padding: 6px 10px; }
+      .elo-num-lg { font-size: 1.15rem; }
+      .data-years-note { display: none; }
 
-      .chart-wrap { height: 250px; }
-      .stat-bar-row { grid-template-columns: 96px 1fr 56px; }
-      .stat-bar-label { font-size: 0.70rem; }
-      .player-header h2 { font-size: 1.15rem; }
-      .badge { font-size: 0.70rem; padding: 3px 7px; }
+      .chart-wrap { height: 240px; }
+      .stat-bar-row { grid-template-columns: 90px 1fr 54px; gap: 6px; }
+      .stat-bar-label { font-size: 0.68rem; }
+      .player-header h2 { font-size: 1.1rem; }
+      .badge { font-size: 0.68rem; padding: 3px 8px; }
     }
   </style>
 </head>
@@ -285,7 +285,7 @@ function buildSidebar(players) {
     div.dataset.name = p.name;
     let sc, badge;
     if (p.isLegend) {
-      sc = '#2DC7FF'; badge = '∞';
+      sc = '#A3E635'; badge = '∞';
     } else if (sortKey === 'elo') {
       sc = eloColor(p.elo);       badge = p.elo      != null ? String(p.elo)              : '—';
     } else if (sortKey === 'nearterm') {
@@ -434,6 +434,26 @@ function toPct(val, key) {
   return Math.max(0, Math.min(100, (val - r[0]) / (r[1] - r[0]) * 100));
 }
 
+// Ring SVG helper — score 0-100, color, size px
+function ringHTML(score, color, sz) {
+  sz = sz || 70;
+  const r = sz / 2 - 6;
+  const circ = 2 * Math.PI * r;
+  const pct = score != null ? Math.min(Math.max(score, 0), 100) : 0;
+  const dash = (circ * pct / 100).toFixed(1);
+  const arc = score != null
+    ? '<circle cx="' + sz/2 + '" cy="' + sz/2 + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="5.5" stroke-dasharray="' + dash + ' ' + circ.toFixed(1) + '" stroke-linecap="round" transform="rotate(-90 ' + sz/2 + ' ' + sz/2 + ')"/>'
+    : '';
+  const label = score != null ? Math.round(score) : '—';
+  const tc = score != null ? color : '#94a3b8';
+  return '<svg width="' + sz + '" height="' + sz + '" viewBox="0 0 ' + sz + ' ' + sz + '" style="display:block">'
+    + '<circle cx="' + sz/2 + '" cy="' + sz/2 + '" r="' + r + '" fill="none" stroke="#e2e8f0" stroke-width="5.5"/>'
+    + arc
+    + '<text x="' + sz/2 + '" y="' + (sz/2 + 1) + '" text-anchor="middle" dominant-baseline="middle"'
+    + ' font-family="Lexend,sans-serif" font-weight="800" font-size="' + Math.round(sz * 0.24) + 'px" fill="' + tc + '">' + label + '</text>'
+    + '</svg>';
+}
+
 function capiColor(v) {
   if (v == null) return '#888';
   if (v >= 75) return '#119822';
@@ -469,33 +489,34 @@ function renderGameStats(p) {
   const capiStr = isLegend ? '∞' : (capi != null ? capi.toFixed(1) : '—');
   const ntStr   = isLegend ? '∞' : (nt   != null ? nt.toFixed(1)   : '—');
 
+  const tourVal = isLegend ? sim : tourPct;
+  const tourC   = isLegend ? sc : tc;
   let html = `
-    <div class="potential-row">
-      <div>
-        <div class="potential-score" style="color:${tc}">${tourStr}<span style="font-size:1rem;font-weight:400;color:#888">${isLegend ? '' : '/100'}</span></div>
-        <div class="potential-label">Calidad en el circuito<br><span style="font-size:0.68rem">Percentil entre los jugadores<br>actuales del top 200</span></div>
+    <div class="scores-section">
+      <div class="score-ring-item">
+        ${ringHTML(tourVal, tourC)}
+        <div class="ring-label">${isLegend ? 'Leyenda' : 'Circuito'}</div>
+        <div class="ring-sub">${isLegend ? 'score vs benchmark' : 'percentil top 200'}</div>
       </div>
-      <div style="border-left:1px solid var(--border);padding-left:14px">
-        <div class="potential-score" style="color:${sc}">${sim != null ? sim.toFixed(1) : '—'}<span style="font-size:1rem;font-weight:400;color:#888">/100</span></div>
-        <div class="potential-label">Índice leyenda<br><span style="font-size:0.68rem">Perfil vs los 4 grandes a esa edad<br>(ellos puntuaban 79–87)</span></div>
+      <div class="score-ring-item">
+        ${ringHTML(sim, sc)}
+        <div class="ring-label">vs Leyendas</div>
+        <div class="ring-sub">79–87 = leyenda</div>
       </div>
-      <div style="border-left:1px solid var(--border);padding-left:14px">
-        <div class="potential-score" style="color:${cc}">${capiStr}<span style="font-size:1rem;font-weight:400;color:#888">${isLegend ? '' : '/100'}</span></div>
-        <div class="potential-label">Potencial de carrera<br><span style="font-size:0.68rem">Índice leyenda descontado<br>por edad y GS ganados</span></div>
+      <div class="score-ring-item">
+        ${ringHTML(isLegend ? null : capi, cc)}
+        <div class="ring-label">Potencial</div>
+        <div class="ring-sub">carrera restante</div>
       </div>
-      <div style="border-left:1px solid var(--border);padding-left:14px">
-        <div class="potential-score" style="color:${ntc}">${ntStr}<span style="font-size:1rem;font-weight:400;color:#888">${isLegend ? '' : '/100'}</span></div>
-        <div class="potential-label">Prob. próxima<br><span style="font-size:0.68rem">Probabilidad de ganar un GS<br>en los próximos 3 años</span></div>
+      <div class="score-ring-item">
+        ${ringHTML(isLegend ? null : nt, ntc)}
+        <div class="ring-label">Próximo GS</div>
+        <div class="ring-sub">próx. 3 años</div>
       </div>
-      <div style="border-left:1px solid var(--border);padding-left:14px">
-        <div class="potential-score" style="color:${ec}">${elo != null ? elo : '—'}</div>
-        <div class="potential-label">Elo rating<br><span style="font-size:0.68rem">Historial desde 1991<br>top: Sinner ~2275</span></div>
-      </div>
-      <div style="font-size:0.73rem;color:#888;line-height:1.6;margin-left:auto">
-        Datos: ${p.yearsOfData} año(s)<br>último año: ${p.latestYear}
-      </div>
+      ${elo != null ? '<div class="elo-badge-card"><span class="elo-num-lg">' + elo + '</span><span class="elo-sub">Elo · top ~2275</span></div>' : ''}
+      <div class="data-years-note">${p.yearsOfData}a · ${p.latestYear}</div>
     </div>
-    ${p.phrase ? `<p style="font-size:0.83rem;color:#333;line-height:1.7;margin:0 0 14px;padding:10px 14px;background:rgba(8,96,95,0.06);border-radius:8px;border-left:3px solid #08605F">${p.phrase}</p>` : ''}
+    ${p.phrase ? '<p style="font-size:0.82rem;color:#334155;line-height:1.75;margin:0 0 14px;padding:11px 14px;background:rgba(0,35,75,0.04);border-radius:10px;border-left:3px solid var(--teal)">' + p.phrase + '</p>' : ''}
     <div class="stat-bar-grid">`;
 
   for (const [key, label] of Object.entries(STAT_LABELS)) {
@@ -538,8 +559,8 @@ function renderGameStats(p) {
         <td style="padding:4px 8px;text-align:center;color:#888">${d.matches}p</td>
       </tr>`;
     }
-    html += `<div style="margin-top:12px;padding-top:10px;border-top:1px solid #e8eaf5">
-      <div style="font-size:0.78rem;font-weight:600;color:#555;margin-bottom:6px">Por superficie (últimos ${p.yearsOfData} años)</div>
+    html += `<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+      <div style="font-size:0.78rem;font-weight:600;color:var(--muted);margin-bottom:6px">Por superficie (últimos ${p.yearsOfData} años)</div>
       <table style="width:100%;border-collapse:collapse;font-size:0.78rem">
         <thead><tr>
           <th style="padding:4px 8px;background:var(--bg);color:var(--muted);text-align:left">Superficie</th>
@@ -591,7 +612,7 @@ function selectPlayer(name) {
         <h2>${p.name}</h2>
         <span class="badge badge-rank">#${p.rank}</span>
         <span class="badge badge-gs">${p.gs} GS · Edad ${p.age}</span>
-        <span class="badge badge-sim" style="background:${p.isLegend ? '#2DC7FF' : simC}">${p.isLegend ? '∞ Leyenda' : (p.sim != null ? p.sim.toFixed(1) + '/100' : '?')}</span>
+        <span class="badge badge-sim" style="background:${p.isLegend ? 'var(--teal)' : simC};border:${p.isLegend ? '2px solid var(--lime)' : 'none'}">${p.isLegend ? '∞ Leyenda' : (p.sim != null ? p.sim.toFixed(1) + '/100' : '?')}</span>
       </div>
     </div>
 
