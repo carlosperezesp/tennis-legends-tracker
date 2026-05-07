@@ -1,8 +1,8 @@
-name: Weekly dashboard update
+name: Daily dashboard update
 
 on:
   schedule:
-    - cron: '0 5 * * 1'   # Every Monday at 5am UTC (6am Spain winter, 7am summer)
+    - cron: '0 4 * * *'   # Every day at 4am UTC (6am Spain summer)
   workflow_dispatch:        # Also triggerable manually from GitHub UI
 
 jobs:
@@ -20,6 +20,11 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Fetch live schedule
+        env:
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+        run: python3 src/live_schedule_fetcher.py || echo "Schedule fetch failed (no API key or endpoint error) — continuing with cached data"
+
       - name: Build dashboard
         run: python3 src/build_index.py --top 200
         # CSVs are cached in data/_csv_cache/ — commit them too so re-downloads
@@ -29,7 +34,7 @@ jobs:
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
-          git add examples/index.html data/_csv_cache/
+          git add examples/index.html data/_csv_cache/ data/live_schedule.json
           git diff --staged --quiet && echo "Nothing changed" && exit 0
           git commit -m "Dashboard update $(date -u +%Y-%m-%d)"
           git push
