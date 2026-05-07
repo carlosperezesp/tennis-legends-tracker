@@ -380,6 +380,8 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
     @media (min-width: 769px) {{
       body {{ height: 100vh; overflow: hidden; }}
       #screens-track {{ display: grid; grid-template-columns: 290px 1fr; height: 100vh; }}
+      #screen-2 {{ display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }}
+      #screen-2 .main {{ flex: 1; min-height: 0; }}
       #screen-3, .mobile-topbar, #search-overlay {{ display: none !important; }}
     }}
 
