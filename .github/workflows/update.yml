@@ -1,0 +1,35 @@
+name: Weekly dashboard update
+
+on:
+  schedule:
+    - cron: '0 5 * * 1'   # Every Monday at 5am UTC (6am Spain winter, 7am summer)
+  workflow_dispatch:        # Also triggerable manually from GitHub UI
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build dashboard
+        run: python3 src/build_index.py --top 200
+        # CSVs are cached in data/_csv_cache/ — commit them too so re-downloads
+        # only happen when the cache is missing (first run or after clearing).
+
+      - name: Commit updated dashboard
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add examples/index.html data/_csv_cache/
+          git diff --staged --quiet && echo "Nothing changed" && exit 0
+          git commit -m "Dashboard update $(date -u +%Y-%m-%d)"
+          git push

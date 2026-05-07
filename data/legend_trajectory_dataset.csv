@@ -1,0 +1,12 @@
+player_name,age,year,grand_slams_total,grand_slam_finals,grand_slam_semifinals,atp_titles_total,atp_250_titles,atp_500_titles,masters_1000_titles,atp_finals_titles,olympic_gold,olympic_silver,olympic_bronze,davis_cup_titles,ranking_end_year,best_ranking_by_age,weeks_at_number_1_by_age,top_10_wins,win_rate,hard_win_rate,clay_win_rate,grass_win_rate,major_injuries_or_interruptions,age_first_grand_slam,age_fifth_grand_slam,age_tenth_grand_slam,age_last_grand_slam
+Roger Federer,21,2003,1,1,null,null,null,null,0,0,0,0,0,0,2,2,0,null,null,null,null,null,null,none,21,null,null,null
+Roger Federer,20,2002,0,0,null,null,null,null,null,0,0,0,0,0,0,2,6,0,null,null,null,null,null,null,none,null,null,null,null
+Roger Federer,22,2004,2,2,null,null,null,null,null,0,0,0,0,0,0,1,null,0,null,null,null,null,null,none,21,null,null,null
+Rafael Nadal,19,2005,1,1,null,null,null,null,null,0,0,0,0,0,2,2,0,null,null,null,null,null,null,none,19,null,null,null
+Rafael Nadal,20,2006,2,2,null,null,null,null,1,0,0,0,0,0,2,2,0,null,null,null,null,null,null,none,19,null,null,null
+Novak Djokovic,20,2008,1,1,null,null,null,null,null,0,0,0,0,0,3,3,0,null,null,null,null,null,null,none,20,null,null,null
+Novak Djokovic,22,2011,1,1,null,null,null,null,2,0,0,0,0,0,2,3,0,null,null,null,null,null,null,none,22,null,null,null
+Pete Sampras,19,1990,1,1,null,null,null,null,0,0,0,0,0,2,2,0,null,null,null,null,null,null,none,19,null,null,null
+Pete Sampras,20,1991,3,3,null,null,null,null,0,0,0,0,0,2,null,0,null,null,null,null,null,null,none,19,null,null,null
+Carlos Alcaraz,19,2023,2,2,null,null,null,3,2,0,0,0,0,0,1,1,null,null,0.80,0.78,0.85,0.76,none,19,null,null,null
+Jannik Sinner,22,2025,0,0,1,10,2,3,1,0,0,0,0,0,3,2,0,15,0.75,0.78,0.68,0.70,none,null,null,null,null

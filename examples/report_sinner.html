@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Legend Trajectory Tennis</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.5; margin: 0; padding: 0; background: #f0f2f8; color: #222; }
+    .container { max-width: 960px; margin: 0 auto; padding: 28px 20px; }
+    h1 { margin: 0 0 4px; font-size: 1.8rem; color: #1a1a2e; }
+    .subtitle { color: #555; margin: 0 0 24px; font-size: 0.95rem; }
+    .player-card { background: #fff; border: 1px solid #dde1f0; border-radius: 14px; margin: 24px 0; padding: 22px; box-shadow: 0 4px 18px rgba(0,0,0,0.07); }
+    .player-card h2 { margin: 0 0 12px; font-size: 1.4rem; color: #1a1a2e; }
+    .player-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center; }
+    .player-meta span { font-size: 0.9rem; color: #444; }
+    .score-badge { background: #e8ecff; color: #2233aa; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: 0.9rem !important; }
+    .category-badge { background: #fff3e0; color: #e65c00; padding: 3px 10px; border-radius: 20px; font-weight: 600; font-size: 0.85rem !important; }
+    .archetype-badge { background: #e8f5e9; color: #2e7d32; padding: 3px 10px; border-radius: 20px; font-weight: 600; font-size: 0.85rem !important; }
+    .panels-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+    .panel { background: #f8f9ff; border: 1px solid #e2e5f5; border-radius: 10px; padding: 14px; }
+    .panel-sm { flex: 1; min-width: 220px; }
+    .panel h3 { margin: 0 0 10px; font-size: 0.95rem; color: #333; }
+    .chart-panel { margin-top: 16px; }
+    .chart-subtitle { margin: 0 0 12px; font-size: 0.87rem; color: #555; }
+    .chart-wrapper { position: relative; height: 380px; width: 100%; }
+    .chart-controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .ctrl-btn {
+      padding: 5px 14px; border: 1px solid #bbb; border-radius: 20px;
+      background: #fff; cursor: pointer; font-size: 0.83rem; color: #555;
+      transition: all 0.15s;
+    }
+    .ctrl-btn.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+    .chart-legend-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .legend-item { display: inline-flex; align-items: center; gap: 5px; font-size: 0.81rem; color: #333; cursor: pointer; padding: 2px 0; transition: opacity 0.15s; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .proj-grid { display: flex; gap: 10px; }
+    .proj-item { flex: 1; text-align: center; background: #fff; border-radius: 8px; padding: 8px 4px; border: 1px solid #e0e3f5; }
+    .proj-label { display: block; font-size: 0.75rem; color: #777; margin-bottom: 4px; }
+    .proj-value { font-size: 1.4rem; font-weight: 700; }
+    .proj-value.blue { color: #1f77b4; }
+    .proj-value.orange { color: #ff7f0e; }
+    .proj-value.green { color: #2ca02c; }
+    table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 0.87rem; }
+    th, td { padding: 6px 8px; border-bottom: 1px solid #e8eaf0; text-align: left; }
+    th { background: #eef0ff; font-weight: 600; color: #333; }
+    .comparison-table td:nth-child(2), .comparison-table td:nth-child(3) { text-align: center; }
+    .color-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+    .data-note { font-size: 0.78rem; color: #888; margin: 10px 0 0; font-style: italic; }
+    h4 { margin: 14px 0 8px; font-size: 0.92rem; color: #333; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Legend Trajectory Tennis</h1>
+    <p class="subtitle">Análisis de trayectorias y proyecciones hacia la leyenda del tenis masculino.</p>
+    
+    <section class="player-card">
+      <h2>Jannik Sinner</h2>
+      <div class="player-meta">
+        <span><strong>Edad:</strong> 23 años</span>
+        <span><strong>Año:</strong> 2025</span>
+        <span class="score-badge">Score: 60.98</span>
+        <span class="category-badge">Leyenda posible</span>
+        <span class="archetype-badge">Dominador longevo</span>
+      </div>
+
+      <div class="panels-row">
+        <div class="panel panel-sm">
+          <h3>Proyección de Grand Slams</h3>
+          <div class="proj-grid">
+            <div class="proj-item"><span class="proj-label">Conservadora</span><span class="proj-value blue">6</span></div>
+            <div class="proj-item"><span class="proj-label">Media</span><span class="proj-value orange">8</span></div>
+            <div class="proj-item"><span class="proj-label">Agresiva</span><span class="proj-value green">10</span></div>
+          </div>
+        </div>
+        <div class="panel panel-sm">
+          <h3>Comparación por edad (scoring model)</h3>
+          <table>
+            <thead><tr><th>Jugador</th><th>Año</th><th>Score</th><th>GS</th></tr></thead>
+            <tbody><tr><td>Pete Sampras</td><td>1995</td><td>79.59</td><td>7</td></tr><tr><td>Roger Federer</td><td>2005</td><td>78.84</td><td>6</td></tr><tr><td>Rafael Nadal</td><td>2009</td><td>76.48</td><td>6</td></tr><tr><td>Novak Djokovic</td><td>2011</td><td>66.68</td><td>4</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      
+      <div class="panel chart-panel">
+        <h3>Trayectoria de Grand Slams por edad</h3>
+        <p class="chart-subtitle">
+          Comparación de Jannik Sinner con las grandes leyendas del tenis masculino.
+          Las líneas sólidas son datos reales; las punteadas son proyecciones.
+        </p>
+        <div class="chart-controls">
+          <button class="ctrl-btn active" onclick="toggleGroup(this,'legends')" data-group="legends">Leyendas</button>
+          <button class="ctrl-btn active" onclick="toggleGroup(this,'projections')" data-group="projections">Proyecciones</button>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="chart-jannik-sinner-interactive"></canvas>
+        </div>
+        <div class="chart-legend-row" id="legend-chart-jannik-sinner-interactive"></div>
+        <h4 style="margin-top:18px">A los 23 años: comparación con las leyendas</h4>
+        <table class="comparison-table">
+          <thead><tr><th>Jugador</th><th>GS a esa edad</th><th>vs Jannik Sinner</th></tr></thead>
+          <tbody><tr><td><span class='color-dot' style='background:#9467bd'></span> Pete Sampras</td><td>7</td><td style='color:#d62728;font-weight:600'>+4</td></tr><tr><td><span class='color-dot' style='background:#e377c2'></span> Carlos Alcaraz</td><td>7</td><td style='color:#d62728;font-weight:600'>+4</td></tr><tr><td><span class='color-dot' style='background:#1f77b4'></span> Roger Federer</td><td>6</td><td style='color:#d62728;font-weight:600'>+3</td></tr><tr><td><span class='color-dot' style='background:#d62728'></span> Rafael Nadal</td><td>6</td><td style='color:#d62728;font-weight:600'>+3</td></tr><tr><td><span class='color-dot' style='background:#2ca02c'></span> Novak Djokovic</td><td>4</td><td style='color:#d62728;font-weight:600'>+1</td></tr><tr><td><span class='color-dot' style='background:#8c564b'></span> Andy Murray</td><td>0</td><td style='color:#2ca02c;font-weight:600'>-3</td></tr></tbody>
+        </table>
+        <p class="data-note">Datos verificados via Tennis API (Alcaraz) y registros ATP históricos.
+        Trayectorias de leyendas retiradas son definitivas; jugadores activos pueden variar.</p>
+      </div>
+      <script>
+      (function() {
+        const ctx = document.getElementById('chart-jannik-sinner-interactive');
+        if (!ctx) return;
+        const datasets = [{"label": "Roger Federer", "data": [{"x": 20, "y": 0}, {"x": 21, "y": 1}, {"x": 22, "y": 4}, {"x": 23, "y": 6}, {"x": 24, "y": 9}, {"x": 25, "y": 12}, {"x": 26, "y": 13}, {"x": 27, "y": 15}, {"x": 28, "y": 16}, {"x": 29, "y": 16}, {"x": 30, "y": 17}, {"x": 31, "y": 17}, {"x": 32, "y": 17}, {"x": 33, "y": 17}, {"x": 34, "y": 17}, {"x": 35, "y": 19}, {"x": 36, "y": 20}, {"x": 37, "y": 20}, {"x": 38, "y": 20}, {"x": 39, "y": 20}, {"x": 40, "y": 20}], "borderColor": "#1f77b4", "backgroundColor": "#1f77b4", "borderWidth": 1.5, "pointRadius": 3, "pointHoverRadius": 6, "tension": 0.3, "fill": false}, {"label": "Rafael Nadal", "data": [{"x": 18, "y": 0}, {"x": 19, "y": 1}, {"x": 20, "y": 2}, {"x": 21, "y": 3}, {"x": 22, "y": 5}, {"x": 23, "y": 6}, {"x": 24, "y": 9}, {"x": 25, "y": 10}, {"x": 26, "y": 11}, {"x": 27, "y": 13}, {"x": 28, "y": 14}, {"x": 29, "y": 14}, {"x": 30, "y": 14}, {"x": 31, "y": 16}, {"x": 32, "y": 17}, {"x": 33, "y": 19}, {"x": 34, "y": 20}, {"x": 35, "y": 20}, {"x": 36, "y": 22}, {"x": 37, "y": 22}], "borderColor": "#d62728", "backgroundColor": "#d62728", "borderWidth": 1.5, "pointRadius": 3, "pointHoverRadius": 6, "tension": 0.3, "fill": false}, {"label": "Novak Djokovic", "data": [{"x": 19, "y": 0}, {"x": 20, "y": 1}, {"x": 21, "y": 1}, {"x": 22, "y": 1}, {"x": 23, "y": 4}, {"x": 24, "y": 5}, {"x": 25, "y": 6}, {"x": 26, "y": 8}, {"x": 27, "y": 11}, {"x": 28, "y": 13}, {"x": 29, "y": 13}, {"x": 30, "y": 15}, {"x": 31, "y": 17}, {"x": 32, "y": 18}, {"x": 33, "y": 21}, {"x": 34, "y": 22}, {"x": 35, "y": 24}, {"x": 36, "y": 24}, {"x": 37, "y": 24}], "borderColor": "#2ca02c", "backgroundColor": "#2ca02c", "borderWidth": 1.5, "pointRadius": 3, "pointHoverRadius": 6, "tension": 0.3, "fill": false}, {"label": "Pete Sampras", "data": [{"x": 18, "y": 1}, {"x": 19, "y": 1}, {"x": 20, "y": 1}, {"x": 21, "y": 3}, {"x": 22, "y": 5}, {"x": 23, "y": 7}, {"x": 24, "y": 9}, {"x": 25, "y": 11}, {"x": 26, "y": 12}, {"x": 27, "y": 13}, {"x": 28, "y": 13}, {"x": 29, "y": 13}, {"x": 30, "y": 14}], "borderColor": "#9467bd", "backgroundColor": "#9467bd", "borderWidth": 1.5, "pointRadius": 3, "pointHoverRadius": 6, "tension": 0.3, "fill": false}, {"label": "Carlos Alcaraz", "data": [{"x": 18, "y": 0}, {"x": 19, "y": 1}, {"x": 20, "y": 2}, {"x": 21, "y": 4}, {"x": 22, "y": 7}], "borderColor": "#e377c2", "backgroundColor": "#e377c2", "borderWidth": 1.5, "pointRadius": 3, "pointHoverRadius": 6, "tension": 0.3, "fill": false}, {"label": "Andy Murray", "data": [{"x": 22, "y": 0}, {"x": 23, "y": 0}, {"x": 24, "y": 0}, {"x": 25, "y": 1}, {"x": 26, "y": 2}, {"x": 27, "y": 3}, {"x": 28, "y": 3}, {"x": 29, "y": 3}, {"x": 30, "y": 3}], "borderColor": "#8c564b", "backgroundColor": "#8c564b", "borderWidth": 1.5, "pointRadius": 3, "pointHoverRadius": 6, "tension": 0.3, "fill": false}, {"label": "Jannik Sinner (real)", "data": [{"x": 20, "y": 0}, {"x": 21, "y": 0}, {"x": 22, "y": 2}, {"x": 23, "y": 3}], "borderColor": "#17becf", "backgroundColor": "#17becf", "borderWidth": 3, "pointRadius": 5, "pointHoverRadius": 8, "tension": 0.3, "fill": false, "order": 0}, {"label": "Proyección conservadora", "data": [{"x": 23.0, "y": 3.0}, {"x": 24.0, "y": 3.2}, {"x": 25.0, "y": 3.4}, {"x": 26.0, "y": 3.6}, {"x": 27.0, "y": 3.8}, {"x": 28.0, "y": 4.0}, {"x": 29.0, "y": 4.2}, {"x": 30.0, "y": 4.4}, {"x": 31.0, "y": 4.6}, {"x": 32.0, "y": 4.8}, {"x": 33.0, "y": 5.0}, {"x": 34.0, "y": 5.2}, {"x": 35.0, "y": 5.4}, {"x": 36.0, "y": 5.6}, {"x": 37.0, "y": 5.8}, {"x": 38.0, "y": 6.0}], "borderColor": "#17becf", "backgroundColor": "transparent", "borderWidth": 2, "borderDash": [6, 4], "pointRadius": 0, "pointHoverRadius": 4, "tension": 0.1, "fill": false, "order": 1}, {"label": "Proyección media", "data": [{"x": 23.0, "y": 3.0}, {"x": 24.0, "y": 3.33}, {"x": 25.0, "y": 3.67}, {"x": 26.0, "y": 4.0}, {"x": 27.0, "y": 4.33}, {"x": 28.0, "y": 4.67}, {"x": 29.0, "y": 5.0}, {"x": 30.0, "y": 5.33}, {"x": 31.0, "y": 5.67}, {"x": 32.0, "y": 6.0}, {"x": 33.0, "y": 6.33}, {"x": 34.0, "y": 6.67}, {"x": 35.0, "y": 7.0}, {"x": 36.0, "y": 7.33}, {"x": 37.0, "y": 7.67}, {"x": 38.0, "y": 8.0}], "borderColor": "#ff7f0e", "backgroundColor": "transparent", "borderWidth": 2, "borderDash": [6, 4], "pointRadius": 0, "pointHoverRadius": 4, "tension": 0.1, "fill": false, "order": 1}, {"label": "Proyección agresiva", "data": [{"x": 23.0, "y": 3.0}, {"x": 24.0, "y": 3.47}, {"x": 25.0, "y": 3.93}, {"x": 26.0, "y": 4.4}, {"x": 27.0, "y": 4.87}, {"x": 28.0, "y": 5.33}, {"x": 29.0, "y": 5.8}, {"x": 30.0, "y": 6.27}, {"x": 31.0, "y": 6.73}, {"x": 32.0, "y": 7.2}, {"x": 33.0, "y": 7.67}, {"x": 34.0, "y": 8.13}, {"x": 35.0, "y": 8.6}, {"x": 36.0, "y": 9.07}, {"x": 37.0, "y": 9.53}, {"x": 38.0, "y": 10.0}], "borderColor": "#2ca02c", "backgroundColor": "transparent", "borderWidth": 2, "borderDash": [6, 4], "pointRadius": 0, "pointHoverRadius": 4, "tension": 0.1, "fill": false, "order": 1}, {"label": "Referencia leyenda (20 GS)", "data": [{"x": 23.0, "y": 3.0}, {"x": 24.0, "y": 4.13}, {"x": 25.0, "y": 5.27}, {"x": 26.0, "y": 6.4}, {"x": 27.0, "y": 7.53}, {"x": 28.0, "y": 8.67}, {"x": 29.0, "y": 9.8}, {"x": 30.0, "y": 10.93}, {"x": 31.0, "y": 12.07}, {"x": 32.0, "y": 13.2}, {"x": 33.0, "y": 14.33}, {"x": 34.0, "y": 15.47}, {"x": 35.0, "y": 16.6}, {"x": 36.0, "y": 17.73}, {"x": 37.0, "y": 18.87}, {"x": 38.0, "y": 20.0}], "borderColor": "#aaaaaa", "backgroundColor": "transparent", "borderWidth": 1, "borderDash": [3, 3], "pointRadius": 0, "pointHoverRadius": 0, "tension": 0.1, "fill": false, "order": 2}];
+        let legendsVisible = true;
+        let projectionsVisible = true;
+
+        const legendIndexes = datasets
+          .map((d, i) => (i < datasets.length - 5 ? i : -1))
+          .filter(i => i >= 0);
+        const playerActualIdx = datasets.length - 5;
+        const projectionIndexes = [datasets.length - 4, datasets.length - 3, datasets.length - 2, datasets.length - 1];
+
+        const chart = new Chart(ctx, {
+          type: 'line',
+          data: { datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: 'index',
+              intersect: false,
+            },
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                callbacks: {
+                  title: (items) => `Edad: ${items[0].parsed.x}`,
+                  label: (item) => {
+                    const gs = Math.round(item.parsed.y * 10) / 10;
+                    return ` ${item.dataset.label}: ${gs} GS`;
+                  },
+                },
+                backgroundColor: 'rgba(20,20,30,0.85)',
+                padding: 10,
+                titleFont: { size: 13, weight: 'bold' },
+                bodyFont: { size: 12 },
+                boxPadding: 4,
+              },
+            },
+            scales: {
+              x: {
+                type: 'linear',
+                title: { display: true, text: 'Edad', font: { size: 13 } },
+                min: 17,
+                max: 40,
+                ticks: { stepSize: 1, callback: v => Number.isInteger(v) ? v : '' },
+                grid: { color: 'rgba(0,0,0,0.06)' },
+              },
+              y: {
+                title: { display: true, text: 'Grand Slams acumulados', font: { size: 13 } },
+                min: 0,
+                ticks: { stepSize: 2 },
+                grid: { color: 'rgba(0,0,0,0.06)' },
+              },
+            },
+          },
+        });
+
+        // Build custom legend
+        const legendEl = document.getElementById('legend-chart-jannik-sinner-interactive');
+        datasets.forEach((ds, i) => {
+          if (ds.label === 'Referencia leyenda (20 GS)') return;
+          const item = document.createElement('span');
+          item.className = 'legend-item';
+          item.innerHTML = `<span class="legend-dot" style="background:${ds.borderColor};opacity:${ds.borderDash ? 0.6 : 1}"></span>${ds.label}`;
+          item.style.cursor = 'pointer';
+          item.onclick = () => {
+            const meta = chart.getDatasetMeta(i);
+            meta.hidden = !meta.hidden;
+            item.style.opacity = meta.hidden ? '0.35' : '1';
+            chart.update();
+          };
+          legendEl.appendChild(item);
+        });
+
+        window.toggleGroup = function(btn, group) {
+          btn.classList.toggle('active');
+          const hide = !btn.classList.contains('active');
+          const idxs = group === 'legends' ? legendIndexes : projectionIndexes;
+          idxs.forEach(i => {
+            chart.getDatasetMeta(i).hidden = hide;
+          });
+          chart.update();
+        };
+      })();
+      </script>
+    
+    </section>
+    
+  </div>
+</body>
+</html>

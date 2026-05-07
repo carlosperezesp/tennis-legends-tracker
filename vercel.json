@@ -1,0 +1,5 @@
+{
+  "buildCommand": "python3 src/build_index.py",
+  "outputDirectory": "examples",
+  "installCommand": "echo 'no deps'"
+}

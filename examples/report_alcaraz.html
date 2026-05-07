@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Legend Trajectory Tennis</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.5; background: #f0f2f8; color: #222; }
+    .container { max-width: 980px; margin: 0 auto; padding: 28px 20px; }
+    h1 { font-size: 1.9rem; color: #1a1a2e; margin-bottom: 4px; }
+    .app-subtitle { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+    .card { background: #fff; border: 1px solid #dde1f0; border-radius: 14px; padding: 22px; box-shadow: 0 4px 18px rgba(0,0,0,0.07); }
+
+    /* Player tabs */
+    .player-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+    .player-tab {
+      padding: 8px 18px; border-radius: 24px; border: 2px solid var(--tab-color, #888);
+      background: #fff; color: #333; cursor: pointer; font-size: 0.9rem; font-weight: 600;
+      transition: all 0.18s;
+    }
+    .player-tab:hover { background: color-mix(in srgb, var(--tab-color) 15%, white); }
+    .player-tab.active { background: var(--tab-color, #888); color: #fff; }
+    .add-player-hint { font-size: 0.82rem; color: #888; margin-left: 6px; align-self: center; }
+
+    /* Player header */
+    .player-header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .player-header h2 { font-size: 1.5rem; color: #1a1a2e; }
+    .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.83rem; font-weight: 600; }
+    .badge-score { background: #e8ecff; color: #2233aa; }
+    .badge-category { background: #fff3e0; color: #e65c00; }
+    .badge-archetype { background: #e8f5e9; color: #2e7d32; }
+    .badge-gs { background: #1a1a2e; color: #fff; font-size: 0.9rem; }
+
+    /* Panels */
+    .panels-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+    @media (max-width: 640px) { .panels-row { grid-template-columns: 1fr; } }
+    .panel { background: #f8f9ff; border: 1px solid #e2e5f5; border-radius: 10px; padding: 14px; }
+    .panel h3 { font-size: 0.92rem; color: #444; margin-bottom: 10px; }
+    .proj-grid { display: flex; gap: 10px; }
+    .proj-item { flex: 1; text-align: center; background: #fff; border-radius: 8px; padding: 8px 4px; border: 1px solid #e0e3f5; }
+    .proj-label { display: block; font-size: 0.72rem; color: #777; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.03em; }
+    .proj-value { font-size: 1.6rem; font-weight: 700; }
+    .blue { color: #1f77b4; } .orange { color: #e07b00; } .green { color: #2ca02c; }
+
+    /* Chart */
+    .chart-panel { background: #f8f9ff; border: 1px solid #e2e5f5; border-radius: 10px; padding: 16px; }
+    .chart-panel h3 { font-size: 0.92rem; color: #444; margin-bottom: 4px; }
+    .chart-subtitle { font-size: 0.82rem; color: #777; margin-bottom: 12px; }
+    .chart-controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+    .ctrl-btn {
+      padding: 4px 13px; border: 1px solid #bbb; border-radius: 20px;
+      background: #fff; cursor: pointer; font-size: 0.80rem; color: #555; transition: all 0.15s;
+    }
+    .ctrl-btn.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+    .chart-wrapper { position: relative; height: 380px; }
+    .chart-legend-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .legend-item {
+      display: inline-flex; align-items: center; gap: 5px; font-size: 0.79rem;
+      color: #444; cursor: pointer; padding: 2px 0; transition: opacity 0.15s;
+    }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin-top: 6px; }
+    th, td { padding: 6px 8px; border-bottom: 1px solid #e8eaf0; text-align: left; }
+    th { background: #eef0ff; font-weight: 600; color: #333; }
+    .td-center { text-align: center; }
+    .color-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+    .diff-pos { color: #d62728; font-weight: 600; }
+    .diff-neg { color: #2ca02c; font-weight: 600; }
+
+    .data-note { font-size: 0.76rem; color: #999; margin-top: 10px; font-style: italic; }
+
+    /* Game stats panel */
+    .game-stats-panel { background: #f8f9ff; border: 1px solid #e2e5f5; border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+    .game-stats-panel h3 { font-size: 0.92rem; color: #444; margin-bottom: 12px; }
+    .potential-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .potential-score {
+      font-size: 2rem; font-weight: 800; line-height: 1;
+      background: linear-gradient(135deg, #1a1a2e, #4455cc);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .potential-label { font-size: 0.78rem; color: #777; }
+    .stat-bar-grid { display: flex; flex-direction: column; gap: 7px; }
+    .stat-bar-row { display: grid; grid-template-columns: 130px 1fr 60px; gap: 8px; align-items: center; }
+    .stat-bar-label { font-size: 0.78rem; color: #555; white-space: nowrap; }
+    .stat-bar-track { background: #e8eaf0; border-radius: 4px; height: 10px; position: relative; overflow: visible; }
+    .stat-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+    .stat-bar-bench { position: absolute; top: -3px; width: 2px; height: 16px; background: #1a1a2e; border-radius: 1px; }
+    .stat-bar-val { font-size: 0.80rem; font-weight: 600; text-align: right; }
+    .bar-above { background: #2ca02c; }
+    .bar-below { background: #e377c2; }
+    .no-game-stats { color: #aaa; font-size: 0.85rem; font-style: italic; padding: 8px 0; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Legend Trajectory Tennis</h1>
+  <p class="app-subtitle">Análisis de trayectorias hacia la leyenda del tenis masculino.</p>
+
+  <div class="card">
+    <div class="player-tabs" id="player-tabs">
+      <button class="player-tab active" onclick="switchPlayer("Carlos Alcaraz")" style="--tab-color:#e377c2">Carlos Alcaraz</button><button class="player-tab" onclick="switchPlayer("Jannik Sinner")" style="--tab-color:#17becf">Jannik Sinner</button>
+      <span class="add-player-hint">+ <code>--input-json jugador.json --output-html informe.html</code></span>
+    </div>
+
+    <!-- Dynamic player header -->
+    <div class="player-header" id="player-header"></div>
+
+    <!-- Projections + comparison table side by side -->
+    <div class="panels-row">
+      <div class="panel">
+        <h3>Proyección de Grand Slams</h3>
+        <div class="proj-grid" id="proj-grid"></div>
+      </div>
+      <div class="panel">
+        <h3>A la misma edad — leyendas históricas</h3>
+        <table>
+          <thead><tr><th>Jugador</th><th class="td-center">GS</th><th class="td-center">Diferencia</th></tr></thead>
+          <tbody id="comparison-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Game stats panel -->
+    <div class="game-stats-panel" id="game-stats-panel">
+      <h3>Perfil de juego vs benchmark de leyenda</h3>
+      <div id="game-stats-content"></div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-panel">
+      <h3>Trayectoria por edad</h3>
+      <p class="chart-subtitle">
+        Leyendas históricas como referencia (líneas finas). Jugador analizado en negrita. Proyecciones punteadas.
+        Curva realista: más Grand Slams en los años de pico, menos con la edad.
+      </p>
+      <div class="chart-controls">
+        <button class="ctrl-btn active" id="btn-legends" onclick="toggleGroup(this,'legends')">Leyendas</button>
+        <button class="ctrl-btn active" id="btn-proj" onclick="toggleGroup(this,'proj')">Proyecciones</button>
+      </div>
+      <div class="chart-wrapper"><canvas id="main-chart"></canvas></div>
+      <div class="chart-legend-row" id="chart-legend-row"></div>
+      <p class="data-note">
+        Datos verificados via Tennis API (Alcaraz) y registros ATP históricos.
+        Trayectorias de jugadores retirados son definitivas.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+const LEGEND_DATASETS = [{"label": "Roger Federer", "data": [{"x": 20, "y": 0}, {"x": 21, "y": 1}, {"x": 22, "y": 4}, {"x": 23, "y": 6}, {"x": 24, "y": 9}, {"x": 25, "y": 12}, {"x": 26, "y": 13}, {"x": 27, "y": 15}, {"x": 28, "y": 16}, {"x": 29, "y": 16}, {"x": 30, "y": 17}, {"x": 31, "y": 17}, {"x": 32, "y": 17}, {"x": 33, "y": 17}, {"x": 34, "y": 17}, {"x": 35, "y": 19}, {"x": 36, "y": 20}, {"x": 37, "y": 20}, {"x": 38, "y": 20}, {"x": 39, "y": 20}, {"x": 40, "y": 20}], "borderColor": "#1f77b4", "backgroundColor": "#1f77b4", "borderWidth": 1.5, "pointRadius": 3, "pointHoverRadius": 6, "tension": 0.35, "fill": false, "order": 5}, {"label": "Rafael Nadal", "data": [{"x": 18, "y": 0}, {"x": 19, "y": 1}, {"x": 20, "y": 2}, {"x": 21, "y": 3}, {"x": 22, "y": 5}, {"x": 23, "y": 6}, {"x": 24, "y": 9}, {"x": 25, "y": 10}, {"x": 26, "y": 11}, {"x": 27, "y": 13}, {"x": 28, "y": 14}, {"x": 29, "y": 14}, {"x": 30, "y": 14}, {"x": 31, "y": 16}, {"x": 32, "y": 17}, {"x": 33, "y": 19}, {"x": 34, "y": 20}, {"x": 35, "y": 20}, {"x": 36, "y": 22}, {"x": 37, "y": 22}], "borderColor": "#d62728", "backgroundColor": "#d62728", "borderWidth": 1.5, "pointRadius": 3, "pointHoverRadius": 6, "tension": 0.35, "fill": false, "order": 5}, {"label": "Novak Djokovic", "data": [{"x": 19, "y": 0}, {"x": 20, "y": 1}, {"x": 21, "y": 1}, {"x": 22, "y": 1}, {"x": 23, "y": 4}, {"x": 24, "y": 5}, {"x": 25, "y": 6}, {"x": 26, "y": 8}, {"x": 27, "y": 11}, {"x": 28, "y": 13}, {"x": 29, "y": 13}, {"x": 30, "y": 15}, {"x": 31, "y": 17}, {"x": 32, "y": 18}, {"x": 33, "y": 21}, {"x": 34, "y": 22}, {"x": 35, "y": 24}, {"x": 36, "y": 24}, {"x": 37, "y": 24}], "borderColor": "#2ca02c", "backgroundColor": "#2ca02c", "borderWidth": 1.5, "pointRadius": 3, "pointHoverRadius": 6, "tension": 0.35, "fill": false, "order": 5}, {"label": "Pete Sampras", "data": [{"x": 18, "y": 1}, {"x": 19, "y": 1}, {"x": 20, "y": 1}, {"x": 21, "y": 3}, {"x": 22, "y": 5}, {"x": 23, "y": 7}, {"x": 24, "y": 9}, {"x": 25, "y": 11}, {"x": 26, "y": 12}, {"x": 27, "y": 13}, {"x": 28, "y": 13}, {"x": 29, "y": 13}, {"x": 30, "y": 14}], "borderColor": "#9467bd", "backgroundColor": "#9467bd", "borderWidth": 1.5, "pointRadius": 3, "pointHoverRadius": 6, "tension": 0.35, "fill": false, "order": 5}, {"label": "Ivan Lendl", "data": [{"x": 18, "y": 0}, {"x": 19, "y": 0}, {"x": 20, "y": 0}, {"x": 21, "y": 0}, {"x": 22, "y": 0}, {"x": 23, "y": 0}, {"x": 24, "y": 1}, {"x": 25, "y": 2}, {"x": 26, "y": 4}, {"x": 27, "y": 6}, {"x": 28, "y": 7}, {"x": 29, "y": 8}, {"x": 30, "y": 8}, {"x": 31, "y": 8}, {"x": 32, "y": 8}, {"x": 33, "y": 8}, {"x": 34, "y": 8}], "borderColor": "#bcbd22", "backgroundColor": "#bcbd22", "borderWidth": 1.5, "pointRadius": 3, "pointHoverRadius": 6, "tension": 0.35, "fill": false, "order": 5}];
+const ALL_PLAYERS = {"Carlos Alcaraz": {"score": 61.14, "category": "Leyenda posible", "archetype": "Completo multisuelo", "age": 22, "gs": 7, "color": "#e377c2", "trajectory": [{"x": 18, "y": 0}, {"x": 19, "y": 1}, {"x": 20, "y": 2}, {"x": 21, "y": 4}, {"x": 22, "y": 7}], "projections": {"conservative": [{"x": 22.0, "y": 7.0}, {"x": 22.5, "y": 7.19}, {"x": 23.0, "y": 7.37}, {"x": 23.5, "y": 7.54}, {"x": 24.0, "y": 7.7}, {"x": 24.5, "y": 7.85}, {"x": 25.0, "y": 8.0}, {"x": 25.5, "y": 8.14}, {"x": 26.0, "y": 8.27}, {"x": 26.5, "y": 8.4}, {"x": 27.0, "y": 8.52}, {"x": 27.5, "y": 8.63}, {"x": 28.0, "y": 8.74}, {"x": 28.5, "y": 8.85}, {"x": 29.0, "y": 8.94}, {"x": 29.5, "y": 9.04}, {"x": 30.0, "y": 9.13}, {"x": 30.5, "y": 9.21}, {"x": 31.0, "y": 9.29}, {"x": 31.5, "y": 9.37}, {"x": 32.0, "y": 9.44}, {"x": 32.5, "y": 9.51}, {"x": 33.0, "y": 9.58}, {"x": 33.5, "y": 9.64}, {"x": 34.0, "y": 9.7}, {"x": 34.5, "y": 9.76}, {"x": 35.0, "y": 9.81}, {"x": 35.5, "y": 9.86}, {"x": 36.0, "y": 9.91}, {"x": 36.5, "y": 9.96}, {"x": 37.0, "y": 10.0}], "medium": [{"x": 22.0, "y": 7.0}, {"x": 22.5, "y": 7.38}, {"x": 23.0, "y": 7.73}, {"x": 23.5, "y": 8.08}, {"x": 24.0, "y": 8.4}, {"x": 24.5, "y": 8.71}, {"x": 25.0, "y": 9.0}, {"x": 25.5, "y": 9.28}, {"x": 26.0, "y": 9.55}, {"x": 26.5, "y": 9.8}, {"x": 27.0, "y": 10.04}, {"x": 27.5, "y": 10.27}, {"x": 28.0, "y": 10.48}, {"x": 28.5, "y": 10.69}, {"x": 29.0, "y": 10.89}, {"x": 29.5, "y": 11.08}, {"x": 30.0, "y": 11.25}, {"x": 30.5, "y": 11.42}, {"x": 31.0, "y": 11.58}, {"x": 31.5, "y": 11.74}, {"x": 32.0, "y": 11.88}, {"x": 32.5, "y": 12.02}, {"x": 33.0, "y": 12.15}, {"x": 33.5, "y": 12.28}, {"x": 34.0, "y": 12.4}, {"x": 34.5, "y": 12.51}, {"x": 35.0, "y": 12.62}, {"x": 35.5, "y": 12.72}, {"x": 36.0, "y": 12.82}, {"x": 36.5, "y": 12.91}, {"x": 37.0, "y": 13.0}], "aggressive": [{"x": 22.0, "y": 7.0}, {"x": 22.5, "y": 7.57}, {"x": 23.0, "y": 8.1}, {"x": 23.5, "y": 8.61}, {"x": 24.0, "y": 9.1}, {"x": 24.5, "y": 9.56}, {"x": 25.0, "y": 10.0}, {"x": 25.5, "y": 10.42}, {"x": 26.0, "y": 10.82}, {"x": 26.5, "y": 11.2}, {"x": 27.0, "y": 11.56}, {"x": 27.5, "y": 11.9}, {"x": 28.0, "y": 12.23}, {"x": 28.5, "y": 12.54}, {"x": 29.0, "y": 12.83}, {"x": 29.5, "y": 13.11}, {"x": 30.0, "y": 13.38}, {"x": 30.5, "y": 13.63}, {"x": 31.0, "y": 13.87}, {"x": 31.5, "y": 14.1}, {"x": 32.0, "y": 14.32}, {"x": 32.5, "y": 14.53}, {"x": 33.0, "y": 14.73}, {"x": 33.5, "y": 14.92}, {"x": 34.0, "y": 15.1}, {"x": 34.5, "y": 15.27}, {"x": 35.0, "y": 15.43}, {"x": 35.5, "y": 15.58}, {"x": 36.0, "y": 15.73}, {"x": 36.5, "y": 15.87}, {"x": 37.0, "y": 16.0}]}, "projFinal": {"conservadora": 10, "media": 13, "agresiva": 16}, "comparison": [{"name": "Rafael Nadal", "gs": 5, "diff": -2, "color": "#d62728"}, {"name": "Pete Sampras", "gs": 5, "diff": -2, "color": "#9467bd"}, {"name": "Roger Federer", "gs": 4, "diff": -3, "color": "#1f77b4"}, {"name": "Novak Djokovic", "gs": 1, "diff": -6, "color": "#2ca02c"}, {"name": "Ivan Lendl", "gs": 0, "diff": -7, "color": "#bcbd22"}], "gameStats": {"profile_similarity": 84.8, "latest_year": 2025, "years_of_data": 5, "player": {"serve_win_pct": 67.9, "return_win_pct": 42.1, "bp_save_pct": 66.5, "bp_conversion_pct": 44.3, "first_serve_in_pct": 64.2, "dominance_ratio": 1.173, "win_rate": 88.8}, "benchmark": {"serve_win_pct": 66.5, "return_win_pct": 42.0, "bp_save_pct": 65.2, "bp_conversion_pct": 43.7, "first_serve_in_pct": 63.9, "dominance_ratio": 1.145, "win_rate": 81.1}}}, "Jannik Sinner": {"score": 60.98, "category": "Leyenda posible", "archetype": "Dominador longevo", "age": 23, "gs": 3, "color": "#17becf", "trajectory": [{"x": 20, "y": 0}, {"x": 21, "y": 0}, {"x": 22, "y": 2}, {"x": 23, "y": 3}], "projections": {"conservative": [{"x": 23.0, "y": 3.0}, {"x": 23.5, "y": 3.19}, {"x": 24.0, "y": 3.38}, {"x": 24.5, "y": 3.55}, {"x": 25.0, "y": 3.72}, {"x": 25.5, "y": 3.88}, {"x": 26.0, "y": 4.03}, {"x": 26.5, "y": 4.18}, {"x": 27.0, "y": 4.31}, {"x": 27.5, "y": 4.44}, {"x": 28.0, "y": 4.57}, {"x": 28.5, "y": 4.68}, {"x": 29.0, "y": 4.8}, {"x": 29.5, "y": 4.9}, {"x": 30.0, "y": 5.0}, {"x": 30.5, "y": 5.1}, {"x": 31.0, "y": 5.19}, {"x": 31.5, "y": 5.28}, {"x": 32.0, "y": 5.36}, {"x": 32.5, "y": 5.44}, {"x": 33.0, "y": 5.52}, {"x": 33.5, "y": 5.59}, {"x": 34.0, "y": 5.66}, {"x": 34.5, "y": 5.72}, {"x": 35.0, "y": 5.78}, {"x": 35.5, "y": 5.84}, {"x": 36.0, "y": 5.9}, {"x": 36.5, "y": 5.95}, {"x": 37.0, "y": 6.0}], "medium": [{"x": 23.0, "y": 3.0}, {"x": 23.5, "y": 3.39}, {"x": 24.0, "y": 3.76}, {"x": 24.5, "y": 4.11}, {"x": 25.0, "y": 4.44}, {"x": 25.5, "y": 4.76}, {"x": 26.0, "y": 5.06}, {"x": 26.5, "y": 5.35}, {"x": 27.0, "y": 5.63}, {"x": 27.5, "y": 5.89}, {"x": 28.0, "y": 6.13}, {"x": 28.5, "y": 6.37}, {"x": 29.0, "y": 6.59}, {"x": 29.5, "y": 6.81}, {"x": 30.0, "y": 7.01}, {"x": 30.5, "y": 7.2}, {"x": 31.0, "y": 7.39}, {"x": 31.5, "y": 7.56}, {"x": 32.0, "y": 7.73}, {"x": 32.5, "y": 7.88}, {"x": 33.0, "y": 8.03}, {"x": 33.5, "y": 8.18}, {"x": 34.0, "y": 8.31}, {"x": 34.5, "y": 8.44}, {"x": 35.0, "y": 8.57}, {"x": 35.5, "y": 8.68}, {"x": 36.0, "y": 8.79}, {"x": 36.5, "y": 8.9}, {"x": 37.0, "y": 9.0}], "aggressive": [{"x": 23.0, "y": 3.0}, {"x": 23.5, "y": 3.58}, {"x": 24.0, "y": 4.14}, {"x": 24.5, "y": 4.66}, {"x": 25.0, "y": 5.17}, {"x": 25.5, "y": 5.64}, {"x": 26.0, "y": 6.1}, {"x": 26.5, "y": 6.53}, {"x": 27.0, "y": 6.94}, {"x": 27.5, "y": 7.33}, {"x": 28.0, "y": 7.7}, {"x": 28.5, "y": 8.05}, {"x": 29.0, "y": 8.39}, {"x": 29.5, "y": 8.71}, {"x": 30.0, "y": 9.01}, {"x": 30.5, "y": 9.3}, {"x": 31.0, "y": 9.58}, {"x": 31.5, "y": 9.84}, {"x": 32.0, "y": 10.09}, {"x": 32.5, "y": 10.33}, {"x": 33.0, "y": 10.55}, {"x": 33.5, "y": 10.77}, {"x": 34.0, "y": 10.97}, {"x": 34.5, "y": 11.16}, {"x": 35.0, "y": 11.35}, {"x": 35.5, "y": 11.52}, {"x": 36.0, "y": 11.69}, {"x": 36.5, "y": 11.85}, {"x": 37.0, "y": 12.0}]}, "projFinal": {"conservadora": 6, "media": 9, "agresiva": 12}, "comparison": [{"name": "Pete Sampras", "gs": 7, "diff": 4, "color": "#9467bd"}, {"name": "Roger Federer", "gs": 6, "diff": 3, "color": "#1f77b4"}, {"name": "Rafael Nadal", "gs": 6, "diff": 3, "color": "#d62728"}, {"name": "Novak Djokovic", "gs": 4, "diff": 1, "color": "#2ca02c"}, {"name": "Ivan Lendl", "gs": 0, "diff": -3, "color": "#bcbd22"}], "gameStats": {"profile_similarity": 85.5, "latest_year": 2025, "years_of_data": 7, "player": {"serve_win_pct": 71.7, "return_win_pct": 42.7, "bp_save_pct": 72.3, "bp_conversion_pct": 44.6, "first_serve_in_pct": 62.0, "dominance_ratio": 1.252, "win_rate": 90.6}, "benchmark": {"serve_win_pct": 68.1, "return_win_pct": 42.3, "bp_save_pct": 66.0, "bp_conversion_pct": 45.8, "first_serve_in_pct": 65.1, "dominance_ratio": 1.181, "win_rate": 88.2}}}};
+const LEGEND_NAMES = ["Roger Federer", "Rafael Nadal", "Novak Djokovic", "Pete Sampras", "Ivan Lendl"];
+const N_LEGENDS = LEGEND_DATASETS.length;
+
+let activePlayer = "Carlos Alcaraz";
+let legendsVisible = true;
+let projVisible = true;
+
+// ── Chart setup ──────────────────────────────────────────────────────────────
+function makePlayerDatasets(name) {
+  const p = ALL_PLAYERS[name];
+  if (!p) return [];
+  const c = p.color;
+  return [
+    {
+      label: name + ' (real)',
+      data: p.trajectory,
+      borderColor: c, backgroundColor: c,
+      borderWidth: 3, pointRadius: 5, pointHoverRadius: 8,
+      tension: 0.3, fill: false, order: 1,
+    },
+    {
+      label: 'Proyección conservadora',
+      data: p.projections.conservative,
+      borderColor: c, backgroundColor: 'transparent',
+      borderWidth: 2, borderDash: [7, 5], pointRadius: 0, pointHoverRadius: 4,
+      tension: 0.2, fill: false, order: 2,
+    },
+    {
+      label: 'Proyección media',
+      data: p.projections.medium,
+      borderColor: '#e07b00', backgroundColor: 'transparent',
+      borderWidth: 2, borderDash: [7, 5], pointRadius: 0, pointHoverRadius: 4,
+      tension: 0.2, fill: false, order: 2,
+    },
+    {
+      label: 'Proyección agresiva',
+      data: p.projections.aggressive,
+      borderColor: '#2ca02c', backgroundColor: 'transparent',
+      borderWidth: 2, borderDash: [7, 5], pointRadius: 0, pointHoverRadius: 4,
+      tension: 0.2, fill: false, order: 2,
+    },
+  ];
+}
+
+const initialDatasets = [...LEGEND_DATASETS, ...makePlayerDatasets(activePlayer)];
+
+const chart = new Chart(document.getElementById('main-chart'), {
+  type: 'line',
+  data: { datasets: initialDatasets },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          title: items => `Edad: ${items[0].parsed.x}`,
+          label: item => {
+            const v = Math.round(item.parsed.y * 10) / 10;
+            return ` ${item.dataset.label}: ${v} GS`;
+          },
+        },
+        backgroundColor: 'rgba(15,15,25,0.88)',
+        padding: 10, titleFont: { size: 13, weight: 'bold' },
+        bodyFont: { size: 12 }, boxPadding: 4,
+      },
+    },
+    scales: {
+      x: {
+        type: 'linear',
+        title: { display: true, text: 'Edad', font: { size: 13 } },
+        min: 17, max: 42,
+        ticks: { stepSize: 1, callback: v => Number.isInteger(v) ? v : '' },
+        grid: { color: 'rgba(0,0,0,0.05)' },
+      },
+      y: {
+        title: { display: true, text: 'Grand Slams acumulados', font: { size: 13 } },
+        min: 0,
+        ticks: { stepSize: 2 },
+        grid: { color: 'rgba(0,0,0,0.05)' },
+      },
+    },
+  },
+});
+
+// ── Custom legend ─────────────────────────────────────────────────────────────
+function buildLegend() {
+  const el = document.getElementById('chart-legend-row');
+  el.innerHTML = '';
+  chart.data.datasets.forEach((ds, i) => {
+    if (ds.label.startsWith('Proyección')) return;
+    const item = document.createElement('span');
+    item.className = 'legend-item';
+    const dot = `<span class="legend-dot" style="background:${ds.borderColor}"></span>`;
+    item.innerHTML = dot + ds.label;
+    item.dataset.idx = i;
+    item.onclick = () => {
+      const meta = chart.getDatasetMeta(i);
+      meta.hidden = !meta.hidden;
+      item.style.opacity = meta.hidden ? '0.3' : '1';
+      chart.update();
+    };
+    el.appendChild(item);
+  });
+}
+
+// ── Toggle groups ─────────────────────────────────────────────────────────────
+window.toggleGroup = function(btn, group) {
+  btn.classList.toggle('active');
+  const hide = !btn.classList.contains('active');
+  if (group === 'legends') {
+    legendsVisible = !hide;
+    for (let i = 0; i < N_LEGENDS; i++) {
+      chart.getDatasetMeta(i).hidden = hide;
+    }
+  } else {
+    projVisible = !hide;
+    // projection datasets are indices N+1, N+2, N+3
+    for (let i = N_LEGENDS + 1; i < N_LEGENDS + 4; i++) {
+      if (chart.data.datasets[i]) chart.getDatasetMeta(i).hidden = hide;
+    }
+  }
+  chart.update();
+};
+
+// ── Player switch ─────────────────────────────────────────────────────────────
+function updateInfoPanel(name) {
+  const p = ALL_PLAYERS[name];
+  if (!p) return;
+
+  // Header
+  document.getElementById('player-header').innerHTML = `
+    <h2>${name}</h2>
+    <span class="badge badge-gs">${p.gs} GS · Edad ${p.age}</span>
+    <span class="badge badge-score">Score: ${p.score}</span>
+    <span class="badge badge-category">${p.category}</span>
+    <span class="badge badge-archetype">${p.archetype}</span>
+  `;
+
+  // Projections
+  document.getElementById('proj-grid').innerHTML = `
+    <div class="proj-item"><span class="proj-label">Conservadora</span><span class="proj-value blue">${p.projFinal.conservadora}</span></div>
+    <div class="proj-item"><span class="proj-label">Media</span><span class="proj-value orange">${p.projFinal.media}</span></div>
+    <div class="proj-item"><span class="proj-label">Agresiva</span><span class="proj-value green">${p.projFinal.agresiva}</span></div>
+  `;
+
+  // Comparison table
+  const rows = p.comparison.map(c => {
+    const diffClass = c.diff > 0 ? 'diff-pos' : c.diff < 0 ? 'diff-neg' : '';
+    const diffStr = c.diff > 0 ? `+${c.diff}` : String(c.diff);
+    return `<tr>
+      <td><span class="color-dot" style="background:${c.color}"></span>${c.name}</td>
+      <td class="td-center">${c.gs}</td>
+      <td class="td-center ${diffClass}">${diffStr}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('comparison-tbody').innerHTML = rows || '<tr><td colspan="3">Sin comparaciones disponibles</td></tr>';
+}
+
+window.switchPlayer = function(name) {
+  if (name === activePlayer) return;
+  activePlayer = name;
+
+  // Update tab buttons
+  document.querySelectorAll('.player-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent === name);
+  });
+
+  // Replace analysis datasets (idx N onwards)
+  const newDs = makePlayerDatasets(name);
+  while (chart.data.datasets.length > N_LEGENDS) chart.data.datasets.pop();
+  newDs.forEach(ds => chart.data.datasets.push(ds));
+
+  // Reapply legend/proj visibility to new datasets
+  if (!legendsVisible) {
+    for (let i = 0; i < N_LEGENDS; i++) chart.getDatasetMeta(i).hidden = true;
+  }
+  chart.update();
+  buildLegend();
+  updateInfoPanel(name);
+  renderGameStats(name);
+};
+
+// ── Game stats panel ─────────────────────────────────────────────────────────
+function renderGameStats(name) {
+  const p = ALL_PLAYERS[name];
+  const el = document.getElementById('game-stats-content');
+  const panel = document.getElementById('game-stats-panel');
+  if (!p || !p.gameStats) {
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = '';
+  const gs = p.gameStats;
+  const pData = gs.player;
+  const bData = gs.benchmark;
+
+  const STATS = [
+    { key: 'serve_win_pct',      label: 'Saque ganado %',    unit: '%' },
+    { key: 'return_win_pct',     label: 'Resto ganado %',    unit: '%' },
+    { key: 'bp_save_pct',        label: 'BP salvados %',     unit: '%' },
+    { key: 'bp_conversion_pct',  label: 'BP convertidos %',  unit: '%' },
+    { key: 'first_serve_in_pct', label: '1er saque dentro %',unit: '%' },
+    { key: 'win_rate',           label: 'Win rate %',        unit: '%' },
+  ];
+
+  // score color
+  const sim = gs.profile_similarity;
+  const simColor = sim >= 80 ? '#2ca02c' : sim >= 65 ? '#e07b00' : '#d62728';
+
+  let html = `
+    <div class="potential-row">
+      <div>
+        <div class="potential-score" style="-webkit-text-fill-color:${simColor}">${sim != null ? sim.toFixed(1) : '—'}<span style="font-size:1rem;font-weight:400;color:#777">/100</span></div>
+        <div class="potential-label">Potential Score (similitud perfil leyenda)</div>
+      </div>
+      <div style="font-size:0.78rem;color:#888;line-height:1.5">
+        Datos: ${gs.years_of_data} año(s) · último: ${gs.latest_year}<br>
+        100 = idéntico al promedio Federer/Nadal/Djokovic/Agassi a esta edad
+      </div>
+    </div>
+    <div class="stat-bar-grid">`;
+
+  for (const s of STATS) {
+    const pVal = pData[s.key];
+    const bVal = bData[s.key];
+    if (pVal == null) continue;
+    // Bar fills up to max(pVal, bVal) * 1.1
+    const maxVal = Math.max(pVal, bVal || pVal) * 1.1 || 100;
+    const pPct   = Math.min(100, (pVal / maxVal) * 100);
+    const bPct   = bVal != null ? Math.min(100, (bVal / maxVal) * 100) : null;
+    const above  = bVal == null || pVal >= bVal;
+    const fillClass = above ? 'bar-above' : 'bar-below';
+    const diff = bVal != null ? (pVal - bVal).toFixed(1) : '';
+    const diffStr = diff ? (parseFloat(diff) >= 0 ? `+${diff}` : diff) : '';
+    const diffColor = parseFloat(diff) >= 0 ? '#2ca02c' : '#d62728';
+    html += `
+      <div class="stat-bar-row">
+        <span class="stat-bar-label">${s.label}</span>
+        <div class="stat-bar-track">
+          <div class="stat-bar-fill ${fillClass}" style="width:${pPct.toFixed(1)}%"></div>
+          ${bPct != null ? `<div class="stat-bar-bench" style="left:${bPct.toFixed(1)}%"></div>` : ''}
+        </div>
+        <span class="stat-bar-val">${pVal}${s.unit} <span style="font-size:0.70rem;color:${diffColor}">${diffStr}</span></span>
+      </div>`;
+  }
+
+  html += `</div>
+    <p class="data-note" style="margin-top:8px">
+      Barra negra = benchmark leyenda a esta edad · Verde = por encima · Rosa = por debajo.
+      Fuente: Jeff Sackmann / tennis_atp.
+    </p>`;
+
+  el.innerHTML = html;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+updateInfoPanel(activePlayer);
+renderGameStats(activePlayer);
+buildLegend();
+</script>
+</body>
+</html>
