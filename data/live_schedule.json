@@ -1,0 +1,114 @@
+{
+  "asOf": "2026-05-07",
+  "timezone": "Europe/Rome",
+  "source": "Eurosport / ATP Tour / tournament schedule",
+  "sourceUrls": [
+    "https://www.eurosport.it/tennis/atp-roma/2026/calendario-risultati.shtml",
+    "https://www.atptour.com/en/news/rome-2026-draw-preview",
+    "https://ticketing.internazionalibnlditalia.com/it/programma"
+  ],
+  "days": [
+    {
+      "date": "2026-05-07",
+      "label": "Hoy",
+      "matches": [
+        {
+          "tournament": "Internazionali BNL d'Italia",
+          "level": "ATP 1000",
+          "round": "R1",
+          "surface": "Clay",
+          "time": "16:30",
+          "player1": "Sebastian Ofner",
+          "player2": "Alex Michelsen",
+          "status": "scheduled"
+        },
+        {
+          "tournament": "Internazionali BNL d'Italia",
+          "level": "ATP 1000",
+          "round": "R1",
+          "surface": "Clay",
+          "time": "TBD",
+          "player1": "Alexei Popyrin",
+          "player2": "Matteo Berrettini",
+          "status": "scheduled"
+        },
+        {
+          "tournament": "Internazionali BNL d'Italia",
+          "level": "ATP 1000",
+          "round": "R1",
+          "surface": "Clay",
+          "time": "TBD",
+          "player1": "Lorenzo Sonego",
+          "player2": "Ignacio Buse",
+          "status": "scheduled"
+        },
+        {
+          "tournament": "Internazionali BNL d'Italia",
+          "level": "ATP 1000",
+          "round": "R1",
+          "surface": "Clay",
+          "time": "TBD",
+          "player1": "Denis Shapovalov",
+          "player2": "Mariano Navone",
+          "status": "scheduled"
+        },
+        {
+          "tournament": "Internazionali BNL d'Italia",
+          "level": "ATP 1000",
+          "round": "R1",
+          "surface": "Clay",
+          "time": "TBD",
+          "player1": "Stefanos Tsitsipas",
+          "player2": "Tomas Machac",
+          "status": "scheduled"
+        },
+        {
+          "tournament": "Internazionali BNL d'Italia",
+          "level": "ATP 1000",
+          "round": "R1",
+          "surface": "Clay",
+          "time": "TBD",
+          "player1": "Marcos Giron",
+          "player2": "Marin Cilic",
+          "status": "scheduled"
+        }
+      ]
+    },
+    {
+      "date": "2026-05-08",
+      "label": "Mañana",
+      "matches": [
+        {
+          "tournament": "Internazionali BNL d'Italia",
+          "level": "ATP 1000",
+          "round": "R2",
+          "surface": "Clay",
+          "time": "TBD",
+          "player1": "Jannik Sinner",
+          "player2": "Sebastian Ofner / Alex Michelsen",
+          "status": "scheduled"
+        },
+        {
+          "tournament": "Internazionali BNL d'Italia",
+          "level": "ATP 1000",
+          "round": "R2",
+          "surface": "Clay",
+          "time": "11:00",
+          "player1": "ATP singles",
+          "player2": "Order of play TBD",
+          "status": "tbd"
+        },
+        {
+          "tournament": "Internazionali BNL d'Italia",
+          "level": "ATP 1000",
+          "round": "R2",
+          "surface": "Clay",
+          "time": "19:00",
+          "player1": "ATP singles",
+          "player2": "Evening session TBD",
+          "status": "tbd"
+        }
+      ]
+    }
+  ]
+}

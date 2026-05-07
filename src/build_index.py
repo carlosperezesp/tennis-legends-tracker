@@ -131,6 +131,22 @@ def _surface_stats(stats_by_year: dict) -> dict:
     return result
 
 
+def _surface_sim_scores(stats_by_year: dict, benchmark: dict) -> dict:
+    """Latest valid profile-sim score by surface."""
+    result = {}
+    for surf in ("All", "Hard", "Clay", "Grass"):
+        result[surf] = None
+        for yr in sorted(stats_by_year.keys(), key=int, reverse=True):
+            stats = (stats_by_year.get(yr) or {}).get(surf)
+            if not stats:
+                continue
+            sim = sf.compute_profile_similarity(stats, benchmark, surf)
+            if sim is not None:
+                result[surf] = sim
+                break
+    return result
+
+
 def _project(current_age, current_gs, player_stats, end_age=37):
     """
     Kernel-regression projection: expected GS depends on how similar this
@@ -177,10 +193,466 @@ def _pct(v):
     return round(v * 100, 1) if v is not None else None
 
 
+def _safe_int(v, default=0):
+    try:
+        return int(v) if v not in (None, "", "nan") else default
+    except (TypeError, ValueError):
+        return default
+
+
+def _blank_perf_acc():
+    return {
+        "matches": 0,
+        "wins": 0,
+        "svpt": 0, "serve_won": 0,
+        "first_in": 0, "first_won": 0, "second_won": 0,
+        "bp_saved": 0, "bp_faced": 0,
+        "retpt": 0, "return_won": 0,
+        "ret_bp_won": 0, "ret_bp_opp": 0,
+        "sv_gms": 0, "breaks_lost": 0,
+        "ret_gms": 0, "breaks_won": 0,
+    }
+
+
+def _add_perf_row(acc: dict, row: dict, as_winner: bool):
+    pfx = "w" if as_winner else "l"
+    opfx = "l" if as_winner else "w"
+
+    svpt = _safe_int(row.get(f"{pfx}_svpt"))
+    first_in = _safe_int(row.get(f"{pfx}_1stIn"))
+    first_won = _safe_int(row.get(f"{pfx}_1stWon"))
+    second_won = _safe_int(row.get(f"{pfx}_2ndWon"))
+    serve_won = _safe_int(row.get(f"{pfx}_1stWon")) + _safe_int(row.get(f"{pfx}_2ndWon"))
+    retpt = _safe_int(row.get(f"{opfx}_svpt"))
+    opp_serve_won = _safe_int(row.get(f"{opfx}_1stWon")) + _safe_int(row.get(f"{opfx}_2ndWon"))
+
+    sv_gms = _safe_int(row.get(f"{pfx}_SvGms"))
+    bp_saved = _safe_int(row.get(f"{pfx}_bpSaved"))
+    bp_faced = _safe_int(row.get(f"{pfx}_bpFaced"))
+    breaks_lost = max(0, _safe_int(row.get(f"{pfx}_bpFaced")) - _safe_int(row.get(f"{pfx}_bpSaved")))
+    ret_gms = _safe_int(row.get(f"{opfx}_SvGms"))
+    ret_bp_saved_opp = _safe_int(row.get(f"{opfx}_bpSaved"))
+    ret_bp_opp = _safe_int(row.get(f"{opfx}_bpFaced"))
+    breaks_won = max(0, _safe_int(row.get(f"{opfx}_bpFaced")) - _safe_int(row.get(f"{opfx}_bpSaved")))
+
+    if svpt:
+        acc["svpt"] += svpt
+        acc["serve_won"] += serve_won
+        acc["first_in"] += first_in
+        acc["first_won"] += first_won
+        acc["second_won"] += second_won
+        acc["bp_saved"] += bp_saved
+        acc["bp_faced"] += bp_faced
+    if retpt:
+        acc["retpt"] += retpt
+        acc["return_won"] += max(0, retpt - opp_serve_won)
+        acc["ret_bp_won"] += max(0, ret_bp_opp - ret_bp_saved_opp)
+        acc["ret_bp_opp"] += ret_bp_opp
+    acc["sv_gms"] += sv_gms
+    acc["breaks_lost"] += min(breaks_lost, sv_gms) if sv_gms else breaks_lost
+    acc["ret_gms"] += ret_gms
+    acc["breaks_won"] += min(breaks_won, ret_gms) if ret_gms else breaks_won
+    acc["matches"] += 1
+    if as_winner:
+        acc["wins"] += 1
+
+
+def _perf_rates(acc: dict):
+    total_points = acc["svpt"] + acc["retpt"]
+    if acc["matches"] < 3 or total_points < 80:
+        return None
+
+    def pct(num, den):
+        return round(num / den * 100) if den else None
+
+    service = pct(acc["serve_won"], acc["svpt"])
+    ret = pct(acc["return_won"], acc["retpt"])
+    total = pct(acc["serve_won"] + acc["return_won"], total_points)
+    second_svpt = acc["svpt"] - acc["first_in"]
+
+    return {
+        "winRate": pct(acc["wins"], acc["matches"]),
+        "totalPtsWon": total,
+        "dominanceRatio": round((service / 100) / (1 - (ret / 100)), 2) if service is not None and ret is not None and ret < 100 else None,
+        "servicePtsWon": service,
+        "firstServePtsWon": pct(acc["first_won"], acc["first_in"]),
+        "secondServePtsWon": pct(acc["second_won"], second_svpt),
+        "breakPointsSaved": pct(acc["bp_saved"], acc["bp_faced"]),
+        "returnPtsWon": ret,
+        "breakPointsCreated": pct(acc["ret_bp_opp"], acc["ret_gms"]),
+        "breakPointsConverted": pct(acc["ret_bp_won"], acc["ret_bp_opp"]),
+        "holdPct": pct(acc["sv_gms"] - acc["breaks_lost"], acc["sv_gms"]),
+        "breakPct": pct(acc["breaks_won"], acc["ret_gms"]),
+    }
+
+
+CHARTING_DIR = DATA_DIR / "external" / "match_charting"
+
+
+def _safe_float(v, default=0.0):
+    if v in (None, "", "-", "nan"):
+        return default
+    try:
+        return float(str(v).rstrip("%"))
+    except (TypeError, ValueError):
+        return default
+
+
+def _chart_acc():
+    return {
+        "serve_pts": 0, "unret": 0, "short_serve_won": 0,
+        "return_pts": 0, "return_in_play": 0, "return_in_play_won": 0,
+        "returnable": 0, "return_deep": 0, "return_very_deep": 0,
+        "rally_pts": 0, "rally_shots": 0,
+        "short_rally_pts": 0, "short_rally_won": 0,
+        "medium_rally_pts": 0, "medium_rally_won": 0,
+        "long_rally_pts": 0, "long_rally_won": 0,
+        "very_long_rally_pts": 0, "very_long_rally_won": 0,
+        "winners": 0, "unforced": 0,
+        "fh_shots": 0, "fh_winners": 0, "fh_forced": 0, "fh_unforced": 0,
+        "bh_shots": 0, "bh_winners": 0, "bh_forced": 0, "bh_unforced": 0,
+        "net_pts": 0, "net_won": 0,
+    }
+
+
+def _add_chart_acc(dst: dict, src: dict):
+    for key, value in src.items():
+        dst[key] = dst.get(key, 0) + value
+
+
+def _chart_rates(acc: dict) -> dict:
+    def pct(num, den):
+        return round(num / den * 100) if den else None
+
+    fh_potency = None
+    if acc["fh_shots"]:
+        fh_potency = round(max(0, min(100, 50 + (acc["fh_winners"] + acc["fh_forced"] - acc["fh_unforced"]) / acc["fh_shots"] * 100)))
+    bh_potency = None
+    if acc["bh_shots"]:
+        bh_potency = round(max(0, min(100, 50 + (acc["bh_winners"] + acc["bh_forced"] - acc["bh_unforced"]) / acc["bh_shots"] * 100)))
+
+    rally_aggression = None
+    if acc["rally_pts"]:
+        rally_aggression = round((acc["winners"] - acc["unforced"]) / acc["rally_pts"] * 100)
+
+    return {
+        "unreturnedServe": pct(acc["unret"], acc["serve_pts"]),
+        "shortServeWon": pct(acc["short_serve_won"], acc["serve_pts"]),
+        "returnInPlay": pct(acc["return_in_play"], acc["return_pts"]),
+        "returnInPlayWon": pct(acc["return_in_play_won"], acc["return_in_play"]),
+        "returnDepthIndex": round((acc["return_deep"] + 2 * acc["return_very_deep"]) / acc["returnable"] * 100, 1) if acc["returnable"] else None,
+        "averageRallyLength": round(acc["rally_shots"] / acc["rally_pts"], 1) if acc["rally_pts"] else None,
+        "shortRallyWin": pct(acc["short_rally_won"], acc["short_rally_pts"]),
+        "mediumRallyWin": pct(acc["medium_rally_won"], acc["medium_rally_pts"]),
+        "longRallyWin": pct(acc["long_rally_won"], acc["long_rally_pts"]),
+        "veryLongRallyWin": pct(acc["very_long_rally_won"], acc["very_long_rally_pts"]),
+        "rallyAggression": rally_aggression,
+        "forehandPotency": fh_potency,
+        "backhandPotency": bh_potency,
+        "forehandWinner": pct(acc["fh_winners"], acc["fh_shots"]),
+        "backhandWinner": pct(acc["bh_winners"], acc["bh_shots"]),
+        "netFrequency": pct(acc["net_pts"], acc["serve_pts"] + acc["return_pts"]),
+        "netWin": pct(acc["net_won"], acc["net_pts"]),
+    }
+
+
+def _charting_metrics_for_players(players: list) -> dict:
+    """Aggregate Tennis Abstract Match Charting stats by player and surface."""
+    required = [
+        "charting-m-matches.csv",
+        "charting-m-stats-Overview.csv",
+        "charting-m-stats-ServeBasics.csv",
+        "charting-m-stats-ReturnOutcomes.csv",
+        "charting-m-stats-ReturnDepth.csv",
+        "charting-m-stats-Rally.csv",
+        "charting-m-stats-NetPoints.csv",
+        "charting-m-stats-ShotTypes.csv",
+    ]
+    if not all((CHARTING_DIR / name).exists() for name in required):
+        return {}
+
+    name_to_pid = {p["name"]: p["player_id"] for p in players}
+    match_meta = {}
+    with open(CHARTING_DIR / "charting-m-matches.csv", encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            surf = (row.get("Surface") or "").strip()
+            if surf not in ("Hard", "Clay", "Grass"):
+                continue
+            match_meta[row["match_id"]] = {
+                "surface": surf,
+                "date": row.get("Date") or row["match_id"][:8],
+            }
+
+    per_match = {}
+
+    def stat_for(player, match_id):
+        pid = name_to_pid.get(player)
+        meta = match_meta.get(match_id)
+        if pid is None or meta is None:
+            return None
+        key = (pid, match_id)
+        if key not in per_match:
+            per_match[key] = {"date": meta["date"], "surface": meta["surface"], "acc": _chart_acc()}
+        return per_match[key]["acc"]
+
+    with open(CHARTING_DIR / "charting-m-stats-Overview.csv", encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            if row.get("set") != "Total":
+                continue
+            acc = stat_for(row.get("player"), row.get("match_id"))
+            if not acc:
+                continue
+            acc["serve_pts"] += _safe_int(row.get("serve_pts"))
+            acc["return_pts"] += _safe_int(row.get("return_pts"))
+            acc["winners"] += _safe_int(row.get("winners"))
+            acc["unforced"] += _safe_int(row.get("unforced"))
+
+    with open(CHARTING_DIR / "charting-m-stats-ServeBasics.csv", encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            if row.get("row") != "Total":
+                continue
+            acc = stat_for(row.get("player"), row.get("match_id"))
+            if not acc:
+                continue
+            acc["unret"] += _safe_int(row.get("unret"))
+            acc["short_serve_won"] += _safe_int(row.get("pts_won_lte_3_shots"))
+
+    with open(CHARTING_DIR / "charting-m-stats-ReturnOutcomes.csv", encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            if row.get("row") != "Total":
+                continue
+            acc = stat_for(row.get("player"), row.get("match_id"))
+            if not acc:
+                continue
+            acc["return_in_play"] += _safe_int(row.get("in_play"))
+            acc["return_in_play_won"] += _safe_int(row.get("in_play_won"))
+            acc["rally_pts"] += _safe_int(row.get("pts"))
+            acc["rally_shots"] += _safe_int(row.get("total_shots"))
+
+    with open(CHARTING_DIR / "charting-m-stats-ReturnDepth.csv", encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            if row.get("row") != "Total":
+                continue
+            acc = stat_for(row.get("player"), row.get("match_id"))
+            if not acc:
+                continue
+            acc["returnable"] += _safe_int(row.get("returnable"))
+            acc["return_deep"] += _safe_int(row.get("deep"))
+            acc["return_very_deep"] += _safe_int(row.get("very_deep"))
+
+    rally_rows = {
+        "1-3": ("short_rally_pts", "short_rally_won"),
+        "4-6": ("medium_rally_pts", "medium_rally_won"),
+        "7-9": ("long_rally_pts", "long_rally_won"),
+        "10": ("very_long_rally_pts", "very_long_rally_won"),
+    }
+    with open(CHARTING_DIR / "charting-m-stats-Rally.csv", encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            bucket = rally_rows.get(row.get("row"))
+            if not bucket:
+                continue
+            pts_key, won_key = bucket
+            pts = _safe_int(row.get("pts"))
+            server = row.get("server")
+            returner = row.get("returner")
+            s_acc = stat_for(server, row.get("match_id"))
+            r_acc = stat_for(returner, row.get("match_id"))
+            if s_acc:
+                s_acc[pts_key] += pts
+                s_acc[won_key] += _safe_int(row.get("pl1_won"))
+            if r_acc:
+                r_acc[pts_key] += pts
+                r_acc[won_key] += _safe_int(row.get("pl2_won"))
+
+    with open(CHARTING_DIR / "charting-m-stats-NetPoints.csv", encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            if row.get("row") != "NetPoints":
+                continue
+            acc = stat_for(row.get("player"), row.get("match_id"))
+            if not acc:
+                continue
+            acc["net_pts"] += _safe_int(row.get("net_pts"))
+            acc["net_won"] += _safe_int(row.get("pts_won"))
+
+    with open(CHARTING_DIR / "charting-m-stats-ShotTypes.csv", encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            shot_row = row.get("row")
+            if shot_row not in ("F", "B"):
+                continue
+            acc = stat_for(row.get("player"), row.get("match_id"))
+            if not acc:
+                continue
+            prefix = "fh" if shot_row == "F" else "bh"
+            acc[f"{prefix}_shots"] += _safe_int(row.get("shots"))
+            acc[f"{prefix}_winners"] += _safe_int(row.get("winners"))
+            acc[f"{prefix}_forced"] += _safe_int(row.get("induced_forced"))
+            acc[f"{prefix}_unforced"] += _safe_int(row.get("unforced"))
+
+    surfaces = ("All", "Hard", "Clay", "Grass")
+    by_player = {p["player_id"]: {surf: [] for surf in surfaces} for p in players}
+    for (pid, _), item in per_match.items():
+        by_player[pid]["All"].append(item)
+        by_player[pid][item["surface"]].append(item)
+
+    result = {}
+    for pid, surface_items in by_player.items():
+        player_result = {}
+        for surf, items in surface_items.items():
+            if not items:
+                continue
+            career = _chart_acc()
+            recent = _chart_acc()
+            for item in items:
+                _add_chart_acc(career, item["acc"])
+            for item in sorted(items, key=lambda x: x["date"], reverse=True)[:10]:
+                _add_chart_acc(recent, item["acc"])
+            career_rates = _chart_rates(career)
+            recent_rates = _chart_rates(recent)
+            if any(v is not None for v in career_rates.values()) and any(v is not None for v in recent_rates.values()):
+                player_result[surf] = {
+                    "matches": len(items),
+                    "recentMatches": min(10, len(items)),
+                    "career": career_rates,
+                    "recent": recent_rates,
+                }
+        if player_result:
+            result[pid] = player_result
+    return result
+
+
+def _performance_metrics_for_players(players: list, years_range, use_cache: bool = True) -> dict:
+    """Compute career vs latest-10-match performance metrics from Sackmann CSVs."""
+    pid_set = {p["player_id"] for p in players}
+    surfaces = ("All", "Hard", "Clay", "Grass")
+    career = {pid: {surf: _blank_perf_acc() for surf in surfaces} for pid in pid_set}
+    recent_rows = {pid: {surf: [] for surf in surfaces} for pid in pid_set}
+    charting = _charting_metrics_for_players(players)
+
+    for year in years_range:
+        rows = sf._fetch_csv(year, use_cache)
+        for row in rows:
+            wid = _safe_int(row.get("winner_id"), None)
+            lid = _safe_int(row.get("loser_id"), None)
+            surf = (row.get("surface") or "").strip()
+            surface_keys = ("All", surf) if surf in surfaces and surf != "All" else ("All",)
+            date_key = (row.get("tourney_date") or "", _safe_int(row.get("match_num")))
+            if wid in pid_set:
+                for key in surface_keys:
+                    _add_perf_row(career[wid][key], row, True)
+                    recent_rows[wid][key].append((date_key, row, True))
+            if lid in pid_set:
+                for key in surface_keys:
+                    _add_perf_row(career[lid][key], row, False)
+                    recent_rows[lid][key].append((date_key, row, False))
+
+    compact_labels = [
+        ("servicePtsWon", "Service Pts Won"),
+        ("returnPtsWon", "Return Pts Won"),
+        ("holdPct", "Hold %"),
+        ("breakPct", "Break %"),
+        ("totalPtsWon", "Total Pts Won"),
+    ]
+    profile_groups = [
+        ("Forma", [
+            ("totalPtsWon", "Total Points Won %"),
+            ("winRate", "Win rate últimos 10"),
+            ("dominanceRatio", "Dominance Ratio"),
+        ]),
+        ("Saque", [
+            ("servicePtsWon", "Service Points Won %"),
+            ("firstServePtsWon", "1st Serve Points Won %"),
+            ("secondServePtsWon", "2nd Serve Points Won %"),
+            ("unreturnedServe", "Unreturned Serve %"),
+            ("shortServeWon", "<=3 Shots Won %"),
+            ("breakPointsSaved", "Break Points Saved %"),
+        ]),
+        ("Resto", [
+            ("returnPtsWon", "Return Points Won %"),
+            ("returnInPlay", "Return in Play %"),
+            ("returnInPlayWon", "Return in Play Won %"),
+            ("returnDepthIndex", "Return Depth Index"),
+            ("breakPointsCreated", "Break Points Created %"),
+            ("breakPointsConverted", "Break Points Converted %"),
+        ]),
+        ("Rally", [
+            ("averageRallyLength", "Average Rally Length"),
+            ("shortRallyWin", "1-3 Shot Win %"),
+            ("mediumRallyWin", "4-6 Shot Win %"),
+            ("longRallyWin", "7-9 Shot Win %"),
+            ("veryLongRallyWin", "10+ Shot Win %"),
+        ]),
+        ("Armas / estilo", [
+            ("rallyAggression", "Rally Aggression"),
+            ("forehandPotency", "Forehand Potency / 100"),
+            ("backhandPotency", "Backhand Potency / 100"),
+            ("forehandWinner", "Forehand Winner %"),
+            ("backhandWinner", "Backhand Winner %"),
+            ("netFrequency", "Net Frequency"),
+            ("netWin", "Net Win %"),
+        ]),
+    ]
+
+    result = {}
+    for pid in pid_set:
+        by_surface = {}
+        for surf in surfaces:
+            recent_acc = _blank_perf_acc()
+            latest_rows = sorted(recent_rows[pid][surf], key=lambda x: x[0], reverse=True)[:10]
+            for _, row, as_winner in latest_rows:
+                _add_perf_row(recent_acc, row, as_winner)
+
+            actual = _perf_rates(recent_acc)
+            baseline = _perf_rates(career[pid][surf])
+            if not actual or not baseline:
+                continue
+            chart_surface = (charting.get(pid) or {}).get(surf)
+            if chart_surface:
+                actual = {**actual, **chart_surface.get("recent", {})}
+                baseline = {**baseline, **chart_surface.get("career", {})}
+
+            rows = []
+            for key, label in compact_labels:
+                a = actual.get(key)
+                c = baseline.get(key)
+                if a is None or c is None:
+                    continue
+                rows.append({"key": key, "label": label, "actual": a, "career": c, "diff": a - c})
+
+            groups = []
+            for group_name, stats in profile_groups:
+                stat_rows = []
+                for key, label in stats:
+                    a = actual.get(key)
+                    c = baseline.get(key)
+                    stat_rows.append({
+                        "key": key,
+                        "label": label,
+                        "actual": a,
+                        "career": c,
+                        "diff": (a - c) if a is not None and c is not None else None,
+                        "available": a is not None and c is not None,
+                    })
+                groups.append({"name": group_name, "rows": stat_rows})
+
+            if rows:
+                by_surface[surf] = {
+                    "surface": surf,
+                    "matches": recent_acc["matches"],
+                    "rows": rows,
+                    "groups": groups,
+                }
+
+        if by_surface:
+            result[pid] = by_surface
+    return result
+
+
 # ── Build player record ───────────────────────────────────────────────────────
 
 def build_player_record(p: dict, stats_by_year: dict, benchmark: dict,
-                         gs_wins: dict, elo_ratings: dict = None) -> dict:
+                         gs_wins: dict, elo_ratings: dict = None,
+                         performance_metrics: dict = None,
+                         next_matches: dict = None) -> dict:
     pid  = p["player_id"]
     name = p["name"]
     born = p["born"]
@@ -273,6 +745,9 @@ def build_player_record(p: dict, stats_by_year: dict, benchmark: dict,
     capi       = _career_adj_score(sim, age, gs_total)
     near_term  = _near_term_score(sim, age, gs_total, rank)
     is_legend  = name in BACKGROUND_LEGENDS
+    sim_by_surface = _surface_sim_scores(stats_by_year, benchmark)
+    sim_by_surface["All"] = sim
+    performance_by_surface = (performance_metrics or {}).get(pid, {})
 
     return {
         "name":       name,
@@ -298,6 +773,11 @@ def build_player_record(p: dict, stats_by_year: dict, benchmark: dict,
             },
             "benchmark": {k: _pct(bench_at.get(k)) for k in STAT_LABELS},
         },
+        "performanceMetrics": performance_by_surface.get("All"),
+        "performanceBySurface": performance_by_surface,
+        "simBySurface": sim_by_surface,
+        "tourPctBySurface": {},
+        "nextMatch": (next_matches or {}).get(name),
         "latestYear":   int(latest_year),
         "yearsOfData":  len(stats_by_year),
         "surfaceStats": _surface_stats(stats_by_year),
@@ -347,882 +827,950 @@ def _recent_matches() -> list:
     return matches[:200]
 
 
-def render_index(players_data: list, legend_datasets: list, recent_matches: list) -> str:
-    legend_datasets_json = json.dumps(legend_datasets, ensure_ascii=False)
-    players_json         = json.dumps(players_data,    ensure_ascii=False)
-    matches_json         = json.dumps(recent_matches,  ensure_ascii=False)
-    legend_names_json    = json.dumps(BACKGROUND_LEGENDS)
+def _load_next_matches() -> dict:
+    path = DATA_DIR / "live_next_matches.json"
+    if not path.exists():
+        return {}
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"  Warning: could not read live next matches: {exc}")
+        return {}
+
+
+def _load_live_schedule() -> dict:
+    path = DATA_DIR / "live_schedule.json"
+    if not path.exists():
+        return {"asOf": date.today().isoformat(), "days": []}
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"  Warning: could not read live schedule: {exc}")
+        return {"asOf": date.today().isoformat(), "days": []}
+
+
+def render_index(players_data: list, legend_datasets: list, recent_matches: list, live_schedule: dict) -> str:
+    players_json = json.dumps(players_data, ensure_ascii=False)
+    live_schedule_json = json.dumps(live_schedule, ensure_ascii=False)
 
     return f"""<!DOCTYPE html>
-<html lang="es">
+<html class="light" lang="es">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Legend Trajectory — ATP Scout</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lexend:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <title>Legend Tracker · ATP Rankings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet"/>
   <style>
-    *, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
-
     :root {{
-      --lime:   #A3E635; --teal:   #00234B; --teal2:  #003070;
-      --green:  #119822; --sky:    #00ABE7; --aqua:   #2DC7FF;
-      --red:    #e63946; --orange: #f59e0b;
-      --bg:     #F8F9FA; --white:  #ffffff;
-      --text:   #00234B; --muted:  #64748b; --border: #e2e8f0;
+      --slate-dark: #141413;
+      --ivory-light: #faf9f5;
+      --ivory-medium: #f0eee6;
+      --ivory-dark: #e8e6dc;
+      --oat: #e3dacc;
+      --cloud-medium: #b0aea5;
+      --cloud-light: #d1cfc5;
+      --cloud-dark: #87867f;
+      --slate-light: #5e5d59;
+      --clay: #d97757;
+      --olive: #788c5d;
+      --sky: #6a9bcc;
+      --fig: #c46686;
     }}
-
-    body {{ font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); }}
-
-    /* ── Desktop layout ──────────────────────────────────────────────── */
-    @media (min-width: 769px) {{
-      body {{ height: 100vh; overflow: hidden; }}
-      #screens-track {{ display: grid; grid-template-columns: 290px 1fr; height: 100vh; }}
-      #screen-2 {{ display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }}
-      #screen-2 .main {{ flex: 1; min-height: 0; }}
-      #screen-3, .mobile-topbar, #search-overlay {{ display: none !important; }}
+    html {{ scroll-behavior: smooth; }}
+    body {{ margin: 0; font-family: 'Inter', system-ui, sans-serif; color: var(--slate-dark); background: var(--ivory-light); }}
+    * {{ box-sizing: border-box; }}
+    ::-webkit-scrollbar {{ display: none; }}
+    .tabs-viewport {{
+      width: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
     }}
-
-    /* Sidebar (screen-1) */
-    .sidebar {{ background: var(--teal); color: #c4dcf4; display: flex; flex-direction: column; overflow: hidden; }}
-    .sidebar-header {{ padding: 20px 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.1); }}
-    .sidebar-header h1 {{ font-family: 'Lexend', sans-serif; font-size: 1rem; font-weight: 700; color: var(--lime); letter-spacing: 0.01em; margin-bottom: 12px; }}
-    .search-box {{
-      width: 100%; padding: 8px 12px; border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.08); color: #c4dcf4;
-      font-size: 0.85rem; outline: none; font-family: 'Inter', sans-serif;
+    .tabs-track {{ display: flex; width: 300%; align-items: flex-start; }}
+    .tab-panel {{ width: 33.333333%; min-width: 33.333333%; scroll-snap-align: start; }}
+    .tab-panel.app-shell {{ max-width: none; margin: 0; }}
+    .tab-panel.app-shell > * {{ max-width: 1200px; margin-left: auto; margin-right: auto; }}
+    .app-shell {{ max-width: 1200px; margin: 0 auto; padding: 0 24px 48px; }}
+    .topbar {{
+      position: sticky; top: 0; z-index: 50; height: 68px;
+      background: var(--ivory-medium); border-bottom: 1px solid var(--slate-dark);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px;
     }}
-    .search-box::placeholder {{ color: rgba(255,255,255,0.35); }}
-    .search-box:focus {{ border-color: var(--lime); background: rgba(255,255,255,0.12); }}
-    .player-count {{ font-size: 0.70rem; color: rgba(255,255,255,0.38); margin-top: 5px; }}
-    .sort-controls {{ display: flex; gap: 4px; margin-top: 10px; flex-wrap: wrap; }}
+    .wordmark {{
+      font-weight: 700; font-size: 16px; letter-spacing: 0; color: var(--slate-dark);
+      text-transform: uppercase;
+    }}
+    .search-toggle {{
+      background: var(--ivory-light); color: var(--slate-dark); border: 1px solid var(--slate-dark);
+      border-radius: 0 0 8px 8px; cursor: pointer; width: 56px; height: 44px;
+      display: inline-flex; align-items: center; justify-content: center;
+    }}
+    .hero {{
+      display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.65fr);
+      gap: 48px; padding: 76px 0 32px; align-items: end;
+    }}
+    .hero h1 {{
+      margin: 0; font-size: clamp(42px, 7vw, 82px); line-height: 1.03;
+      letter-spacing: 0; font-weight: 700; color: var(--slate-dark);
+    }}
+    .hero u {{ text-decoration-thickness: 0.08em; text-underline-offset: 0.12em; }}
+    .hero p {{ margin: 0; font-size: 18px; line-height: 1.4; color: var(--slate-dark); max-width: 360px; }}
+    .toolbar {{
+      background: var(--ivory-medium); border: 1px solid var(--slate-dark); border-radius: 24px;
+      padding: 31px; margin-bottom: 16px;
+    }}
+    .search-panel {{ display:none; margin-bottom: 16px; }}
+    .search-input {{
+      width:100%; background: var(--ivory-light); border:1px solid var(--slate-dark); border-radius:0;
+      padding: 14px 16px; font-size: 15px; outline: none; font-family: inherit; color: var(--slate-dark);
+    }}
+    .search-input:focus {{ border-color: var(--clay); }}
+    .toolbar-row {{ display:flex; align-items:center; gap:16px; }}
+    .sort-group {{ display:flex; gap:8px; overflow-x:auto; flex:1; }}
     .sort-btn {{
-      flex: 1; min-width: 44px; padding: 5px 2px; border-radius: 6px;
-      border: 1px solid rgba(255,255,255,0.15); background: transparent;
-      color: rgba(255,255,255,0.5); cursor: pointer; font-size: 0.64rem;
-      font-family: 'Inter', sans-serif; text-align: center; transition: all 0.14s; white-space: nowrap;
+      font-size: 15px; font-weight: 500; padding: 12px 18px; border-radius: 0;
+      border: 1px solid var(--slate-dark); color: var(--slate-dark); background: transparent;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
     }}
-    .sort-btn:hover {{ background: rgba(255,255,255,0.1); color: #fff; }}
-    .sort-btn.active {{ background: var(--lime); color: var(--teal); border-color: var(--lime); font-weight: 700; }}
-
-    /* Player list */
-    .player-list {{ overflow-y: auto; flex: 1; }}
-    .player-list::-webkit-scrollbar {{ width: 3px; }}
-    .player-list::-webkit-scrollbar-thumb {{ background: rgba(255,255,255,0.18); border-radius: 2px; }}
-    .player-item {{
-      display: grid; grid-template-columns: 28px 1fr auto; gap: 8px;
-      align-items: center; padding: 10px 16px; cursor: pointer;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      border-left: 3px solid transparent; transition: all 0.12s;
+    .sort-btn.active {{ background: var(--slate-dark); color: var(--ivory-light); }}
+    .sort-btn:hover:not(.active) {{ background: var(--oat); }}
+    .player-count {{
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cloud-dark);
+      text-transform: uppercase; flex-shrink: 0;
     }}
-    .player-item:hover {{ background: rgba(255,255,255,0.07); }}
-    .player-item.active {{ background: rgba(163,230,53,0.12); border-left-color: var(--lime); }}
-    .p-rank {{ font-size: 0.70rem; color: rgba(255,255,255,0.38); text-align: right; font-family: 'Lexend', sans-serif; }}
-    .p-name {{ font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #c4dcf4; }}
-    .p-age  {{ font-size: 0.67rem; color: rgba(255,255,255,0.42); }}
-    .p-sim  {{
-      font-size: 0.70rem; font-weight: 700; padding: 2px 7px;
-      border-radius: 20px; border: 1px solid; text-align: center;
-      min-width: 36px; font-family: 'Lexend', sans-serif;
+    .list-panel {{ background: var(--ivory-medium); border-radius: 8px; overflow: hidden; }}
+    .player-row {{
+      display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 16px;
+      padding: 18px 24px; cursor: pointer; transition: background 0.12s;
+      border-bottom: 1px solid var(--cloud-light);
     }}
-
-    /* Main panel */
-    .main {{ overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }}
-    .main::-webkit-scrollbar {{ width: 4px; }}
-    .main::-webkit-scrollbar-thumb {{ background: #d1d5db; border-radius: 2px; }}
-
-    /* Cards */
-    .card {{ background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }}
-    .player-header {{ display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }}
-    .player-header h2 {{ font-family: 'Lexend', sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }}
-    .badge {{ padding: 4px 12px; border-radius: 20px; font-size: 0.76rem; font-weight: 600; font-family: 'Lexend', sans-serif; }}
-    .badge-rank {{ background: var(--teal); color: var(--lime); }}
-    .badge-gs {{ background: #ecfdf5; color: var(--green); border: 1px solid #a7f3d0; }}
-    .badge-sim {{ color: #fff; }}
-
-    /* Two-col panels */
-    .panels-row {{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }}
-    @media (max-width: 800px) {{ .panels-row {{ grid-template-columns: 1fr; }} }}
-    .panel {{ background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }}
-    .panel h3 {{ font-family: 'Lexend', sans-serif; font-size: 0.68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }}
-
-    /* Projections */
-    .proj-grid {{ display: flex; gap: 8px; }}
-    .proj-item {{ flex: 1; text-align: center; background: var(--bg); border-radius: 10px; padding: 12px 4px; border: 1px solid var(--border); }}
-    .proj-label {{ display: block; font-size: 0.58rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; font-family: 'Inter', sans-serif; }}
-    .proj-value {{ font-family: 'Lexend', sans-serif; font-size: 1.9rem; font-weight: 800; }}
-    .blue {{ color: var(--sky); }} .orange {{ color: var(--orange); }} .green {{ color: var(--green); }}
-
-    /* Comparison table */
-    table {{ width: 100%; border-collapse: collapse; font-size: 0.81rem; }}
-    th {{ padding: 7px 8px; background: var(--bg); font-weight: 600; color: var(--muted); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; font-family: 'Inter', sans-serif; text-align: left; }}
-    td {{ padding: 8px 8px; border-bottom: 1px solid var(--border); font-family: 'Inter', sans-serif; }}
-    .td-c {{ text-align: center; }}
-    .color-dot {{ display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }}
-    .diff-pos {{ color: var(--red); font-weight: 600; }}
-    .diff-neg {{ color: var(--green); font-weight: 600; }}
-
-    /* Chart */
-    .chart-panel {{ background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }}
-    .chart-panel h3 {{ font-family: 'Lexend', sans-serif; font-size: 0.68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }}
-    .chart-sub {{ font-size: 0.75rem; color: var(--muted); margin-bottom: 12px; }}
-    .chart-controls {{ display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }}
-    .ctrl-btn {{
-      padding: 4px 12px; border: 1px solid var(--border); border-radius: 20px;
-      background: var(--white); cursor: pointer; font-size: 0.74rem;
-      color: var(--muted); transition: all 0.14s; font-family: 'Inter', sans-serif;
+    .player-row:hover, .player-row.selected {{ background: var(--oat); }}
+    .rank-cell {{
+      font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--cloud-dark);
+      text-align: right; font-variant-numeric: tabular-nums;
     }}
-    .ctrl-btn.active {{ background: var(--teal); color: var(--lime); border-color: var(--teal); font-weight: 600; }}
-    .chart-wrap {{ position: relative; height: 340px; }}
-    .chart-legend-row {{ display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }}
-    .legend-item {{ display: inline-flex; align-items: center; gap: 5px; font-size: 0.73rem; color: var(--muted); cursor: pointer; transition: opacity 0.13s; font-family: 'Inter', sans-serif; }}
-    .legend-dot {{ width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }}
-
-    /* Game stats bars */
-    .stat-bar-grid {{ display: flex; flex-direction: column; gap: 8px; }}
-    .stat-bar-row {{ display: grid; grid-template-columns: 130px 1fr 70px; gap: 8px; align-items: center; }}
-    .stat-bar-label {{ font-size: 0.73rem; color: var(--muted); font-family: 'Inter', sans-serif; }}
-    .stat-bar-track {{ background: #f0f3f8; border-radius: 6px; height: 8px; position: relative; overflow: visible; }}
-    .stat-bar-fill {{ height: 100%; border-radius: 6px; transition: width 0.4s; }}
-    .stat-bar-bench {{ position: absolute; top: -4px; width: 2px; height: 16px; background: var(--text); border-radius: 1px; opacity: 0.5; }}
-    .stat-bar-val {{ font-size: 0.74rem; font-weight: 600; text-align: right; white-space: nowrap; font-family: 'Lexend', sans-serif; }}
-    /* Two main metrics */
-    .two-metrics {{ display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }}
-    .metric-hero {{ display: flex; flex-direction: column; align-items: center; gap: 7px; }}
-    .metric-name {{ font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 0.75rem; color: var(--text); text-align: center; }}
-    .metric-desc {{ font-size: 0.60rem; color: var(--muted); text-align: center; line-height: 1.4; max-width: 100px; }}
-    .elo-badge-card {{ display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 10px 16px; background: var(--teal); border-radius: 12px; align-self: center; }}
-    .elo-num-lg {{ font-family: 'Lexend', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--lime); line-height: 1; }}
-    .elo-sub {{ font-size: 0.55rem; color: rgba(196,220,244,0.7); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }}
-    .proj-strip {{ margin-top: 10px; font-size: 0.76rem; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }}
-    .proj-chip {{ padding: 3px 10px; border-radius: 20px; background: var(--bg); border: 1px solid var(--border); font-family: 'Lexend', sans-serif; font-weight: 700; font-size: 0.76rem; }}
-    .proj-chip.cons {{ color: var(--sky); }} .proj-chip.med {{ color: var(--orange); }} .proj-chip.agr {{ color: var(--green); }}
-
-    .no-player {{ color: var(--muted); text-align: center; padding: 60px 20px; font-size: 1rem; font-family: 'Lexend', sans-serif; }}
-    .data-note {{ font-size: 0.68rem; color: #9ca3af; margin-top: 10px; font-style: italic; font-family: 'Inter', sans-serif; }}
-
-    /* ── Mobile: 3-screen swipe layout ─────────────────────────────── */
-    @media (max-width: 768px) {{
-      body {{ overflow: hidden; height: 100dvh; }}
-      #screens-track {{
-        display: flex; width: 300vw; height: 100dvh;
-        transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
-      }}
-      .screen {{
-        width: 100vw; height: 100dvh; flex-shrink: 0;
-        display: flex; flex-direction: column; overflow: hidden;
-      }}
-      #screen-2 {{ background: var(--bg); }}
-      #screen-3 {{ background: var(--bg); display: flex; flex-direction: column; }}
-
-      /* Top nav bar (screens 2 & 3) */
-      .mobile-topbar {{
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 10px 14px; background: var(--teal);
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        flex-shrink: 0; position: sticky; top: 0; z-index: 10;
-      }}
-      .topbar-btn {{
-        background: none; border: none; color: #c4dcf4; font-size: 1.2rem;
-        cursor: pointer; padding: 6px 10px; border-radius: 8px;
-        transition: background 0.12s;
-      }}
-      .topbar-btn:active {{ background: rgba(255,255,255,0.15); }}
-      .topbar-title {{
-        font-family: 'Lexend', sans-serif; font-size: 0.9rem; font-weight: 700;
-        color: var(--lime);
-      }}
-      .topbar-search-btn {{
-        background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
-        border-radius: 50%; width: 38px; height: 38px; display: flex;
-        align-items: center; justify-content: center; font-size: 1rem;
-        color: #c4dcf4; cursor: pointer;
-      }}
-
-      /* Scrollable content areas */
-      .main {{ flex: 1; overflow-y: auto; padding: 12px 12px 30px; gap: 12px; height: auto; }}
-      .matches-content {{ flex: 1; overflow-y: auto; padding: 12px; }}
-
-      /* Screen 1: sidebar keeps its flex layout */
-      #screen-1 {{ height: 100dvh; overflow: hidden; }}
-      .sidebar-header {{ position: sticky; top: 0; z-index: 5; background: var(--teal); padding: 14px 14px 10px; }}
-      .player-list {{ flex: 1; overflow-y: auto; }}
-
-      /* Cards */
-      .card {{ padding: 14px; border-radius: 12px; }}
-      .panels-row {{ grid-template-columns: 1fr; }}
-      .two-metrics {{ gap: 10px; }}
-      .metric-hero svg {{ width: 70px; height: 70px; }}
-      .metric-desc {{ display: none; }}
-      .elo-badge-card {{ padding: 8px 12px; }}
-      .elo-num-lg {{ font-size: 1.2rem; }}
-      .proj-value {{ font-size: 1.4rem; }}
-      .chart-wrap {{ height: 230px; }}
-      .stat-bar-row {{ grid-template-columns: 88px 1fr 52px; gap: 6px; }}
-      .stat-bar-label {{ font-size: 0.67rem; }}
-      .player-header h2 {{ font-size: 1.05rem; }}
-      .badge {{ font-size: 0.67rem; padding: 3px 7px; }}
+    .player-name {{ font-weight: 600; font-size: 20px; color: var(--slate-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+    .player-meta {{ font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cloud-dark); text-transform: uppercase; margin-top: 5px; }}
+    .gs-mark {{ border-bottom: 2px solid var(--slate-dark); padding-bottom: 1px; margin-left: 8px; font-size: 13px; font-weight: 600; white-space: nowrap; }}
+    .score-cell {{ text-align:right; min-width: 76px; }}
+    .score-value {{ font-family: 'Lora', serif; font-weight: 600; font-size: 30px; line-height: 1; color: var(--slate-dark); }}
+    .score-label {{ font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cloud-dark); text-transform: uppercase; margin-top: 4px; }}
+    .player-page {{
+      min-height: calc(100vh - 68px); display: grid; place-items: center;
+      padding-top: 48px; padding-bottom: 48px;
     }}
-
-    /* ── Search overlay (mobile) ─────────────────────────────────── */
-    #search-overlay {{
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-      z-index: 500; align-items: flex-start; justify-content: center; padding-top: 60px;
+    .player-card {{
+      width: min(100%, 760px); background: var(--slate-dark); color: var(--ivory-light);
+      border-radius: 24px; padding: clamp(28px, 5vw, 64px);
+      display: grid; justify-items: center; text-align: center; gap: 24px;
     }}
-    #search-overlay.open {{ display: flex; }}
-    .search-overlay-box {{
-      background: var(--white); border-radius: 14px; width: calc(100vw - 32px);
-      max-width: 420px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+    .player-card h2 {{
+      margin: 0; font-family: 'Lora', serif; font-size: clamp(46px, 8vw, 92px);
+      font-weight: 400; line-height: 1.05; letter-spacing: 0; color: var(--ivory-light);
     }}
-    .search-overlay-input {{
-      width: 100%; padding: 14px 16px; border: none; border-bottom: 1px solid var(--border);
-      font-size: 1rem; font-family: 'Inter', sans-serif; color: var(--text);
-      background: var(--white); outline: none;
+    .player-age {{
+      font-family: 'JetBrains Mono', monospace; color: var(--ivory-dark);
+      font-size: 14px; text-transform: uppercase; margin-top: 8px;
     }}
-    .search-overlay-results {{ max-height: 55vh; overflow-y: auto; }}
-    .search-result-item {{
-      padding: 10px 16px; cursor: pointer; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 10px;
+    .next-match-chip {{
+      width: 100%; border: 1px solid var(--slate-medium, #3d3d3a); background: rgba(250,249,245,0.06);
+      color: var(--ivory-light); padding: 14px 16px; text-align: left;
+      display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center;
     }}
-    .search-result-item:hover {{ background: var(--bg); }}
-    .search-result-item:active {{ background: rgba(163,230,53,0.1); }}
-    .sri-rank {{ font-size: 0.68rem; color: var(--muted); min-width: 28px; }}
-    .sri-name {{ font-size: 0.9rem; color: var(--text); }}
-    .sri-badge {{
-      margin-left: auto; font-size: 0.68rem; font-weight: 700; font-family: 'Lexend', sans-serif;
-      padding: 2px 6px; border-radius: 10px; border: 1px solid;
+    .next-match-kicker {{
+      font-family: 'JetBrains Mono', monospace; color: var(--ivory-dark);
+      font-size: 11px; text-transform: uppercase; margin-bottom: 5px;
     }}
-
-    /* ── Matches screen ──────────────────────────────────────────── */
-    .match-group {{ margin-bottom: 20px; }}
-    .match-group-title {{
-      font-family: 'Lexend', sans-serif; font-size: 0.70rem; font-weight: 700;
-      color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em;
-      padding: 6px 0 8px; border-bottom: 2px solid var(--teal); margin-bottom: 8px;
+    .next-match-main {{ font-weight: 700; font-size: 15px; line-height: 1.25; }}
+    .next-match-meta {{
+      font-family: 'JetBrains Mono', monospace; color: var(--ivory-dark);
+      font-size: 11px; text-transform: uppercase; margin-top: 6px;
     }}
+    .next-match-time {{
+      border: 1px solid var(--ivory-dark); padding: 8px 10px; font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; text-transform: uppercase; white-space: nowrap;
+    }}
+    .tour-ring {{
+      --pct: 0; width: clamp(190px, 34vw, 280px); aspect-ratio: 1; border-radius: 50%;
+      background: conic-gradient(var(--ivory-light) calc(var(--pct) * 1%), var(--slate-medium, #3d3d3a) 0);
+      display: grid; place-items: center; margin-top: 8px;
+    }}
+    .tour-ring-inner {{
+      width: 76%; aspect-ratio: 1; border-radius: 50%; background: var(--slate-dark);
+      display: grid; place-items: center;
+    }}
+    .tour-score {{ font-family: 'Lora', serif; font-size: clamp(48px, 8vw, 72px); line-height: 1; }}
+    .tour-label {{
+      font-family: 'JetBrains Mono', monospace; color: var(--ivory-dark);
+      font-size: 13px; text-transform: uppercase; margin-top: 8px;
+    }}
+    .surface-switcher {{
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;
+      width: 100%; margin-top: -4px;
+    }}
+    .surface-btn {{
+      border: 1px solid var(--ivory-dark); background: transparent; color: var(--ivory-light);
+      min-height: 40px; padding: 9px 8px; font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; text-transform: uppercase; cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }}
+    .surface-btn:hover {{ background: var(--slate-medium, #3d3d3a); }}
+    .surface-btn.active {{ background: var(--ivory-light); color: var(--slate-dark); border-color: var(--ivory-light); }}
+    .surface-btn:disabled {{ opacity: 0.42; cursor: not-allowed; }}
+    .performance-panel {{
+      width: 100%; margin-top: 8px; border-top: 1px solid var(--slate-medium, #3d3d3a);
+      padding-top: 24px; text-align: left;
+    }}
+    .performance-title {{
+      font-family: 'JetBrains Mono', monospace; color: var(--ivory-dark);
+      font-size: 13px; text-transform: uppercase; margin-bottom: 14px;
+    }}
+    .metric-table {{ display: grid; gap: 0; width: 100%; }}
+    .metric-row {{
+      display: grid; grid-template-columns: minmax(104px, 1fr) 72px 72px 76px;
+      align-items: center; gap: 10px; padding: 12px 0;
+      border-top: 1px solid var(--slate-medium, #3d3d3a);
+    }}
+    .metric-row:first-child {{ border-top: 0; }}
+    .metric-head {{
+      padding-top: 0; color: var(--ivory-dark); font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; text-transform: uppercase;
+    }}
+    .metric-name {{ color: var(--ivory-light); font-size: 15px; line-height: 1.25; }}
+    .metric-val {{
+      font-family: 'JetBrains Mono', monospace; color: var(--ivory-light);
+      font-size: 14px; font-variant-numeric: tabular-nums; text-align: right;
+    }}
+    .metric-diff {{ font-weight: 600; }}
+    .metric-diff.up {{ color: var(--olive); }}
+    .metric-diff.down {{ color: var(--clay); }}
+    .metric-diff.flat {{ color: var(--ivory-dark); }}
+    .identity-card {{
+      width: 100%; margin-top: 8px; background: var(--ivory-medium); color: var(--slate-dark);
+      border-radius: 16px; padding: clamp(18px, 4vw, 32px); text-align: left;
+    }}
+    .identity-card h3 {{
+      margin: 0 0 8px; font-size: clamp(26px, 5vw, 44px); line-height: 1.05;
+      letter-spacing: 0; font-weight: 700;
+    }}
+    .identity-intro {{ margin: 0 0 18px; color: var(--slate-light); font-size: 15px; line-height: 1.45; }}
+    .tag-cloud {{ display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }}
+    .auto-tag {{
+      border: 1px solid var(--slate-dark); padding: 8px 10px; font-size: 12px;
+      font-family: 'JetBrains Mono', monospace; text-transform: uppercase; background: var(--ivory-light);
+    }}
+    .auto-tag.good {{ border-color: var(--olive); color: var(--olive); }}
+    .auto-tag.warn {{ border-color: var(--clay); color: var(--clay); }}
+    .profile-groups {{ display: grid; gap: 10px; }}
+    .profile-group {{ border: 1px solid var(--cloud-light); background: var(--ivory-light); }}
+    .profile-summary {{
+      list-style: none; cursor: pointer; padding: 14px 14px; display: flex; align-items: center;
+      justify-content: space-between; gap: 12px; font-weight: 700; font-size: 16px;
+    }}
+    .profile-summary::-webkit-details-marker {{ display: none; }}
+    .group-status {{ font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cloud-dark); text-transform: uppercase; font-weight: 400; }}
+    .profile-stat-row {{
+      display: grid; grid-template-columns: minmax(112px, 1fr) 58px 58px 62px 72px;
+      gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--cloud-light);
+    }}
+    .profile-stat-head {{ color: var(--cloud-dark); font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; }}
+    .profile-stat-name {{ font-size: 13px; line-height: 1.25; }}
+    .profile-stat-val {{ font-family: 'JetBrains Mono', monospace; font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }}
+    .profile-stat-label {{ font-family: 'JetBrains Mono', monospace; font-size: 10px; text-align: right; text-transform: uppercase; }}
+    .profile-stat-label.up {{ color: var(--olive); }}
+    .profile-stat-label.down {{ color: var(--clay); }}
+    .profile-stat-label.flat, .profile-stat-label.na {{ color: var(--cloud-dark); }}
+    .schedule-page {{ padding-top: 48px; padding-bottom: 48px; }}
+    .schedule-hero {{
+      display: flex; justify-content: space-between; gap: 24px; align-items: end;
+      padding: 24px 0 28px; border-bottom: 1px solid var(--slate-dark);
+    }}
+    .schedule-hero h2 {{
+      margin: 0; font-family: 'Lora', serif; font-size: clamp(44px, 7vw, 84px);
+      line-height: 1; font-weight: 400; letter-spacing: 0;
+    }}
+    .schedule-meta {{
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cloud-dark);
+      text-transform: uppercase; text-align: right;
+    }}
+    .schedule-days {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding-top: 18px; }}
+    .schedule-day {{ background: var(--ivory-medium); border: 1px solid var(--slate-dark); }}
+    .schedule-day-head {{
+      display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+      padding: 16px 18px; border-bottom: 1px solid var(--slate-dark);
+    }}
+    .schedule-day-title {{ font-weight: 700; font-size: 20px; }}
+    .schedule-date {{ font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cloud-dark); text-transform: uppercase; }}
+    .match-list {{ display: grid; }}
     .match-card {{
-      background: var(--white); border: 1px solid var(--border); border-radius: 10px;
-      padding: 10px 12px; margin-bottom: 6px;
+      display: grid; border-top: 1px solid var(--cloud-light);
     }}
-    .match-player {{ display: flex; align-items: center; gap: 8px; padding: 4px 0; }}
-    .match-player.loser .match-pname {{ color: var(--muted); }}
-    .match-player.clickable {{ cursor: pointer; }}
-    .match-player.clickable:active {{ background: rgba(163,230,53,0.08); border-radius: 6px; }}
-    .match-pname {{ font-size: 0.85rem; font-weight: 500; flex: 1; }}
-    .match-pbadge {{
-      font-size: 0.68rem; font-weight: 700; font-family: 'Lexend', sans-serif;
-      padding: 2px 6px; border-radius: 8px; border: 1px solid currentColor;
+    .match-card:first-child {{ border-top: 0; }}
+    .match-card summary {{
+      display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 12px;
+      padding: 14px 18px; align-items: center; cursor: pointer; list-style: none;
     }}
-    .match-score {{ font-size: 0.70rem; color: var(--muted); padding: 2px 0 4px; font-family: 'Lexend', sans-serif; }}
+    .match-card summary:hover {{ background: var(--oat); }}
+    .match-card summary::-webkit-details-marker {{ display: none; }}
+    .match-time {{ font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cloud-dark); text-transform: uppercase; }}
+    .match-names {{ font-weight: 700; font-size: 15px; line-height: 1.25; }}
+    .match-info {{ font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cloud-dark); text-transform: uppercase; margin-top: 5px; }}
+    .match-level {{
+      border: 1px solid var(--slate-dark); padding: 6px 8px; font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; text-transform: uppercase; white-space: nowrap;
+    }}
+    .match-compare {{
+      grid-column: 1 / -1; display: grid; gap: 10px; padding-top: 12px; margin-top: 2px;
+      border-top: 1px solid var(--cloud-light);
+    }}
+    .compare-ring-row {{ display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }}
+    .compare-player {{
+      background: var(--ivory-light); border: 1px solid var(--cloud-light); padding: 10px;
+    }}
+    .compare-player-name {{ font-weight: 700; font-size: 13px; }}
+    .compare-score {{ font-family: 'Lora', serif; font-size: 30px; line-height: 1; margin-top: 4px; }}
+    .compare-vs {{ font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--cloud-dark); text-transform: uppercase; }}
+    .compare-table {{ display: grid; border: 1px solid var(--cloud-light); background: var(--ivory-light); }}
+    .compare-row {{
+      display: grid; grid-template-columns: 1fr 72px 72px; gap: 8px; align-items: center;
+      padding: 9px 10px; border-top: 1px solid var(--cloud-light);
+    }}
+    .compare-row:first-child {{ border-top: 0; }}
+    .compare-row.head {{ font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--cloud-dark); text-transform: uppercase; }}
+    .compare-stat {{ font-size: 12px; line-height: 1.25; }}
+    .compare-val {{ font-family: 'JetBrains Mono', monospace; font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }}
+    .compare-val.win {{ color: var(--olive); font-weight: 700; }}
+    .empty-schedule {{ padding: 18px; color: var(--cloud-dark); font-size: 14px; }}
+    @media (max-width: 720px) {{
+      .app-shell {{ padding: 0 12px 32px; }}
+      .topbar {{ padding: 0 16px; }}
+      .hero {{ grid-template-columns: 1fr; gap: 16px; padding: 40px 0 24px; }}
+      .hero p {{ font-size: 16px; }}
+      .toolbar {{ padding: 16px; border-radius: 16px; }}
+      .toolbar-row {{ align-items: flex-start; flex-direction: column; }}
+      .sort-group {{ width: 100%; }}
+      .player-row {{ grid-template-columns: 36px minmax(0, 1fr) auto; padding: 16px; gap: 12px; }}
+      .player-name {{ font-size: 16px; }}
+      .score-value {{ font-size: 24px; }}
+      .player-page {{ padding-top: 28px; }}
+      .player-card {{ min-height: 70vh; justify-content: center; }}
+      .next-match-chip {{ grid-template-columns: 1fr; }}
+      .next-match-time {{ justify-self: start; }}
+      .surface-switcher {{ gap: 6px; }}
+      .surface-btn {{ font-size: 10px; padding: 8px 4px; }}
+      .metric-row {{ grid-template-columns: minmax(86px, 1fr) 52px 58px 62px; gap: 8px; }}
+      .metric-name {{ font-size: 13px; }}
+      .metric-val {{ font-size: 12px; }}
+      .identity-card {{ padding: 18px 14px; }}
+      .profile-stat-row {{ grid-template-columns: minmax(88px, 1fr) 44px 48px 48px 58px; padding: 10px; gap: 6px; }}
+      .profile-stat-name {{ font-size: 12px; }}
+      .profile-stat-val {{ font-size: 11px; }}
+      .profile-stat-label {{ font-size: 9px; }}
+      .schedule-page {{ padding-top: 28px; }}
+      .schedule-hero {{ align-items: flex-start; flex-direction: column; }}
+      .schedule-meta {{ text-align: left; }}
+      .schedule-days {{ grid-template-columns: 1fr; }}
+      .match-card summary {{ grid-template-columns: 46px minmax(0, 1fr); }}
+      .match-level {{ grid-column: 2; justify-self: start; }}
+      .compare-row {{ grid-template-columns: minmax(0, 1fr) 56px 56px; }}
+      .compare-score {{ font-size: 24px; }}
+    }}
   </style>
 </head>
 <body>
-<div id="screens-track">
 
-  <!-- Screen 1: Rankings -->
-  <div class="screen sidebar" id="screen-1">
-    <div class="sidebar-header">
-      <h1>🎾 Legend Tracker</h1>
-      <input class="search-box" id="search" type="text" placeholder="Buscar jugador…" oninput="filterPlayers(this.value)"/>
-      <div class="sort-controls">
-        <button class="sort-btn active" id="sort-rank"     onclick="setSort('rank')">Ranking ↑</button>
-        <button class="sort-btn"        id="sort-tour"     onclick="setSort('tour')">Circuito</button>
-        <button class="sort-btn"        id="sort-nearterm" onclick="setSort('nearterm')">Próximo</button>
-        <button class="sort-btn"        id="sort-score"    onclick="setSort('score')">CAPI</button>
-        <button class="sort-btn"        id="sort-age"      onclick="setSort('age')">Edad</button>
-      </div>
-      <div class="player-count" id="player-count"></div>
+  <!-- Header -->
+  <header class="topbar">
+    <div class="wordmark">Legend Tracker</div>
+    <button class="search-toggle" onclick="toggleSearch()" title="Buscar">
+      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+    </button>
+  </header>
+
+  <div id="tabs-viewport" class="tabs-viewport">
+    <div class="tabs-track">
+      <main id="ranking-tab" class="tab-panel app-shell">
+        <section class="hero">
+          <h1>ATP <u>ranking</u> and legend <u>signals</u></h1>
+          <p>Una lectura editorial del circuito: ranking actual, CAPI, edad y traza de Grand Slams en una sola lista compacta.</p>
+        </section>
+
+        <!-- Search bar -->
+        <div id="search-bar" class="search-panel">
+          <input id="search-input" class="search-input" type="search" placeholder="Buscar jugador..." oninput="refresh()"/>
+        </div>
+
+        <!-- Sort tabs + count bar -->
+        <section class="toolbar">
+          <div class="toolbar-row">
+            <div class="sort-group">
+              <button class="sort-btn active" id="sort-rank"  onclick="setSort('rank')">Ranking</button>
+              <button class="sort-btn"        id="sort-score" onclick="setSort('score')">CAPI</button>
+              <button class="sort-btn"        id="sort-tour"  onclick="setSort('tour')">Circuito</button>
+              <button class="sort-btn"        id="sort-age"   onclick="setSort('age')">Edad</button>
+            </div>
+            <span id="player-count" class="player-count"></span>
+          </div>
+        </section>
+
+        <!-- Player list -->
+        <div id="player-list" class="list-panel"></div>
+      </main>
+
+      <main id="player-tab" class="tab-panel app-shell player-page">
+        <section id="player-detail" class="player-card"></section>
+      </main>
+
+      <main id="schedule-tab" class="tab-panel app-shell schedule-page">
+        <section class="schedule-hero">
+          <h2>Partidos</h2>
+          <div class="schedule-meta">
+            <div>Hoy y ma&ntilde;ana</div>
+            <div id="schedule-asof"></div>
+          </div>
+        </section>
+        <section id="schedule-days" class="schedule-days"></section>
+      </main>
     </div>
-    <div class="player-list" id="player-list"></div>
   </div>
 
-  <!-- Screen 2: Player detail -->
-  <div class="screen" id="screen-2">
-    <div class="mobile-topbar">
-      <button class="topbar-btn" onclick="goTo(1)" aria-label="Rankings">☰</button>
-      <button class="topbar-search-btn" onclick="openSearch()" aria-label="Buscar">&#9906;</button>
-      <button class="topbar-btn" onclick="goTo(3)" aria-label="Partidos">&#128197;</button>
-    </div>
-    <main class="main" id="main-panel">
-      <div class="no-player">Selecciona un jugador del ranking</div>
-    </main>
-  </div>
+  <script>
+const ALL_PLAYERS = {players_json};
+const LIVE_SCHEDULE = {live_schedule_json};
+const SURFACES = [
+  {{ key: 'All', label: 'Global' }},
+  {{ key: 'Hard', label: 'R&aacute;pida' }},
+  {{ key: 'Clay', label: 'Tierra' }},
+  {{ key: 'Grass', label: 'Hierba' }},
+];
 
-  <!-- Screen 3: Recent matches -->
-  <div class="screen" id="screen-3">
-    <div class="mobile-topbar">
-      <button class="topbar-btn" onclick="goTo(2)" aria-label="Jugador">&#8592;</button>
-      <span class="topbar-title">Partidos recientes</span>
-      <span style="width:44px"></span>
-    </div>
-    <div id="matches-panel" class="matches-content"></div>
-  </div>
+let sortKey = 'rank', sortDir = 1, activePlayer = null, activeSurface = 'All';
 
-</div>
-
-<!-- Search overlay (mobile) -->
-<div id="search-overlay" onclick="if(event.target===this)closeSearch()">
-  <div class="search-overlay-box">
-    <input class="search-overlay-input" id="search-overlay-input" type="text"
-      placeholder="Buscar jugador…" oninput="searchOverlayFilter(this.value)" autocomplete="off"/>
-    <div class="search-overlay-results" id="search-overlay-results"></div>
-  </div>
-</div>
-
-<script>
-// ── Data ──────────────────────────────────────────────────────────────────────
-const LEGEND_DATASETS = {legend_datasets_json};
-const ALL_PLAYERS     = {players_json};
-const LEGEND_NAMES    = {legend_names_json};
-const N_LEG           = LEGEND_DATASETS.length;
-
-let activePlayer = null;
-
-// ── Screen navigation ─────────────────────────────────────────────────────────
-const RECENT_MATCHES = {matches_json};
-let currentScreen = 1;
-
-window.goTo = function(n) {{
-  if (window.innerWidth > 768) return;
-  currentScreen = Math.max(1, Math.min(3, n));
-  document.getElementById('screens-track').style.transform =
-    'translateX(-' + (currentScreen - 1) + '00vw)';
-  if (currentScreen === 3) renderMatches();
-}};
-
-// Swipe detection
-(function() {{
-  let sx = 0, sy = 0;
-  document.addEventListener('touchstart', e => {{
-    sx = e.changedTouches[0].clientX;
-    sy = e.changedTouches[0].clientY;
-  }}, {{passive: true}});
-  document.addEventListener('touchend', e => {{
-    const dx = e.changedTouches[0].clientX - sx;
-    const dy = e.changedTouches[0].clientY - sy;
-    if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
-    if (dx < 0 && currentScreen < 3) goTo(currentScreen + 1);
-    if (dx > 0 && currentScreen > 1) goTo(currentScreen - 1);
-  }}, {{passive: true}});
-}})();
-
-// ── Search overlay ────────────────────────────────────────────────────────────
-window.openSearch = function() {{
-  document.getElementById('search-overlay').classList.add('open');
-  const inp = document.getElementById('search-overlay-input');
-  inp.value = '';
-  searchOverlayFilter('');
-  setTimeout(() => inp.focus(), 80);
-}};
-
-window.closeSearch = function() {{
-  document.getElementById('search-overlay').classList.remove('open');
-}};
-
-window.searchOverlayFilter = function(q) {{
-  const qn = q.toLowerCase().trim();
-  const list = qn ? ALL_PLAYERS.filter(p => p.name.toLowerCase().includes(qn))
-                  : sortPlayers(ALL_PLAYERS).slice(0, 30);
-  const el = document.getElementById('search-overlay-results');
-  el.innerHTML = list.map(p => {{
-    const v = p.tourPct ?? p.sim;
-    const c = simColor(v);
-    return '<div class="search-result-item" onclick="searchSelect(\'' + p.name.replace(/'/g, "\\'") + '\')">'
-      + '<span class="sri-rank">#' + p.rank + '</span>'
-      + '<span class="sri-name">' + p.name + '</span>'
-      + '<span class="sri-badge" style="color:' + c + ';border-color:' + c + '">' + (v != null ? v.toFixed(0) : '—') + '</span>'
-      + '</div>';
-  }}).join('');
-}};
-
-window.searchSelect = function(name) {{
-  closeSearch();
-  selectPlayer(name);
-}};
-
-// ── Matches rendering ─────────────────────────────────────────────────────────
-let matchesRendered = false;
-
-function renderMatches() {{
-  if (matchesRendered) return;
-  matchesRendered = true;
-  const el = document.getElementById('matches-panel');
-  if (!RECENT_MATCHES || !RECENT_MATCHES.length) {{
-    el.innerHTML = '<div style="padding:24px;color:var(--muted)">Sin partidos en el periodo.<br><small>Los datos se actualizan semanalmente.</small></div>';
-    return;
-  }}
-  const levelLabel = {{ G: 'Grand Slam', M: 'Masters 1000', F: 'ATP Finals', A: 'ATP 500 / 250', D: 'Davis Cup' }};
-  const groups = {{}};
-  RECENT_MATCHES.forEach(m => {{
-    const d = m.date;
-    const dStr = d.slice(0,4) + '-' + d.slice(4,6) + '-' + d.slice(6,8);
-    const key = (levelLabel[m.level] || 'ATP') + ' · ' + m.tournament + ' · ' + dStr;
-    if (!groups[key]) groups[key] = {{ level: m.level, rows: [] }};
-    groups[key].rows.push(m);
-  }});
-  let html = '';
-  for (const [gname, g] of Object.entries(groups)) {{
-    html += '<div class="match-group"><div class="match-group-title">' + gname + '</div>';
-    g.rows.forEach(m => {{
-      const wp = ALL_PLAYERS.find(p => p.name === m.winner);
-      const lp = ALL_PLAYERS.find(p => p.name === m.loser);
-      const wv = wp ? (wp.tourPct ?? wp.sim) : null;
-      const lv = lp ? (lp.tourPct ?? lp.sim) : null;
-      const wc = simColor(wv);
-      const lc = simColor(lv);
-      const wClick = wp ? ' onclick="selectAndGo(\'' + m.winner.replace(/'/g,"\\'") + '\')"' : '';
-      const lClick = lp ? ' onclick="selectAndGo(\'' + m.loser.replace(/'/g,"\\'") + '\')"' : '';
-      html += '<div class="match-card">'
-        + '<div class="match-player' + (wp ? ' clickable' : '') + '"' + wClick + '>'
-        + '<span class="match-pname"><b>' + m.winner + '</b></span>'
-        + (wv != null ? '<span class="match-pbadge" style="color:' + wc + ';border-color:' + wc + '">' + wv.toFixed(0) + '</span>' : '')
-        + '</div>'
-        + '<div class="match-score">' + (m.round || '') + (m.score ? ' · ' + m.score : '') + '</div>'
-        + '<div class="match-player loser' + (lp ? ' clickable' : '') + '"' + lClick + '>'
-        + '<span class="match-pname">' + m.loser + '</span>'
-        + (lv != null ? '<span class="match-pbadge" style="color:' + lc + ';border-color:' + lc + '">' + lv.toFixed(0) + '</span>' : '')
-        + '</div>'
-        + '</div>';
-    }});
-    html += '</div>';
-  }}
-  el.innerHTML = html;
-}}
-
-window.selectAndGo = function(name) {{
-  selectPlayer(name);
-  goTo(2);
-}};
-
-let legendsVisible = true;
-let projVisible    = true;
-let chart = null;
-let sortKey = 'rank';
-let sortDir = 1;  // 1 = asc, -1 = desc
-
-// ── Sidebar ───────────────────────────────────────────────────────────────────
-function simColor(sim) {{
-  if (sim == null) return '#888';
-  if (sim >= 80)   return '#119822';
-  if (sim >= 65)   return '#f59e0b';
-  return '#e63946';
+function getQ() {{
+  return (document.getElementById('search-input')?.value || '').toLowerCase().trim();
 }}
 
 function sortPlayers(arr) {{
-  return [...arr].sort((a, b) => {{
+  return arr.slice().sort((a, b) => {{
     let va, vb;
-    if      (sortKey === 'rank')     {{ va = a.rank;              vb = b.rank; }}
-    else if (sortKey === 'tour')     {{ va = a.tourPct   ?? -1;  vb = b.tourPct   ?? -1; }}
-    else if (sortKey === 'score')    {{ va = a.capi      ?? -1;  vb = b.capi      ?? -1; }}
-    else if (sortKey === 'nearterm') {{ va = a.nearTerm  ?? -1;  vb = b.nearTerm  ?? -1; }}
-    else if (sortKey === 'elo')      {{ va = a.elo       ?? -1;  vb = b.elo       ?? -1; }}
-    else                             {{ va = a.age;               vb = b.age; }}
+    if (sortKey === 'rank')       {{ va = a.rank;          vb = b.rank; }}
+    else if (sortKey === 'score') {{ va = a.capi ?? -1;    vb = b.capi ?? -1; }}
+    else if (sortKey === 'tour')  {{ va = a.tourPct ?? -1; vb = b.tourPct ?? -1; }}
+    else                          {{ va = a.age;            vb = b.age; }}
     return sortDir * (va - vb);
   }});
 }}
 
-window.setSort = function(key) {{
-  if (sortKey === key) {{
-    sortDir = -sortDir;
-  }} else {{
-    sortKey = key;
-    sortDir = (key === 'score' || key === 'elo' || key === 'nearterm' || key === 'tour') ? -1 : 1;
-  }}
-  ['rank','tour','score','nearterm','elo','age'].forEach(k => {{
-    const btn = document.getElementById('sort-' + k);
-    if (!btn) return;
-    const arrow = sortKey === k ? (sortDir === 1 ? ' ↑' : ' ↓') : '';
-    const labels = {{ rank: 'Ranking', tour: 'Circuito', score: 'CAPI', nearterm: 'Próximo', elo: 'Elo', age: 'Edad' }};
-    btn.textContent = labels[k] + arrow;
-    btn.classList.toggle('active', k === sortKey);
-  }});
-  const q = document.getElementById('search').value.toLowerCase().trim();
-  const filtered = q ? ALL_PLAYERS.filter(p => p.name.toLowerCase().includes(q)) : ALL_PLAYERS;
-  buildSidebar(sortPlayers(filtered));
-}};
+function scoreColor(v) {{
+  if (v == null) return '#87867f';
+  if (v >= 70) return '#141413';
+  if (v >= 45) return '#788c5d';
+  return '#d97757';
+}}
 
-function buildSidebar(players) {{
+function getBadge(p) {{
+  if (p.isLegend) return {{ val: '&#8734;', label: 'Leyenda', color: '#141413' }};
+  if (sortKey === 'tour') {{
+    const v = p.tourPct;
+    return {{ val: v != null ? v.toFixed(0) + '%' : '&#8212;', label: 'Circuito', color: scoreColor(v) }};
+  }}
+  const v = p.capi != null ? p.capi : p.sim;
+  return {{ val: v != null ? v.toFixed(0) : '&#8212;', label: 'CAPI', color: scoreColor(v) }};
+}}
+
+function buildList(players) {{
   const list = document.getElementById('player-list');
-  list.innerHTML = '';
+  const frag = document.createDocumentFragment();
   players.forEach(p => {{
-    const div = document.createElement('div');
-    div.className = 'player-item' + (p.name === activePlayer ? ' active' : '');
-    div.dataset.name = p.name;
-    let sc, badge;
-    if (p.isLegend) {{
-      sc = '#A3E635'; badge = '∞';
-    }} else if (sortKey === 'elo') {{
-      sc = eloColor(p.elo);       badge = p.elo      != null ? String(p.elo)              : '—';
-    }} else if (sortKey === 'nearterm') {{
-      sc = capiColor(p.nearTerm); badge = p.nearTerm != null ? p.nearTerm.toFixed(0)      : '—';
-    }} else if (sortKey === 'tour') {{
-      sc = simColor(p.tourPct);   badge = p.tourPct  != null ? p.tourPct.toFixed(0) + '%' : '—';
-    }} else {{
-      const v = p.capi ?? p.sim;  sc = simColor(v);   badge = v != null ? v.toFixed(0) : '—';
-    }}
-    div.innerHTML = `
-      <span class="p-rank">${{p.rank}}</span>
-      <div>
-        <div class="p-name">${{p.name}}</div>
-        <div class="p-age">Edad ${{p.age}} · ${{p.gs}} GS</div>
-      </div>
-      <div class="p-sim" style="color:${{sc}};border-color:${{sc}}">${{badge}}</div>
-    `;
-    div.onclick = () => selectPlayer(p.name);
-    list.appendChild(div);
+    const row = document.createElement('div');
+    row.className = 'player-row' + (p.name === activePlayer ? ' selected' : '');
+    row.dataset.name = p.name;
+    const b = getBadge(p);
+    row.innerHTML =
+      '<span class="rank-cell">' +
+        (p.isLegend ? '&#9733;' : p.rank) +
+      '</span>' +
+      '<div style="min-width:0">' +
+        '<div style="display:flex;align-items:baseline;gap:0;min-width:0">' +
+          '<span class="player-name">' + p.name + '</span>' +
+          (p.gs > 0 ? '<span class="gs-mark">' + p.gs + ' GS</span>' : '') +
+        '</div>' +
+        '<div class="player-meta">' + p.age + ' a&#241;os</div>' +
+      '</div>' +
+      '<div class="score-cell">' +
+        '<div class="score-value" style="color:' + b.color + '">' + b.val + '</div>' +
+        '<div class="score-label">' + b.label + '</div>' +
+      '</div>';
+    frag.appendChild(row);
   }});
-  document.getElementById('player-count').textContent = `${{players.length}} jugadores`;
+  list.innerHTML = '';
+  list.appendChild(frag);
+  document.getElementById('player-count').textContent = players.length + ' jugadores';
 }}
 
-window.filterPlayers = function(query) {{
-  const q = query.toLowerCase().trim();
-  const filtered = q ? ALL_PLAYERS.filter(p => p.name.toLowerCase().includes(q)) : ALL_PLAYERS;
-  buildSidebar(sortPlayers(filtered));
-}};
+function defaultPlayer() {{
+  return ALL_PLAYERS.slice().sort((a, b) => a.rank - b.rank)[0] || null;
+}}
 
-// ── Chart ─────────────────────────────────────────────────────────────────────
-function makePlayerDatasets(p) {{
-  const c = p.color;
-  return [
-    {{ label: p.name + ' (real)', data: p.trajectory,
-       borderColor: c, backgroundColor: c, borderWidth: 3,
-       pointRadius: 5, pointHoverRadius: 8, tension: 0.3, fill: false, order: 1 }},
-    {{ label: 'Proyección conservadora', data: p.curves.c,
-       borderColor: c, backgroundColor: 'transparent',
-       borderWidth: 2, borderDash: [7,5], pointRadius: 0, tension: 0.2, fill: false, order: 2 }},
-    {{ label: 'Proyección media', data: p.curves.m,
-       borderColor: '#f59e0b', backgroundColor: 'transparent',
-       borderWidth: 2, borderDash: [7,5], pointRadius: 0, tension: 0.2, fill: false, order: 2 }},
-    {{ label: 'Proyección agresiva', data: p.curves.a,
-       borderColor: '#119822', backgroundColor: 'transparent',
-       borderWidth: 2, borderDash: [7,5], pointRadius: 0, tension: 0.2, fill: false, order: 2 }},
+function currentPlayer() {{
+  return ALL_PLAYERS.find(p => p.name === activePlayer) || defaultPlayer();
+}}
+
+function fallbackPerformanceMetrics(p) {{
+  const gs = p.gameStats?.player || {{}};
+  const capiDelta = Math.max(-6, Math.min(6, Math.round(((p.nearTerm ?? p.capi ?? p.sim ?? 50) - (p.capi ?? p.sim ?? 50)) / 4)));
+  const careerServe = Math.round(gs.serve_win_pct ?? 0);
+  const careerReturn = Math.round(gs.return_win_pct ?? 0);
+  const careerTotal = careerServe && careerReturn ? Math.round((careerServe + careerReturn) / 2) : null;
+  const baseRows = [
+    ['servicePtsWon', 'Service Pts Won', careerServe],
+    ['returnPtsWon', 'Return Pts Won', careerReturn],
+    ['holdPct', 'Hold %', careerServe ? Math.min(98, Math.round(careerServe + 16)) : null],
+    ['breakPct', 'Break %', careerReturn ? Math.max(0, Math.round(careerReturn - 12)) : null],
+    ['totalPtsWon', 'Total Pts Won', careerTotal],
   ];
-}}
-
-function initChart(p) {{
-  const canvas = document.getElementById('main-chart');
-  if (!canvas) return;
-  if (chart) chart.destroy();
-  chart = new Chart(canvas, {{
-    type: 'line',
-    data: {{ datasets: [...LEGEND_DATASETS, ...makePlayerDatasets(p)] }},
-    options: {{
-      responsive: true, maintainAspectRatio: false,
-      interaction: {{ mode: 'index', intersect: false }},
-      plugins: {{
-        legend: {{ display: false }},
-        tooltip: {{
-          callbacks: {{
-            title: items => `Edad: ${{items[0].parsed.x}}`,
-            label: item => ` ${{item.dataset.label}}: ${{Math.round(item.parsed.y * 10) / 10}} GS`,
-          }},
-          backgroundColor: 'rgba(15,15,25,0.88)', padding: 10,
-          titleFont: {{ size: 13, weight: 'bold' }}, bodyFont: {{ size: 12 }}, boxPadding: 4,
-        }},
-      }},
-      scales: {{
-        x: {{
-          type: 'linear',
-          title: {{ display: true, text: 'Edad', font: {{ size: 12 }} }},
-          min: 16, max: 42,
-          ticks: {{ stepSize: 1, callback: v => Number.isInteger(v) ? v : '' }},
-          grid: {{ color: 'rgba(0,0,0,0.05)' }},
-        }},
-        y: {{
-          title: {{ display: true, text: 'Grand Slams acumulados', font: {{ size: 12 }} }},
-          min: 0, ticks: {{ stepSize: 2 }},
-          grid: {{ color: 'rgba(0,0,0,0.05)' }},
-        }},
-      }},
-    }},
-  }});
-  buildChartLegend(p);
-}}
-
-function buildChartLegend(p) {{
-  const el = document.getElementById('chart-legend-row');
-  if (!el || !chart) return;
-  el.innerHTML = '';
-  chart.data.datasets.forEach((ds, i) => {{
-    if (ds.label.startsWith('Proyección')) return;
-    const item = document.createElement('span');
-    item.className = 'legend-item';
-    item.innerHTML = `<span class="legend-dot" style="background:${{ds.borderColor}}"></span>${{ds.label}}`;
-    item.dataset.idx = i;
-    item.onclick = () => {{
-      const meta = chart.getDatasetMeta(i);
-      meta.hidden = !meta.hidden;
-      item.style.opacity = meta.hidden ? '0.3' : '1';
-      chart.update();
-    }};
-    el.appendChild(item);
-  }});
-}}
-
-window.toggleGroup = function(btn, group) {{
-  btn.classList.toggle('active');
-  const hide = !btn.classList.contains('active');
-  if (!chart) return;
-  if (group === 'legends') {{
-    legendsVisible = !hide;
-    for (let i = 0; i < N_LEG; i++) chart.getDatasetMeta(i).hidden = hide;
-  }} else {{
-    projVisible = !hide;
-    for (let i = N_LEG + 1; i < N_LEG + 4; i++) {{
-      if (chart.data.datasets[i]) chart.getDatasetMeta(i).hidden = hide;
-    }}
-  }}
-  chart.update();
-}};
-
-// ── Game stats bars ───────────────────────────────────────────────────────────
-const STAT_LABELS = {{
-  win_rate:          'Win rate %',
-  serve_win_pct:     'Saque ganado %',
-  return_win_pct:    'Resto ganado %',
-  bp_save_pct:       'BP salvados %',
-  vs_top10_win_pct:  'Win % vs Top 10',
-}};
-
-// Fixed scale ranges per stat — consistent across all players
-const STAT_RANGES = {{
-  win_rate:         [45, 85],
-  serve_win_pct:    [55, 75],
-  return_win_pct:   [28, 48],
-  bp_save_pct:      [50, 80],
-  vs_top10_win_pct: [20, 80],
-}};
-
-function toPct(val, key) {{
-  const r = STAT_RANGES[key];
-  if (!r) return Math.min(100, val);
-  return Math.max(0, Math.min(100, (val - r[0]) / (r[1] - r[0]) * 100));
-}}
-
-// Ring SVG helper — score 0-100, color, size px
-function ringHTML(score, color, sz) {{
-  sz = sz || 70;
-  const r = sz / 2 - 6;
-  const circ = 2 * Math.PI * r;
-  const pct = score != null ? Math.min(Math.max(score, 0), 100) : 0;
-  const dash = (circ * pct / 100).toFixed(1);
-  const arc = score != null
-    ? '<circle cx="' + sz/2 + '" cy="' + sz/2 + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="5.5" stroke-dasharray="' + dash + ' ' + circ.toFixed(1) + '" stroke-linecap="round" transform="rotate(-90 ' + sz/2 + ' ' + sz/2 + ')"/>'
-    : '';
-  const label = score != null ? Math.round(score) : '—';
-  const tc = score != null ? color : '#94a3b8';
-  return '<svg width="' + sz + '" height="' + sz + '" viewBox="0 0 ' + sz + ' ' + sz + '" style="display:block">'
-    + '<circle cx="' + sz/2 + '" cy="' + sz/2 + '" r="' + r + '" fill="none" stroke="#e2e8f0" stroke-width="5.5"/>'
-    + arc
-    + '<text x="' + sz/2 + '" y="' + (sz/2 + 1) + '" text-anchor="middle" dominant-baseline="middle"'
-    + ' font-family="Lexend,sans-serif" font-weight="800" font-size="' + Math.round(sz * 0.24) + 'px" fill="' + tc + '">' + label + '</text>'
-    + '</svg>';
-}}
-
-function capiColor(v) {{
-  if (v == null) return '#888';
-  if (v >= 75) return '#119822';
-  if (v >= 55) return '#f59e0b';
-  return '#e63946';
-}}
-
-function eloColor(v) {{
-  if (v == null) return '#888';
-  if (v >= 2000) return '#119822';
-  if (v >= 1750) return '#f59e0b';
-  return '#e63946';
-}}
-
-function renderGameStats(p) {{
-  const el = document.getElementById('game-stats-content');
-  if (!el || !p.gameStats) return;
-  const gs   = p.gameStats;
-  const pD   = gs.player;
-  const bD   = gs.benchmark;
-  const tourPct  = p.tourPct;
-  const sim      = p.sim;
-  const capi     = p.capi;
-  const nt       = p.nearTerm;
-  const elo      = p.elo;
-  const isLegend = p.isLegend;
-  const tc   = isLegend ? '#2DC7FF' : simColor(tourPct);
-  const sc   = simColor(sim);
-  const cc   = isLegend ? '#2DC7FF' : capiColor(capi);
-  const ntc  = isLegend ? '#2DC7FF' : capiColor(nt);
-  const ec   = eloColor(elo);
-  const tourStr = isLegend ? '∞' : (tourPct != null ? tourPct.toFixed(0) : '—');
-  const capiStr = isLegend ? '∞' : (capi != null ? capi.toFixed(1) : '—');
-  const ntStr   = isLegend ? '∞' : (nt   != null ? nt.toFixed(1)   : '—');
-
-  // Metric 2: for legends show sim (achievement); for active players show capi (potential)
-  const m2val   = isLegend ? sim   : capi;
-  const m2color = isLegend ? sc    : cc;
-  const m2name  = isLegend ? 'Score leyenda'        : 'Trayectoria leyenda';
-  const m2desc  = isLegend ? 'vs benchmark a esa edad' : 'Ajustado por edad y GS ganados';
-
-  let html = `
-    <div class="two-metrics">
-      <div class="metric-hero">
-        ${{ringHTML(isLegend ? sim : tourPct, isLegend ? sc : tc, 88)}}
-        <div class="metric-name">Nivel actual</div>
-        <div class="metric-desc">Percentil entre los top 200 de hoy</div>
-      </div>
-      <div class="metric-hero">
-        ${{ringHTML(m2val, m2color, 88)}}
-        <div class="metric-name">${{m2name}}</div>
-        <div class="metric-desc">${{m2desc}}</div>
-      </div>
-      ${{elo != null ? '<div class="elo-badge-card"><span class="elo-num-lg">' + elo + '</span><span class="elo-sub">Elo · top ~2275</span></div>' : ''}}
-    </div>
-    ${{p.phrase ? '<p style="font-size:0.82rem;color:#334155;line-height:1.75;margin:0 0 16px;padding:11px 14px;background:rgba(0,35,75,0.04);border-radius:10px;border-left:3px solid var(--teal)">' + p.phrase + '</p>' : ''}}
-    <div class="stat-bar-grid">`;
-
-  for (const [key, label] of Object.entries(STAT_LABELS)) {{
-    const pVal = pD[key];
-    const bVal = bD[key];
-    if (pVal == null) continue;
-    const pPct = toPct(pVal, key);
-    const bPct = bVal != null ? toPct(bVal, key) : null;
-    const diff    = bVal != null ? (pVal - bVal).toFixed(1) : null;
-    const diffStr = diff != null ? (parseFloat(diff) >= 0 ? `+${{diff}}` : diff) : '';
-    const barFill = bVal == null || pVal >= bVal ? '#119822'
-                  : (pVal / bVal >= 0.96)        ? '#f59e0b'
-                  :                                '#e63946';
-    const diffColor = barFill;
-    html += `
-      <div class="stat-bar-row">
-        <span class="stat-bar-label">${{label}}</span>
-        <div class="stat-bar-track">
-          <div class="stat-bar-fill" style="width:${{pPct.toFixed(1)}}%;background:${{barFill}}"></div>
-          ${{bPct != null ? `<div class="stat-bar-bench" style="left:${{bPct.toFixed(1)}}%"></div>` : ''}}
-        </div>
-        <span class="stat-bar-val">${{pVal}}% ${{diffStr ? `<span style="font-size:0.68rem;color:${{diffColor}}">${{diffStr}}</span>` : ''}}</span>
-      </div>`;
-  }}
-  html += `</div>
-    <p class="data-note">Línea negra = benchmark de leyenda · Verde/naranja/rojo = encima/cerca/debajo · Fuente: Jeff Sackmann / tennis_atp</p>`;
-
-  // Surface splits
-  const surfLabels = {{ Hard: 'Pista rápida', Clay: 'Tierra batida', Grass: 'Hierba' }};
-  const ss = p.surfaceStats || {{}};
-  const surfKeys = ['Hard','Clay','Grass'].filter(k => ss[k]);
-  if (surfKeys.length > 0) {{
-    let rows = '';
-    for (const k of surfKeys) {{
-      const d = ss[k];
-      const c = d.win_pct >= 68 ? '#119822' : d.win_pct >= 52 ? '#f59e0b' : '#e63946';
-      rows += `<tr>
-        <td style="padding:4px 8px">${{surfLabels[k]}}</td>
-        <td style="padding:4px 8px;text-align:center;color:${{c}};font-weight:600">${{d.win_pct}}%</td>
-        <td style="padding:4px 8px;text-align:center;color:#888">${{d.matches}}p</td>
-      </tr>`;
-    }}
-    html += `<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
-      <div style="font-size:0.78rem;font-weight:600;color:var(--muted);margin-bottom:6px">Por superficie (últimos ${{p.yearsOfData}} años)</div>
-      <table style="width:100%;border-collapse:collapse;font-size:0.78rem">
-        <thead><tr>
-          <th style="padding:4px 8px;background:var(--bg);color:var(--muted);text-align:left">Superficie</th>
-          <th style="padding:4px 8px;background:var(--bg);color:var(--muted);text-align:center">Win %</th>
-          <th style="padding:4px 8px;background:var(--bg);color:var(--muted);text-align:center">Partidos</th>
-        </tr></thead>
-        <tbody>${{rows}}</tbody>
-      </table>
-    </div>`;
-  }}
-
-  // Comparison vs legends at same age
-  if (p.comparison && p.comparison.length > 0) {{
-    html += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">';
-    html += '<div style="font-size:0.68rem;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.07em;font-family:Lexend,sans-serif">A la misma edad · leyendas históricas</div>';
-    html += '<div style="overflow-x:auto"><table style="min-width:280px"><thead><tr><th>Jugador</th><th class="td-c">GS</th><th class="td-c">Dif.</th><th class="td-c">Score</th></tr></thead><tbody>';
-    p.comparison.forEach(c => {{
-      const dc      = c.diff > 0 ? 'diff-pos' : c.diff < 0 ? 'diff-neg' : '';
-      const ds      = c.diff > 0 ? '+' + c.diff : String(c.diff);
-      const rawDiff = c.simAtAge != null ? (p.sim - c.simAtAge) : null;
-      const stxt    = c.simAtAge != null ? c.simAtAge.toFixed(1) : '—';
-      const dtxt    = rawDiff != null ? (rawDiff >= 0 ? '+' + rawDiff.toFixed(1) : rawDiff.toFixed(1)) : '';
-      const dcol    = rawDiff == null ? '#888' : rawDiff >= 0 ? '#119822' : '#e63946';
-      html += '<tr>'
-        + '<td><span class="color-dot" style="background:' + c.color + '"></span>' + c.name + '</td>'
-        + '<td class="td-c">' + c.gs + '</td>'
-        + '<td class="td-c ' + dc + '">' + ds + '</td>'
-        + '<td class="td-c" style="font-size:0.78rem;white-space:nowrap"><span style="color:#888">' + stxt + '</span>'
-        + (dtxt ? '<span style="color:' + dcol + ';margin-left:3px;font-weight:600">' + dtxt + '</span>' : '')
-        + '</td></tr>';
+  const rows = baseRows
+    .filter(([, , career]) => career != null && Number.isFinite(career))
+    .map(([key, label, career], idx) => {{
+      const diff = capiDelta + (idx === 3 ? Math.sign(capiDelta || 1) : 0);
+      return {{ key, label, career, actual: Math.max(0, Math.min(100, career + diff)), diff }};
     }});
-    html += '</tbody></table></div></div>';
+  return rows.length ? {{ matches: 10, rows, estimated: true }} : null;
+}}
+
+function activeSurfaceLabel() {{
+  return SURFACES.find(s => s.key === activeSurface)?.label || 'Global';
+}}
+
+function surfaceMetrics(p) {{
+  return p.performanceBySurface?.[activeSurface] ||
+    (activeSurface === 'All' ? (p.performanceMetrics || fallbackPerformanceMetrics(p)) : null);
+}}
+
+function surfaceTourPct(p) {{
+  return p.tourPctBySurface?.[activeSurface] ?? (activeSurface === 'All' ? p.tourPct : null);
+}}
+
+function renderSurfaceSwitcher(p) {{
+  return '<div class="surface-switcher" role="tablist" aria-label="Superficie">' +
+    SURFACES.map(s => {{
+      const isActive = s.key === activeSurface;
+      const hasPct = p.tourPctBySurface?.[s.key] != null || s.key === 'All';
+      return '<button class="surface-btn ' + (isActive ? 'active' : '') + '" ' +
+        'onclick="setPlayerSurface(\\'' + s.key + '\\')" ' +
+        'aria-selected="' + (isActive ? 'true' : 'false') + '" ' +
+        (hasPct ? '' : 'title="Sin muestra suficiente"') + '>' + s.label + '</button>';
+    }}).join('') +
+  '</div>';
+}}
+
+function renderNextMatch(p) {{
+  const match = p.nextMatch;
+  if (!match) {{
+    return '<div class="next-match-chip">' +
+      '<div>' +
+        '<div class="next-match-kicker">Siguiente partido</div>' +
+        '<div class="next-match-main">TBD</div>' +
+        '<div class="next-match-meta">Sin partido confirmado</div>' +
+      '</div>' +
+      '<div class="next-match-time">TBD</div>' +
+    '</div>';
+  }}
+  const opponent = match.opponent || 'TBD';
+  const tournament = match.tournament || 'Torneo TBD';
+  const round = match.round ? match.round + ' · ' : '';
+  const surface = match.surface ? ' · ' + match.surface : '';
+  const time = match.time || 'TBD';
+  return '<div class="next-match-chip">' +
+    '<div>' +
+      '<div class="next-match-kicker">Siguiente partido</div>' +
+      '<div class="next-match-main">vs ' + opponent + '</div>' +
+      '<div class="next-match-meta">' + round + tournament + surface + '</div>' +
+    '</div>' +
+    '<div class="next-match-time">' + time + '</div>' +
+  '</div>';
+}}
+
+function renderPerformanceMetrics(p) {{
+  const metrics = surfaceMetrics(p);
+  if (!metrics?.rows?.length) {{
+    return '<section class="performance-panel">' +
+      '<div class="performance-title">' + activeSurfaceLabel() + ' · muestra insuficiente</div>' +
+      '<div class="metric-table"><div class="metric-row"><div class="metric-name">Sin datos suficientes para esta superficie</div><div></div><div></div><div></div></div></div>' +
+    '</section>';
+  }}
+  const rows = metrics.rows.map(r => {{
+    const cls = r.diff > 0 ? 'up' : r.diff < 0 ? 'down' : 'flat';
+    const sign = r.diff > 0 ? '+' : '';
+    const mark = r.diff > 0 ? '&#9650;' : r.diff < 0 ? '&#9660;' : '&#8212;';
+    return '<div class="metric-row">' +
+      '<div class="metric-name">' + r.label + '</div>' +
+      '<div class="metric-val">' + r.career + '%</div>' +
+      '<div class="metric-val">' + r.actual + '%</div>' +
+      '<div class="metric-val metric-diff ' + cls + '">' + mark + ' ' + sign + r.diff + '</div>' +
+    '</div>';
+  }}).join('');
+  const source = (metrics.estimated ? 'Actual estimado' : '&#218;ltimos ' + (metrics.matches || 10)) + ' · ' + activeSurfaceLabel();
+  return '<section class="performance-panel">' +
+    '<div class="performance-title">' + source + ' vs carrera</div>' +
+    '<div class="metric-table">' +
+      '<div class="metric-row metric-head"><div>Stat</div><div class="metric-val">Carrera</div><div class="metric-val">Actual</div><div class="metric-val">Dif</div></div>' +
+      rows +
+    '</div>' +
+  '</section>';
+}}
+
+function profileMetricMap(p) {{
+  const metrics = surfaceMetrics(p);
+  const map = {{}};
+  (metrics?.groups || []).forEach(group => {{
+    (group.rows || []).forEach(row => {{
+      map[row.key] = row;
+    }});
+  }});
+  return map;
+}}
+
+function profileThreshold(row) {{
+  if (!row) return 2;
+  if (row.key === 'dominanceRatio') return 0.05;
+  if (row.key === 'averageRallyLength' || row.key === 'returnDepthIndex') return 0.25;
+  return 2;
+}}
+
+function profileTrend(row) {{
+  if (!row?.available || row.diff == null || !Number.isFinite(row.diff)) {{
+    return {{ cls: 'na', label: 'Sin datos', mark: '&#8212;' }};
+  }}
+  const threshold = profileThreshold(row);
+  if (row.diff >= threshold) return {{ cls: 'up', label: 'Mejora', mark: '&#9650;' }};
+  if (row.diff <= -threshold) return {{ cls: 'down', label: 'Caida', mark: '&#9660;' }};
+  return {{ cls: 'flat', label: 'Estable', mark: '&#8212;' }};
+}}
+
+function formatProfileValue(row, value) {{
+  if (!row?.available || value == null || !Number.isFinite(value)) return '&#8212;';
+  if (row.key === 'dominanceRatio') return value.toFixed(2);
+  if (row.key === 'averageRallyLength' || row.key === 'returnDepthIndex') return value.toFixed(1);
+  return Math.round(value) + '%';
+}}
+
+function formatProfileDiff(row) {{
+  if (!row?.available || row.diff == null || !Number.isFinite(row.diff)) return '&#8212;';
+  const sign = row.diff > 0 ? '+' : '';
+  if (row.key === 'dominanceRatio') return sign + row.diff.toFixed(2);
+  if (row.key === 'averageRallyLength' || row.key === 'returnDepthIndex') return sign + row.diff.toFixed(1);
+  return sign + Math.round(row.diff);
+}}
+
+function automaticTags(p) {{
+  const m = profileMetricMap(p);
+  const has = key => m[key]?.available;
+  const up = (key, by) => has(key) && m[key].diff >= (by ?? profileThreshold(m[key]));
+  const down = (key, by) => has(key) && m[key].diff <= -(by ?? profileThreshold(m[key]));
+  const high = (key, value) => has(key) && m[key].actual >= value;
+  const tags = [];
+
+  if (up('servicePtsWon') && (up('firstServePtsWon') || up('breakPointsSaved'))) {{
+    tags.push({{ text: 'Saque dominante', cls: 'good' }});
+  }} else if (down('servicePtsWon') && down('secondServePtsWon')) {{
+    tags.push({{ text: 'Saque vulnerable', cls: 'warn' }});
+  }} else if (has('servicePtsWon')) {{
+    tags.push({{ text: 'Saque funcional', cls: 'neutral' }});
   }}
 
-  el.innerHTML = html;
+  if (up('returnPtsWon') && (up('breakPointsConverted') || up('breakPointsCreated'))) {{
+    tags.push({{ text: 'Restador agresivo', cls: 'good' }});
+  }}
+  if (up('returnDepthIndex')) tags.push({{ text: 'Restador profundo', cls: 'good' }});
+  if (up('returnInPlay') && down('rallyAggression')) tags.push({{ text: 'Restador conservador', cls: 'neutral' }});
+
+  if (up('shortRallyWin', 4)) tags.push({{ text: 'Matador de puntos cortos', cls: 'good' }});
+  if (up('mediumRallyWin') || up('longRallyWin')) tags.push({{ text: 'Jugador de rallies medios', cls: 'good' }});
+  if (up('veryLongRallyWin')) tags.push({{ text: 'Maratoniano', cls: 'good' }});
+
+  if (has('forehandPotency') && has('backhandPotency') && m.forehandPotency.actual >= m.backhandPotency.actual + 8) {{
+    tags.push({{ text: 'Forehand-heavy', cls: 'good' }});
+  }}
+  if (up('backhandPotency')) tags.push({{ text: 'Backhand weapon', cls: 'good' }});
+  if (high('netFrequency', 16) && high('netWin', 64)) tags.push({{ text: 'All-court player', cls: 'good' }});
+  if ((high('servicePtsWon', 69) && high('totalPtsWon', 53)) || (high('servicePtsWon', 68) && up('totalPtsWon'))) {{
+    tags.push({{ text: 'First-strike attacker', cls: 'good' }});
+  }}
+  if (high('returnPtsWon', 40) && up('returnPtsWon')) {{
+    tags.push({{ text: 'Counterpuncher', cls: 'good' }});
+  }}
+
+  const unavailable = Object.values(m).filter(row => !row.available).length;
+  if (unavailable) tags.push({{ text: 'Charting pendiente', cls: 'neutral' }});
+  if (!tags.length) tags.push({{ text: 'Perfil estable', cls: 'neutral' }});
+  return tags.slice(0, 6);
 }}
 
-// ── Select player ─────────────────────────────────────────────────────────────
-function selectPlayer(name) {{
+function renderIdentityCard(p) {{
+  const metrics = surfaceMetrics(p);
+  if (!metrics?.groups?.length) return '';
+  const tags = automaticTags(p).map(tag =>
+    '<span class="auto-tag ' + tag.cls + '">' + tag.text + '</span>'
+  ).join('');
+  const groups = metrics.groups.map((group, idx) => {{
+    const availableRows = (group.rows || []).filter(row => row.available);
+    const improving = availableRows.filter(row => profileTrend(row).cls === 'up').length;
+    const falling = availableRows.filter(row => profileTrend(row).cls === 'down').length;
+    const status = availableRows.length
+      ? improving + ' mejora / ' + falling + ' caida'
+      : 'Datos pendientes';
+    const rows = [
+      '<div class="profile-stat-row profile-stat-head"><div>Stat</div><div class="profile-stat-val">Carr.</div><div class="profile-stat-val">Rec.</div><div class="profile-stat-val">Dif</div><div class="profile-stat-label">Estado</div></div>'
+    ].concat((group.rows || []).map(row => {{
+      const trend = profileTrend(row);
+      return '<div class="profile-stat-row">' +
+        '<div class="profile-stat-name">' + row.label + '</div>' +
+        '<div class="profile-stat-val">' + formatProfileValue(row, row.career) + '</div>' +
+        '<div class="profile-stat-val">' + formatProfileValue(row, row.actual) + '</div>' +
+        '<div class="profile-stat-val">' + formatProfileDiff(row) + '</div>' +
+        '<div class="profile-stat-label ' + trend.cls + '">' + trend.mark + ' ' + trend.label + '</div>' +
+      '</div>';
+    }})).join('');
+    return '<details class="profile-group" ' + (idx < 2 ? 'open' : '') + '>' +
+      '<summary class="profile-summary"><span>' + group.name + '</span><span class="group-status">' + status + '</span></summary>' +
+      rows +
+    '</details>';
+  }}).join('');
+  return '<section class="identity-card">' +
+    '<h3>Perfil actual</h3>' +
+    '<p class="identity-intro">Lectura de los ultimos 10 partidos en ' + activeSurfaceLabel().toLowerCase() + ' contra su media de carrera en esa superficie. Las metricas de punto a punto o charting quedan marcadas hasta importar esas fuentes.</p>' +
+    '<div class="tag-cloud">' + tags + '</div>' +
+    '<div class="profile-groups">' + groups + '</div>' +
+  '</section>';
+}}
+
+function renderPlayerDetail() {{
+  const p = currentPlayer();
+  const el = document.getElementById('player-detail');
+  if (!p || !el) return;
+  const tourRaw = surfaceTourPct(p);
+  const tour = tourRaw == null ? null : Math.max(0, Math.min(100, tourRaw));
+  el.innerHTML =
+    '<div>' +
+      '<h2>' + p.name + '</h2>' +
+      '<div class="player-age">' + p.age + ' a&#241;os</div>' +
+    '</div>' +
+    renderNextMatch(p) +
+    '<div class="tour-ring" style="--pct:' + (tour == null ? '0' : tour.toFixed(1)) + '">' +
+      '<div class="tour-ring-inner">' +
+        '<div>' +
+          '<div class="tour-score">' + (tour == null ? '&#8212;' : tour.toFixed(0)) + '</div>' +
+          '<div class="tour-label">Media circuito · ' + activeSurfaceLabel() + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    renderSurfaceSwitcher(p) +
+    renderPerformanceMetrics(p) +
+    renderIdentityCard(p);
+}}
+
+function renderSchedule() {{
+  const wrap = document.getElementById('schedule-days');
+  const asOf = document.getElementById('schedule-asof');
+  if (!wrap) return;
+  if (asOf) {{
+    asOf.textContent = LIVE_SCHEDULE?.asOf ? 'Actualizado ' + LIVE_SCHEDULE.asOf : 'Actualizado TBD';
+  }}
+  const days = LIVE_SCHEDULE?.days || [];
+  if (!days.length) {{
+    wrap.innerHTML = '<div class="schedule-day"><div class="empty-schedule">Sin calendario disponible.</div></div>';
+    return;
+  }}
+  wrap.innerHTML = days.map(day => {{
+    const matches = day.matches || [];
+    const body = matches.length
+      ? '<div class="match-list">' + matches.map(match => {{
+          const names = (match.player1 || 'TBD') + ' <span style="color:var(--cloud-dark)">vs</span> ' + (match.player2 || 'TBD');
+          const info = [match.round, match.tournament, match.surface].filter(Boolean).join(' · ');
+          return '<details class="match-card">' +
+            '<summary>' +
+              '<div class="match-time">' + (match.time || 'TBD') + '</div>' +
+              '<div><div class="match-names">' + names + '</div><div class="match-info">' + info + '</div></div>' +
+              '<div class="match-level">' + (match.level || 'ATP') + '</div>' +
+            '</summary>' +
+            renderMatchComparison(match) +
+          '</details>';
+        }}).join('') + '</div>'
+      : '<div class="empty-schedule">Sin partidos masculinos individuales importantes.</div>';
+    return '<section class="schedule-day">' +
+      '<div class="schedule-day-head">' +
+        '<div class="schedule-day-title">' + (day.label || 'Día') + '</div>' +
+        '<div class="schedule-date">' + (day.date || '') + '</div>' +
+      '</div>' +
+      body +
+    '</section>';
+  }}).join('');
+}}
+
+function normaliseName(name) {{
+  return (name || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
+    .replace(/[^a-z ]/g, ' ')
+    .replace(/\\s+/g, ' ')
+    .trim();
+}}
+
+function findPlayerByMatchName(name) {{
+  const clean = normaliseName(name);
+  if (!clean || clean === 'tbd' || clean.includes('order of play')) return null;
+  return ALL_PLAYERS.find(p => normaliseName(p.name) === clean) ||
+    ALL_PLAYERS.find(p => {{
+      const pn = normaliseName(p.name);
+      return pn.includes(clean) || clean.includes(pn);
+    }}) || null;
+}}
+
+function surfaceKeyForMatch(match) {{
+  const surface = normaliseName(match.surface);
+  if (surface.includes('clay') || surface.includes('tierra')) return 'Clay';
+  if (surface.includes('grass') || surface.includes('hierba')) return 'Grass';
+  if (surface.includes('hard') || surface.includes('rapida')) return 'Hard';
+  return 'All';
+}}
+
+function compareValue(p, surface, key) {{
+  if (!p) return null;
+  if (key === 'tourPct') return p.tourPctBySurface?.[surface] ?? p.tourPctBySurface?.All ?? p.tourPct ?? null;
+  const metrics = p.performanceBySurface?.[surface] || p.performanceBySurface?.All || null;
+  const compactRow = (metrics?.rows || []).find(r => r.key === key);
+  if (compactRow?.actual != null) return compactRow.actual;
+  const groups = metrics?.groups || [];
+  for (const group of groups) {{
+    const row = (group.rows || []).find(r => r.key === key);
+    if (row?.available && row.actual != null) return row.actual;
+  }}
+  return null;
+}}
+
+function formatCompareVal(value, key) {{
+  if (value == null || !Number.isFinite(value)) return '&#8212;';
+  if (key === 'dominanceRatio') return value.toFixed(2);
+  if (key === 'averageRallyLength' || key === 'returnDepthIndex') return value.toFixed(1);
+  return Math.round(value) + '%';
+}}
+
+function renderCompareCell(value, other, key) {{
+  const winner = value != null && other != null && value > other;
+  return '<div class="compare-val ' + (winner ? 'win' : '') + '">' + formatCompareVal(value, key) + '</div>';
+}}
+
+function renderComparePlayer(p, surface) {{
+  if (!p) {{
+    return '<div class="compare-player"><div class="compare-player-name">TBD</div><div class="compare-score">&#8212;</div><div class="match-info">Sin datos</div></div>';
+  }}
+  const pct = compareValue(p, surface, 'tourPct');
+  return '<div class="compare-player">' +
+    '<div class="compare-player-name">' + p.name + '</div>' +
+    '<div class="compare-score">' + (pct == null ? '&#8212;' : Math.round(pct)) + '</div>' +
+    '<div class="match-info">Media circuito · ' + activeSurfaceName(surface) + '</div>' +
+  '</div>';
+}}
+
+function activeSurfaceName(surface) {{
+  return SURFACES.find(s => s.key === surface)?.label || 'Global';
+}}
+
+function renderMatchComparison(match) {{
+  const surface = surfaceKeyForMatch(match);
+  const p1 = findPlayerByMatchName(match.player1);
+  const p2 = findPlayerByMatchName(match.player2);
+  const stats = [
+    ['tourPct', 'Media circuito'],
+    ['totalPtsWon', 'Total Points Won'],
+    ['servicePtsWon', 'Service Pts Won'],
+    ['returnPtsWon', 'Return Pts Won'],
+    ['holdPct', 'Hold %'],
+    ['breakPct', 'Break %'],
+    ['unreturnedServe', 'Unreturned Serve'],
+    ['shortServeWon', '<=3 Shots Won'],
+    ['returnDepthIndex', 'Return Depth'],
+    ['shortRallyWin', '1-3 Shot Win'],
+    ['forehandPotency', 'FH Potency'],
+    ['backhandPotency', 'BH Potency'],
+    ['netWin', 'Net Win'],
+  ];
+  const rows = stats.map(([key, label]) => {{
+    const v1 = compareValue(p1, surface, key);
+    const v2 = compareValue(p2, surface, key);
+    return '<div class="compare-row">' +
+      '<div class="compare-stat">' + label + '</div>' +
+      renderCompareCell(v1, v2, key) +
+      renderCompareCell(v2, v1, key) +
+    '</div>';
+  }}).join('');
+  return '<div class="match-compare">' +
+    '<div class="compare-ring-row">' +
+      renderComparePlayer(p1, surface) +
+      '<div class="compare-vs">vs</div>' +
+      renderComparePlayer(p2, surface) +
+    '</div>' +
+    '<div class="compare-table">' +
+      '<div class="compare-row head"><div>Stat</div><div class="compare-val">' + (p1?.name?.split(' ').slice(-1)[0] || 'P1') + '</div><div class="compare-val">' + (p2?.name?.split(' ').slice(-1)[0] || 'P2') + '</div></div>' +
+      rows +
+    '</div>' +
+  '</div>';
+}}
+
+function goToPlayerTab() {{
+  document.getElementById('player-tab')?.scrollIntoView({{ behavior: 'smooth', inline: 'start', block: 'nearest' }});
+}}
+
+// Event delegation — attached once to static container
+document.getElementById('player-list').addEventListener('click', e => {{
+  const row = e.target.closest('[data-name]');
+  if (row) selectPlayer(row.dataset.name);
+}});
+
+window.setSort = function(key) {{
+  if (sortKey === key) {{ sortDir = -sortDir; }}
+  else {{ sortKey = key; sortDir = (key === 'age') ? 1 : -1; }}
+  document.querySelectorAll('.sort-btn').forEach(btn =>
+    btn.classList.toggle('active', btn.id === 'sort-' + key)
+  );
+  refresh();
+}};
+
+function refresh() {{
+  const q = getQ();
+  const filtered = q
+    ? ALL_PLAYERS.filter(p => p.name.toLowerCase().includes(q))
+    : ALL_PLAYERS;
+  buildList(sortPlayers(filtered));
+  renderPlayerDetail();
+  renderSchedule();
+}}
+
+window.selectPlayer = function(name) {{
   activePlayer = name;
-  const p = ALL_PLAYERS.find(x => x.name === name);
-  if (!p) return;
+  refresh();
+  goToPlayerTab();
+}};
 
-  // Update sidebar highlight
-  document.querySelectorAll('.player-item').forEach(el => {{
-    el.classList.toggle('active', el.dataset.name === name);
-  }});
+window.setPlayerSurface = function(surface) {{
+  activeSurface = surface;
+  renderPlayerDetail();
+}};
 
-  // Build main panel HTML
-  const simC = simColor(p.sim);
+window.toggleSearch = function() {{
+  const bar = document.getElementById('search-bar');
+  const wasHidden = bar.style.display === 'none';
+  bar.style.display = wasHidden ? 'block' : 'none';
+  if (wasHidden) document.getElementById('search-input').focus();
+  else {{ document.getElementById('search-input').value = ''; refresh(); }}
+}};
 
-  document.getElementById('main-panel').innerHTML = `
-    <div class="card">
-      <div class="player-header">
-        <h2>${{p.name}}</h2>
-        <span class="badge badge-rank">#${{p.rank}}</span>
-        <span class="badge badge-gs">${{p.gs}} GS · Edad ${{p.age}}</span>
-        <span class="badge badge-sim" style="background:${{p.isLegend ? 'var(--teal)' : simC}};border:${{p.isLegend ? '2px solid var(--lime)' : 'none'}}">${{p.isLegend ? '∞ Leyenda' : (p.sim != null ? p.sim.toFixed(1) + '/100' : '?')}}</span>
-      </div>
-      <div class="proj-strip">
-        <span style="color:var(--muted)">GS proyectados:</span>
-        <span class="proj-chip cons">${{p.proj.c}} cons.</span>
-        <span class="proj-chip med">${{p.proj.m}} media</span>
-        <span class="proj-chip agr">${{p.proj.a}} agr.</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <div id="game-stats-content"></div>
-    </div>
-
-    <div class="chart-panel card" style="padding:16px">
-      <h3>Trayectoria por edad</h3>
-      <p class="chart-sub">Leyendas como referencia. Proyecciones punteadas basadas en el Potential Score.</p>
-      <div class="chart-controls">
-        <button class="ctrl-btn active" id="btn-legends" onclick="toggleGroup(this,'legends')">Leyendas</button>
-        <button class="ctrl-btn active" id="btn-proj"    onclick="toggleGroup(this,'proj')">Proyecciones</button>
-      </div>
-      <div class="chart-wrap"><canvas id="main-chart"></canvas></div>
-      <div class="chart-legend-row" id="chart-legend-row"></div>
-      <p class="data-note">Datos verificados via Jeff Sackmann / tennis_atp · Regresión: 14 jugadores históricos (Federer, Nadal, Djokovic, Sampras + 10 ganadores de 1-3 GS)</p>
-    </div>
-  `;
-
-  initChart(p);
-  renderGameStats(p);
-  // Re-apply toggle states
-  if (!legendsVisible) for (let i = 0; i < N_LEG; i++) chart.getDatasetMeta(i).hidden = true;
-  if (!projVisible)    for (let i = N_LEG+1; i < N_LEG+4; i++) if (chart.data.datasets[i]) chart.getDatasetMeta(i).hidden = true;
-  if (!legendsVisible || !projVisible) chart.update();
-  // On mobile: navigate to player screen
-  if (window.innerWidth <= 768) goTo(2);
-}}
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-buildSidebar(sortPlayers(ALL_PLAYERS));
-// Desktop: auto-select first player. Mobile: stay on screen 1 (rankings).
-if (ALL_PLAYERS.length > 0 && window.innerWidth > 768) {{
-  selectPlayer(sortPlayers(ALL_PLAYERS)[0].name);
-}}
-</script>
+refresh();
+  </script>
 </body>
 </html>"""
 
@@ -1315,6 +1863,14 @@ def main():
     elo_ratings = ec.compute_elo_ratings()
     print(f"  Elo computed for {len(elo_ratings)} players")
 
+    print("Computing last-10 vs career performance metrics...")
+    performance_metrics = _performance_metrics_for_players(
+        players, range(1991, current_year + 1), use_cache=use_cache
+    )
+    print(f"  Performance metrics for {len(performance_metrics)} players")
+    next_matches = _load_next_matches()
+    print(f"  Live next-match chips: {len(next_matches)}")
+
     # 6. Build player records
     print("Building player records...")
     players_data = []
@@ -1325,7 +1881,9 @@ def main():
         if not stats_by_year:
             skipped += 1
             continue
-        record = build_player_record(p, stats_by_year, benchmark, gs_wins, elo_ratings)
+        record = build_player_record(
+            p, stats_by_year, benchmark, gs_wins, elo_ratings, performance_metrics, next_matches
+        )
         if record:
             players_data.append(record)
 
@@ -1333,14 +1891,27 @@ def main():
 
     # 6b. Tour percentile: rank each player's sim among current players (0-100)
     import bisect
-    valid_sims = sorted(r["sim"] for r in players_data if r.get("sim") is not None)
-    n_valid = len(valid_sims)
+    surface_keys = ("All", "Hard", "Clay", "Grass")
+    valid_sims_by_surface = {
+        surf: sorted(
+            (r.get("simBySurface") or {}).get(surf)
+            for r in players_data
+            if (r.get("simBySurface") or {}).get(surf) is not None
+        )
+        for surf in surface_keys
+    }
     for r in players_data:
-        if r.get("sim") is not None:
-            idx = bisect.bisect_left(valid_sims, r["sim"])
-            r["tourPct"] = round(idx / n_valid * 100, 1)
-        else:
-            r["tourPct"] = None
+        pct_by_surface = {}
+        for surf in surface_keys:
+            sim_val = (r.get("simBySurface") or {}).get(surf)
+            valid_sims = valid_sims_by_surface[surf]
+            if sim_val is not None and valid_sims:
+                idx = bisect.bisect_left(valid_sims, sim_val)
+                pct_by_surface[surf] = round(idx / len(valid_sims) * 100, 1)
+            else:
+                pct_by_surface[surf] = None
+        r["tourPctBySurface"] = pct_by_surface
+        r["tourPct"] = pct_by_surface.get("All")
 
     # 7. Build legend background datasets
     legend_datasets = []
@@ -1359,10 +1930,13 @@ def main():
     print("Reading recent matches...")
     recent_matches = _recent_matches()
     print(f"  {len(recent_matches)} recent matches (GS/Masters/500/250/Davis)")
+    live_schedule = _load_live_schedule()
+    live_match_count = sum(len(day.get("matches", [])) for day in live_schedule.get("days", []))
+    print(f"  Live schedule matches: {live_match_count}")
 
     # 9. Render and save
     EXAMPLES_DIR.mkdir(parents=True, exist_ok=True)
-    html = render_index(players_data, legend_datasets, recent_matches)
+    html = render_index(players_data, legend_datasets, recent_matches, live_schedule)
     out_path = Path(args.output)
     out_path.write_text(html, encoding="utf-8")
     print(f"\nDone! → {out_path}")
