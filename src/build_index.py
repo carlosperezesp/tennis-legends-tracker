@@ -213,7 +213,7 @@ def _parse_dob(raw: str) -> date | None:
 
 
 def _build_elo_age_reference(use_cache: bool = True) -> dict:
-    """Year-end Elo reference curves by historical achievement tier."""
+    """Year-end Elo reference curves by historical achievement tier and surface."""
     lookup = _load_player_id_lookup(use_cache)
     ref_names = {name for group in ELO_REFERENCE_GROUPS.values() for name in group["players"]}
     ref_ids = {
@@ -224,9 +224,10 @@ def _build_elo_age_reference(use_cache: bool = True) -> dict:
     if not ref_ids:
         return {}
 
-    elo = {}
-    matches = {}
-    yearly = {name: {} for name in ref_names}
+    surfaces = ("All", "Hard", "Clay", "Grass")
+    elo = {surface: {} for surface in surfaces}
+    matches = {surface: {} for surface in surfaces}
+    yearly = {surface: {name: {} for name in ref_names} for surface in surfaces}
     for path in sorted((DATA_DIR / "_csv_cache").glob("atp_matches_*.csv")):
         try:
             year = int(path.stem.split("_")[-1])
@@ -239,39 +240,51 @@ def _build_elo_age_reference(use_cache: bool = True) -> dict:
                     lid = _safe_int(row.get("loser_id"), None)
                     if wid is None or lid is None:
                         continue
-                    ra = elo.get(wid, ec.INITIAL_ELO)
-                    rb = elo.get(lid, ec.INITIAL_ELO)
                     k = ec.K_FACTORS.get((row.get("tourney_level") or "").strip(), ec.DEFAULT_K)
-                    ea = 1.0 / (1.0 + 10 ** ((rb - ra) / 400.0))
-                    elo[wid] = ra + k * (1.0 - ea)
-                    elo[lid] = rb + k * (0.0 - (1.0 - ea))
-                    matches[wid] = matches.get(wid, 0) + 1
-                    matches[lid] = matches.get(lid, 0) + 1
+                    surface = (row.get("surface") or "").strip()
+                    surface_keys = ("All", surface) if surface in ("Hard", "Clay", "Grass") else ("All",)
+                    for key in surface_keys:
+                        ratings = elo[key]
+                        counts = matches[key]
+                        ra = ratings.get(wid, ec.INITIAL_ELO)
+                        rb = ratings.get(lid, ec.INITIAL_ELO)
+                        ea = 1.0 / (1.0 + 10 ** ((rb - ra) / 400.0))
+                        ratings[wid] = ra + k * (1.0 - ea)
+                        ratings[lid] = rb + k * (0.0 - (1.0 - ea))
+                        counts[wid] = counts.get(wid, 0) + 1
+                        counts[lid] = counts.get(lid, 0) + 1
         except OSError:
             continue
 
-        for pid, info in ref_ids.items():
-            if pid not in elo or matches.get(pid, 0) < 20:
-                continue
-            age = _age_at(info["born"], year)
-            yearly[info["name"]][age] = round(elo[pid], 0)
+        for surface in surfaces:
+            min_matches = 20 if surface == "All" else 8
+            for pid, info in ref_ids.items():
+                if pid not in elo[surface] or matches[surface].get(pid, 0) < min_matches:
+                    continue
+                age = _age_at(info["born"], year)
+                yearly[surface][info["name"]][age] = round(elo[surface][pid], 0)
 
-    by_group = {}
-    for key, group in ELO_REFERENCE_GROUPS.items():
-        by_age = {}
-        for name in group["players"]:
-            for age, value in yearly.get(name, {}).items():
-                by_age.setdefault(age, []).append(value)
-        by_group[key] = {
-            age: round(sum(values) / len(values), 0)
-            for age, values in by_age.items()
-            if values
-        }
-    return by_group
+    by_surface = {}
+    for surface in surfaces:
+        by_group = {}
+        for key, group in ELO_REFERENCE_GROUPS.items():
+            by_age = {}
+            for name in group["players"]:
+                for age, value in yearly[surface].get(name, {}).items():
+                    by_age.setdefault(age, []).append(value)
+            by_group[key] = {
+                age: round(sum(values) / len(values), 0)
+                for age, values in by_age.items()
+                if values
+            }
+        by_surface[surface] = by_group
+    return by_surface
 
 
-def _reference_elo_for_age(group_key: str, age: int) -> float | None:
-    curve = (_ELO_AGE_REFERENCE or {}).get(group_key) or {}
+def _reference_elo_for_age(group_key: str, age: int, surface: str = "All") -> float | None:
+    by_surface = _ELO_AGE_REFERENCE or {}
+    surface_refs = by_surface.get(surface) or by_surface.get("All") or {}
+    curve = surface_refs.get(group_key) or {}
     if not curve:
         return None
     for delta in (0, -1, 1, -2, 2, -3, 3):
@@ -280,12 +293,12 @@ def _reference_elo_for_age(group_key: str, age: int) -> float | None:
     return None
 
 
-def _age_elo_strength_score(elo, age: int) -> tuple[float | None, dict]:
+def _age_elo_strength_score(elo, age: int, surface: str = "All") -> tuple[float | None, dict]:
     if elo is None or age is None:
         return None, {}
     elo = float(elo)
     refs = {
-        key: _reference_elo_for_age(key, age)
+        key: _reference_elo_for_age(key, age, surface)
         for key in ("big3", "samprassi", "slam_winners")
     }
     multi = refs.get("slam_winners")
@@ -293,14 +306,22 @@ def _age_elo_strength_score(elo, age: int) -> tuple[float | None, dict]:
     big3 = refs.get("big3")
     if not any(refs.values()):
         return _elo_strength_score(elo), refs
-    if big3 and elo >= big3:
-        score = 100
-    elif samprassi and big3 and elo >= samprassi:
-        score = 85 + (elo - samprassi) / max(1, big3 - samprassi) * 15
-    elif multi and samprassi and elo >= multi:
-        score = 65 + (elo - multi) / max(1, samprassi - multi) * 20
-    elif multi:
-        score = 25 + (elo - 1450) / max(1, multi - 1450) * 40
+    anchors = sorted(v for v in (multi, samprassi) if v is not None)
+    lower = anchors[0] if anchors else None
+    upper = anchors[-1] if anchors else None
+    if big3 and upper:
+        if elo >= big3:
+            score = 100
+        elif elo >= upper:
+            score = 78 + (elo - upper) / max(1, big3 - upper) * 17
+        elif lower and elo >= lower:
+            score = 62 + (elo - lower) / max(1, upper - lower) * 16
+        elif lower:
+            score = 25 + (elo - 1450) / max(1, lower - 1450) * 37
+        else:
+            score = _elo_strength_score(elo)
+    elif upper:
+        score = 25 + (elo - 1450) / max(1, upper - 1450) * 55
     else:
         score = _elo_strength_score(elo)
     refs = {k: round(v, 0) if v is not None else None for k, v in refs.items()}
@@ -340,7 +361,7 @@ def _composite_level(stat_pct: float | None, rank: int, elo: int | None, age: in
                      samples: dict, effective_samples: dict,
                      performance_metrics: dict | None, surface: str) -> tuple[float | None, dict]:
     """Realistic circuit level: stats + strength anchor + opponent/sample context + form."""
-    age_elo, elo_refs = _age_elo_strength_score(elo, age)
+    age_elo, elo_refs = _age_elo_strength_score(elo, age, surface)
     strength = _blend_available([
         (_rank_strength_score(rank), 0.40),
         (age_elo, 0.60),
@@ -1156,6 +1177,7 @@ def _annotate_performance_context(players_data: list) -> None:
 
 def build_player_record(p: dict, stats_by_year: dict, benchmark: dict,
                          gs_wins: dict, elo_ratings: dict = None,
+                         surface_elo_ratings: dict = None,
                          performance_metrics: dict = None,
                          next_matches: dict = None,
                          effective_counts: dict = None,
@@ -1169,6 +1191,11 @@ def build_player_record(p: dict, stats_by_year: dict, benchmark: dict,
     # Elo rating (from full match history)
     elo_data = (elo_ratings or {}).get(pid)
     elo      = int(elo_data["elo"]) if elo_data else None
+    elo_by_surface = {}
+    for surface in ("All", "Hard", "Clay", "Grass"):
+        surface_data = ((surface_elo_ratings or {}).get(surface) or {}).get(pid)
+        if surface_data:
+            elo_by_surface[surface] = int(surface_data["elo"])
 
     # Latest year stats (All surfaces) — fall back to most recent year with valid sim
     if not stats_by_year:
@@ -1270,6 +1297,7 @@ def build_player_record(p: dict, stats_by_year: dict, benchmark: dict,
         "capi":       capi,
         "nearTerm":   near_term,
         "elo":        elo,
+        "eloBySurface": elo_by_surface,
         "isLegend":   is_legend,
         "color":      color,
         "trajectory": traj_pts,
@@ -2625,7 +2653,14 @@ def main():
     # 5. Compute Elo ratings from full match history
     print("Computing Elo ratings from match history...")
     elo_ratings = ec.compute_elo_ratings()
-    print(f"  Elo computed for {len(elo_ratings)} players")
+    surface_elo_ratings = ec.compute_elo_ratings_by_surface()
+    print(
+        "  Elo computed for "
+        f"{len(elo_ratings)} players "
+        f"(surface: H {len(surface_elo_ratings.get('Hard', {}))}, "
+        f"C {len(surface_elo_ratings.get('Clay', {}))}, "
+        f"G {len(surface_elo_ratings.get('Grass', {}))})"
+    )
 
     print("Computing last-10 vs career performance metrics...")
     performance_metrics = _performance_metrics_for_players(
@@ -2662,7 +2697,7 @@ def main():
             skipped += 1
             continue
         record = build_player_record(
-            p, stats_by_year, benchmark, gs_wins, elo_ratings, performance_metrics,
+            p, stats_by_year, benchmark, gs_wins, elo_ratings, surface_elo_ratings, performance_metrics,
             next_matches, effective_counts.get(pid), live_profiles.get(pid),
             trend_stats.get(pid)
         )
@@ -2701,7 +2736,7 @@ def main():
             level, factors = _composite_level(
                 pct_by_surface.get(surf),
                 r.get("rank"),
-                r.get("elo"),
+                (r.get("eloBySurface") or {}).get(surf) if surf != "All" else r.get("elo"),
                 r.get("age"),
                 r.get("surfaceSamples") or {},
                 r.get("effectiveSamples") or {},
