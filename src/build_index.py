@@ -12,6 +12,8 @@ Open it directly in a browser and search/click any player to see their
 GS trajectory, profile stats, and projections vs the legend benchmark.
 """
 
+from __future__ import annotations
+
 import argparse
 import csv
 import json
@@ -38,6 +40,7 @@ from legend_trajectory import (
 _REGRESSION_TARGETS: dict = {}
 _ALL_STATS: dict = {}
 _LEGEND_SIM_BY_AGE: dict = {}   # {legend_name: {age: sim_score}}
+_ELO_AGE_REFERENCE: dict = {}
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -61,6 +64,25 @@ STAT_LABELS = {
     "return_win_pct":     "Resto ganado %",
     "bp_save_pct":        "BP salvados %",
     "vs_top10_win_pct":   "Win % vs Top 10",
+}
+
+ELO_REFERENCE_GROUPS = {
+    "big3": {
+        "label": "Big 3",
+        "players": ["Roger Federer", "Rafael Nadal", "Novak Djokovic"],
+    },
+    "samprassi": {
+        "label": "Sampras/Agassi",
+        "players": ["Pete Sampras", "Andre Agassi"],
+    },
+    "slam_winners": {
+        "label": "Campeones GS recientes",
+        "players": [
+            "Gaston Gaudio", "Marat Safin", "Juan Martin del Potro",
+            "Andy Murray", "Stan Wawrinka", "Marin Cilic",
+            "Dominic Thiem", "Daniil Medvedev",
+        ],
+    },
 }
 
 
@@ -131,20 +153,456 @@ def _surface_stats(stats_by_year: dict) -> dict:
     return result
 
 
-def _surface_sim_scores(stats_by_year: dict, benchmark: dict) -> dict:
+def _surface_match_counts(stats_by_year: dict) -> dict:
+    counts = {surf: 0 for surf in ("All", "Hard", "Clay", "Grass")}
+    for yr_data in stats_by_year.values():
+        for surf in counts:
+            counts[surf] += ((yr_data.get(surf) or {}).get("matches") or 0)
+    return counts
+
+
+def _confidence_adjusted_score(score: float, matches: float, target: int) -> float:
+    if score is None:
+        return None
+    confidence = min(1.0, math.sqrt(max(0.0, matches) / target)) if target else 1.0
+    return round(50 + (score - 50) * confidence, 1)
+
+
+def _clamp(value: float, lo: float = 0.0, hi: float = 100.0) -> float:
+    return max(lo, min(hi, value))
+
+
+def _rank_strength_score(rank) -> float | None:
+    rank = _safe_int(rank, None)
+    if rank is None or rank <= 0:
+        return None
+    # Top 1 ~= 100, top 10 ~= 95, top 100 ~= 50, top 200 ~= 0.
+    return round(_clamp((201 - min(rank, 201)) / 200 * 100), 1)
+
+
+def _elo_strength_score(elo) -> float | None:
+    if elo is None:
+        return None
+    # ATP Elo usually spans roughly 1450-1950 for this top-200 view.
+    return round(_clamp((float(elo) - 1450) / 500 * 100), 1)
+
+
+def _load_player_id_lookup(use_cache: bool = True) -> dict:
+    lookup = {}
+    for row in sf._load_player_registry(use_cache):
+        name = f"{row.get('name_first', '').strip()} {row.get('name_last', '').strip()}".strip()
+        try:
+            pid = int(row.get("player_id") or 0)
+        except (TypeError, ValueError):
+            continue
+        if name and pid:
+            lookup[name] = {
+                "id": pid,
+                "born": _parse_dob(row.get("dob", "")),
+            }
+    return lookup
+
+
+def _parse_dob(raw: str) -> date | None:
+    if not raw or len(raw) != 8:
+        return None
+    try:
+        return date(int(raw[:4]), int(raw[4:6]), int(raw[6:8]))
+    except ValueError:
+        return None
+
+
+def _build_elo_age_reference(use_cache: bool = True) -> dict:
+    """Year-end Elo reference curves by historical achievement tier."""
+    lookup = _load_player_id_lookup(use_cache)
+    ref_names = {name for group in ELO_REFERENCE_GROUPS.values() for name in group["players"]}
+    ref_ids = {
+        lookup[name]["id"]: {"name": name, "born": lookup[name]["born"]}
+        for name in ref_names
+        if lookup.get(name, {}).get("id") and lookup.get(name, {}).get("born")
+    }
+    if not ref_ids:
+        return {}
+
+    elo = {}
+    matches = {}
+    yearly = {name: {} for name in ref_names}
+    for path in sorted((DATA_DIR / "_csv_cache").glob("atp_matches_*.csv")):
+        try:
+            year = int(path.stem.split("_")[-1])
+        except ValueError:
+            continue
+        try:
+            with open(path, encoding="utf-8", newline="") as fh:
+                for row in csv.DictReader(fh):
+                    wid = _safe_int(row.get("winner_id"), None)
+                    lid = _safe_int(row.get("loser_id"), None)
+                    if wid is None or lid is None:
+                        continue
+                    ra = elo.get(wid, ec.INITIAL_ELO)
+                    rb = elo.get(lid, ec.INITIAL_ELO)
+                    k = ec.K_FACTORS.get((row.get("tourney_level") or "").strip(), ec.DEFAULT_K)
+                    ea = 1.0 / (1.0 + 10 ** ((rb - ra) / 400.0))
+                    elo[wid] = ra + k * (1.0 - ea)
+                    elo[lid] = rb + k * (0.0 - (1.0 - ea))
+                    matches[wid] = matches.get(wid, 0) + 1
+                    matches[lid] = matches.get(lid, 0) + 1
+        except OSError:
+            continue
+
+        for pid, info in ref_ids.items():
+            if pid not in elo or matches.get(pid, 0) < 20:
+                continue
+            age = _age_at(info["born"], year)
+            yearly[info["name"]][age] = round(elo[pid], 0)
+
+    by_group = {}
+    for key, group in ELO_REFERENCE_GROUPS.items():
+        by_age = {}
+        for name in group["players"]:
+            for age, value in yearly.get(name, {}).items():
+                by_age.setdefault(age, []).append(value)
+        by_group[key] = {
+            age: round(sum(values) / len(values), 0)
+            for age, values in by_age.items()
+            if values
+        }
+    return by_group
+
+
+def _reference_elo_for_age(group_key: str, age: int) -> float | None:
+    curve = (_ELO_AGE_REFERENCE or {}).get(group_key) or {}
+    if not curve:
+        return None
+    for delta in (0, -1, 1, -2, 2, -3, 3):
+        if age + delta in curve:
+            return curve[age + delta]
+    return None
+
+
+def _age_elo_strength_score(elo, age: int) -> tuple[float | None, dict]:
+    if elo is None or age is None:
+        return None, {}
+    elo = float(elo)
+    refs = {
+        key: _reference_elo_for_age(key, age)
+        for key in ("big3", "samprassi", "slam_winners")
+    }
+    multi = refs.get("slam_winners")
+    samprassi = refs.get("samprassi")
+    big3 = refs.get("big3")
+    if not any(refs.values()):
+        return _elo_strength_score(elo), refs
+    if big3 and elo >= big3:
+        score = 100
+    elif samprassi and big3 and elo >= samprassi:
+        score = 85 + (elo - samprassi) / max(1, big3 - samprassi) * 15
+    elif multi and samprassi and elo >= multi:
+        score = 65 + (elo - multi) / max(1, samprassi - multi) * 20
+    elif multi:
+        score = 25 + (elo - 1450) / max(1, multi - 1450) * 40
+    else:
+        score = _elo_strength_score(elo)
+    refs = {k: round(v, 0) if v is not None else None for k, v in refs.items()}
+    return round(_clamp(score), 1), refs
+
+
+def _blend_available(values: list[tuple[float | None, float]]) -> float | None:
+    total = sum(weight for value, weight in values if value is not None)
+    if total <= 0:
+        return None
+    return sum(value * weight for value, weight in values if value is not None) / total
+
+
+def _form_score(metrics: dict | None, surface: str) -> float | None:
+    by_surface = metrics or {}
+    surface_metrics = by_surface.get(surface) or by_surface.get("All")
+    rows = (surface_metrics or {}).get("rows", [])
+    vals = [row.get("tourPct") for row in rows if row.get("tourPct") is not None]
+    if not vals:
+        return None
+    return round(sum(vals) / len(vals), 1)
+
+
+def _quality_score(samples: dict, effective_samples: dict, surface: str) -> float | None:
+    sample = (samples or {}).get(surface)
+    effective = (effective_samples or {}).get(surface)
+    if not sample:
+        return None
+    ratio = (effective or sample) / sample
+    opponent_quality = _clamp(50 + (ratio - 1.0) * 90)
+    target = 60 if surface == "All" else 28
+    confidence = min(1.0, math.sqrt(sample / target)) * 100
+    return round(opponent_quality * 0.55 + confidence * 0.45, 1)
+
+
+def _composite_level(stat_pct: float | None, rank: int, elo: int | None, age: int,
+                     samples: dict, effective_samples: dict,
+                     performance_metrics: dict | None, surface: str) -> tuple[float | None, dict]:
+    """Realistic circuit level: stats + strength anchor + opponent/sample context + form."""
+    age_elo, elo_refs = _age_elo_strength_score(elo, age)
+    strength = _blend_available([
+        (_rank_strength_score(rank), 0.40),
+        (age_elo, 0.60),
+    ])
+    quality = _quality_score(samples, effective_samples, surface)
+    form = _form_score(performance_metrics, surface)
+    value = _blend_available([
+        (stat_pct, 0.40),
+        (strength, 0.35),
+        (quality, 0.10),
+        (form, 0.15),
+    ])
+    factors = {
+        "statPct": round(stat_pct, 1) if stat_pct is not None else None,
+        "strength": round(strength, 1) if strength is not None else None,
+        "ageElo": age_elo,
+        "eloRefs": elo_refs,
+        "quality": quality,
+        "form": form,
+    }
+    return (round(value, 1) if value is not None else None), factors
+
+
+def _surface_sim_scores(stats_by_year: dict, benchmark: dict,
+                        effective_counts: dict | None = None) -> tuple[dict, dict]:
     """Latest valid profile-sim score by surface."""
-    result = {}
+    raw = {}
+    counts = effective_counts or _surface_match_counts(stats_by_year)
     for surf in ("All", "Hard", "Clay", "Grass"):
-        result[surf] = None
+        raw[surf] = None
         for yr in sorted(stats_by_year.keys(), key=int, reverse=True):
             stats = (stats_by_year.get(yr) or {}).get(surf)
             if not stats:
                 continue
             sim = sf.compute_profile_similarity(stats, benchmark, surf)
             if sim is not None:
-                result[surf] = sim
+                raw[surf] = sim
                 break
+    adjusted = {}
+    for surf, score in raw.items():
+        if score is None:
+            adjusted[surf] = None
+            continue
+        if surf != "All" and counts.get(surf, 0) < 8:
+            adjusted[surf] = None
+            continue
+        target = 40 if surf == "All" else 24
+        adjusted[surf] = _confidence_adjusted_score(score, counts.get(surf, 0), target)
+    return adjusted, raw
+
+
+def _level_trend_by_surface(stats_by_year: dict, benchmark: dict) -> dict:
+    """Year-by-year profile level by surface for the player detail trend chart."""
+    result = {surf: [] for surf in ("All", "Hard", "Clay", "Grass")}
+    for year in sorted(stats_by_year.keys(), key=int):
+        for surf in result:
+            stats = (stats_by_year.get(year) or {}).get(surf)
+            if not stats:
+                continue
+            sim = sf.compute_profile_similarity(stats, benchmark, surf)
+            matches = stats.get("matches") or 0
+            if sim is None or matches < 3:
+                continue
+            target = 30 if surf == "All" else 16
+            result[surf].append({
+                "year": int(year),
+                "value": _confidence_adjusted_score(sim, matches, target),
+                "raw": round(sim, 1),
+                "matches": matches,
+            })
     return result
+
+
+def _trend_only_batch(players: list, years_range, use_cache: bool = True) -> dict:
+    """Compute lightweight career-wide stats for trend charts."""
+    return sf.compute_all_players_batch(players, years=tuple(years_range), use_cache=use_cache)
+
+
+def _level_weight(level: str) -> float:
+    level = (level or "").strip().upper()
+    if level == "G":
+        return 1.35
+    if level == "M":
+        return 1.25
+    if level == "A":
+        return 1.0
+    if level == "F":
+        return 1.2
+    if level == "D":
+        return 0.55
+    return 0.8
+
+
+def _opponent_weight(rank) -> float:
+    rank = _safe_int(rank, None)
+    if rank is None:
+        return 0.5
+    if rank <= 10:
+        return 1.35
+    if rank <= 30:
+        return 1.2
+    if rank <= 100:
+        return 1.0
+    if rank <= 250:
+        return 0.75
+    return 0.45
+
+
+def _match_weight(row: dict, as_winner: bool) -> float:
+    opp_rank = row.get("loser_rank" if as_winner else "winner_rank")
+    return round(_level_weight(row.get("tourney_level")) * _opponent_weight(opp_rank), 3)
+
+
+def _effective_match_counts(players: list, years_range, use_cache: bool = True) -> dict:
+    pid_set = {p["player_id"] for p in players}
+    result = {pid: {surf: 0.0 for surf in ("All", "Hard", "Clay", "Grass")} for pid in pid_set}
+    for year in years_range:
+        for row in sf._fetch_csv(year, use_cache):
+            surf = (row.get("surface") or "").strip()
+            surface_keys = ("All", surf) if surf in ("Hard", "Clay", "Grass") else ("All",)
+            wid = _safe_int(row.get("winner_id"), None)
+            lid = _safe_int(row.get("loser_id"), None)
+            if wid in pid_set:
+                weight = _match_weight(row, True)
+                for key in surface_keys:
+                    result[wid][key] += weight
+            if lid in pid_set:
+                weight = _match_weight(row, False)
+                for key in surface_keys:
+                    result[lid][key] += weight
+    return result
+
+
+def _empty_live_record() -> dict:
+    return {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+            "Hard": {"matches": 0, "wins": 0, "losses": 0},
+            "Clay": {"matches": 0, "wins": 0, "losses": 0},
+            "Grass": {"matches": 0, "wins": 0, "losses": 0},
+        },
+    }
+
+
+def _add_live_match(record: dict, surface: str, won: bool) -> None:
+    record["matches"] += 1
+    record["wins" if won else "losses"] += 1
+    if surface in record["bySurface"]:
+        surf_record = record["bySurface"][surface]
+        surf_record["matches"] += 1
+        surf_record["wins" if won else "losses"] += 1
+
+
+def _has_point_stats(row: dict) -> bool:
+    return any(_safe_int(row.get(k), 0) > 0 for k in ("w_svpt", "l_svpt", "w_1stIn", "l_1stIn"))
+
+
+def _is_walkover(row: dict) -> bool:
+    return (row.get("score") or "").strip().upper() in {"W/O", "WALKOVER"}
+
+
+def _merge_live_override(base: dict, override: dict) -> dict:
+    """Shallow merge for optional API/manual facts without losing derived samples."""
+    result = {**base, **override}
+    for key in ("careerRecord", "seasonRecord", "statSamples"):
+        if key in base or key in override:
+            result[key] = {**base.get(key, {}), **override.get(key, {})}
+            if "bySurface" in base.get(key, {}) or "bySurface" in override.get(key, {}):
+                result[key]["bySurface"] = {
+                    **base.get(key, {}).get("bySurface", {}),
+                    **override.get(key, {}).get("bySurface", {}),
+                }
+    sources = []
+    for source in base.get("sources", []) + override.get("sources", []):
+        if source not in sources:
+            sources.append(source)
+    result["sources"] = sources
+    return result
+
+
+def _load_live_profile_overrides() -> dict:
+    """Optional API/manual enrichment layer.
+
+    data/player_live_profiles.json can override or enrich the derived Sackmann
+    record. This is where a daily API fetcher can write ATP/RapidAPI facts.
+    """
+    path = DATA_DIR / "player_live_profiles.json"
+    if not path.exists():
+        return {}
+    try:
+        with open(path, encoding="utf-8") as fh:
+            raw = json.load(fh)
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"  Warning: could not read player live profiles: {exc}")
+        return {}
+    players = raw.get("players", raw)
+    return players if isinstance(players, dict) else {}
+
+
+def _live_profiles_for_players(players: list, years_range, live_schedule: dict,
+                               use_cache: bool = True) -> dict:
+    """Mix official match records, stats samples, and schedule facts per player.
+
+    The important distinction: official records count played ATP-level matches
+    available in Sackmann (walkovers excluded), while stat samples count only
+    rows with point stats usable for deeper metrics.
+    """
+    pid_set = {p["player_id"] for p in players}
+    current_year = date.today().year
+    profiles = {}
+    for p in players:
+        profiles[p["player_id"]] = {
+            "asOf": date.today().isoformat(),
+            "sources": ["Jeff Sackmann records", "Jeff Sackmann point stats"],
+            "careerRecord": _empty_live_record(),
+            "seasonRecord": _empty_live_record(),
+            "statSamples": {"matches": 0, "bySurface": {"Hard": 0, "Clay": 0, "Grass": 0}},
+            "latestMatchDate": None,
+        }
+
+    for year in years_range:
+        for row in sf._fetch_csv(year, use_cache):
+            if _is_walkover(row):
+                continue
+            wid = _safe_int(row.get("winner_id"), None)
+            lid = _safe_int(row.get("loser_id"), None)
+            surf = (row.get("surface") or "").strip()
+            match_date = (row.get("tourney_date") or "").strip()
+            for pid, won in ((wid, True), (lid, False)):
+                if pid not in pid_set:
+                    continue
+                profile = profiles[pid]
+                _add_live_match(profile["careerRecord"], surf, won)
+                if int(year) == current_year:
+                    _add_live_match(profile["seasonRecord"], surf, won)
+                if _has_point_stats(row):
+                    profile["statSamples"]["matches"] += 1
+                    if surf in profile["statSamples"]["bySurface"]:
+                        profile["statSamples"]["bySurface"][surf] += 1
+                if match_date and (not profile["latestMatchDate"] or match_date > profile["latestMatchDate"]):
+                    profile["latestMatchDate"] = match_date
+
+    schedule_names = {
+        (match.get(side) or "").strip()
+        for day in live_schedule.get("days", [])
+        for match in day.get("matches", [])
+        for side in ("player1", "player2")
+    }
+    name_to_pid = {p["name"]: p["player_id"] for p in players}
+    for name in schedule_names:
+        pid = name_to_pid.get(name)
+        if pid in profiles and "Daily schedule" not in profiles[pid]["sources"]:
+            profiles[pid]["sources"].append("Daily schedule")
+
+    overrides = _load_live_profile_overrides()
+    for p in players:
+        override = overrides.get(p["name"]) or overrides.get(str(p["player_id"]))
+        if isinstance(override, dict):
+            profiles[p["player_id"]] = _merge_live_override(profiles[p["player_id"]], override)
+    return profiles
 
 
 def _project(current_age, current_gs, player_stats, end_age=37):
@@ -699,7 +1157,10 @@ def _annotate_performance_context(players_data: list) -> None:
 def build_player_record(p: dict, stats_by_year: dict, benchmark: dict,
                          gs_wins: dict, elo_ratings: dict = None,
                          performance_metrics: dict = None,
-                         next_matches: dict = None) -> dict:
+                         next_matches: dict = None,
+                         effective_counts: dict = None,
+                         live_profile: dict = None,
+                         trend_stats_by_year: dict = None) -> dict:
     pid  = p["player_id"]
     name = p["name"]
     born = p["born"]
@@ -792,8 +1253,12 @@ def build_player_record(p: dict, stats_by_year: dict, benchmark: dict,
     capi       = _career_adj_score(sim, age, gs_total)
     near_term  = _near_term_score(sim, age, gs_total, rank)
     is_legend  = name in BACKGROUND_LEGENDS
-    sim_by_surface = _surface_sim_scores(stats_by_year, benchmark)
-    sim_by_surface["All"] = sim
+    surface_samples = _surface_match_counts(stats_by_year)
+    effective_samples = effective_counts or surface_samples
+    sim_by_surface, raw_sim_by_surface = _surface_sim_scores(
+        stats_by_year, benchmark, effective_samples
+    )
+    surface_samples = _surface_match_counts(stats_by_year)
     performance_by_surface = (performance_metrics or {}).get(pid, {})
 
     return {
@@ -823,6 +1288,11 @@ def build_player_record(p: dict, stats_by_year: dict, benchmark: dict,
         "performanceMetrics": performance_by_surface.get("All"),
         "performanceBySurface": performance_by_surface,
         "simBySurface": sim_by_surface,
+        "rawSimBySurface": raw_sim_by_surface,
+        "levelTrendBySurface": _level_trend_by_surface(trend_stats_by_year or stats_by_year, benchmark),
+        "surfaceSamples": surface_samples,
+        "effectiveSamples": {k: round(v, 1) for k, v in effective_samples.items()},
+        "liveProfile": live_profile or {},
         "tourPctBySurface": {},
         "nextMatch": (next_matches or {}).get(name),
         "latestYear":   int(latest_year),
@@ -975,6 +1445,19 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       border-radius: 0 0 8px 8px; cursor: pointer; width: 56px; height: 44px;
       display: inline-flex; align-items: center; justify-content: center;
     }}
+    .header-search {{
+      display: flex; align-items: stretch; justify-content: flex-end; max-width: min(460px, 58vw);
+    }}
+    .header-search .search-input {{
+      width: 0; min-width: 0; padding-left: 0; padding-right: 0;
+      border-right: 0; opacity: 0; pointer-events: none;
+      transition: width 0.18s ease, padding 0.18s ease, opacity 0.12s ease;
+    }}
+    .header-search.open .search-input {{
+      width: min(360px, 48vw); padding-left: 14px; padding-right: 14px;
+      opacity: 1; pointer-events: auto;
+    }}
+    .header-search.open .search-toggle {{ border-radius: 0 0 8px 0; }}
     .hero {{
       display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.65fr);
       gap: 48px; padding: 76px 0 32px; align-items: end;
@@ -989,7 +1472,6 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       background: var(--ivory-medium); border: 1px solid var(--slate-dark); border-radius: 24px;
       padding: 31px; margin-bottom: 16px;
     }}
-    .search-panel {{ display:none; margin-bottom: 16px; }}
     .search-input {{
       width:100%; background: var(--ivory-light); border:1px solid var(--slate-dark); border-radius:0;
       padding: 14px 16px; font-size: 15px; outline: none; font-family: inherit; color: var(--slate-dark);
@@ -1042,6 +1524,15 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       font-family: 'JetBrains Mono', monospace; color: var(--ivory-dark);
       font-size: 14px; text-transform: uppercase; margin-top: 8px;
     }}
+    .live-profile-chip {{
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase;
+      color: var(--ivory-dark);
+    }}
+    .live-profile-chip span {{
+      border: 1px solid var(--slate-medium, #3d3d3a); padding: 6px 8px;
+      background: rgba(250,249,245,0.05);
+    }}
     .next-match-chip {{
       width: 100%; border: 1px solid var(--slate-medium, #3d3d3a); background: rgba(250,249,245,0.06);
       color: var(--ivory-light); padding: 14px 16px; text-align: left;
@@ -1090,6 +1581,30 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
     .surface-btn:hover {{ background: var(--slate-medium, #3d3d3a); }}
     .surface-btn.active {{ background: var(--ivory-light); color: var(--slate-dark); border-color: var(--ivory-light); }}
     .surface-btn:disabled {{ opacity: 0.42; cursor: not-allowed; }}
+    .level-trend {{
+      width: 100%; display: grid; gap: 10px; border-top: 1px solid var(--slate-medium, #3d3d3a);
+      border-bottom: 1px solid var(--slate-medium, #3d3d3a); padding: 18px 0 16px;
+    }}
+    .level-trend-head {{ display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }}
+    .level-trend-title {{
+      font-family: 'JetBrains Mono', monospace; color: var(--ivory-light);
+      font-size: 12px; text-transform: uppercase;
+    }}
+    .level-trend-delta {{
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase;
+      color: var(--ivory-dark); text-align: right;
+    }}
+    .level-trend-delta.up {{ color: var(--olive); }}
+    .level-trend-delta.down {{ color: var(--clay); }}
+    .level-trend svg {{ width: 100%; height: 118px; display: block; overflow: visible; }}
+    .trend-grid {{ stroke: rgba(250,249,245,0.14); stroke-width: 1; }}
+    .trend-line {{ fill: none; stroke: var(--ivory-light); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }}
+    .trend-area {{ fill: rgba(250,249,245,0.08); }}
+    .trend-dot {{ fill: var(--ivory-light); stroke: var(--slate-dark); stroke-width: 2; }}
+    .trend-labels {{
+      display: flex; justify-content: space-between; gap: 8px;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ivory-dark); text-transform: uppercase;
+    }}
     .performance-panel {{
       width: 100%; margin-top: 8px; border-top: 1px solid var(--slate-medium, #3d3d3a);
       padding-top: 24px; text-align: left;
@@ -1160,7 +1675,7 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
     .profile-summary::-webkit-details-marker {{ display: none; }}
     .group-status {{ font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cloud-dark); text-transform: uppercase; font-weight: 400; }}
     .profile-stat-row {{
-      display: grid; grid-template-columns: minmax(112px, 1fr) 58px 58px 62px 72px;
+      display: grid; grid-template-columns: minmax(112px, 1fr) 58px 58px 62px 92px;
       gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--cloud-light);
     }}
     .profile-stat-head {{ color: var(--cloud-dark); font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; }}
@@ -1170,6 +1685,23 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
     .profile-stat-label.up {{ color: var(--olive); }}
     .profile-stat-label.down {{ color: var(--clay); }}
     .profile-stat-label.flat, .profile-stat-label.na {{ color: var(--cloud-dark); }}
+    .profile-stat-context {{
+      display: block; margin-top: 6px; font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; color: var(--cloud-dark); text-transform: uppercase;
+    }}
+    .profile-stat-context.elite {{ color: var(--olive); }}
+    .profile-stat-context.good {{ color: #6f8552; }}
+    .profile-stat-context.weak {{ color: #b06945; }}
+    .profile-stat-context.low {{ color: var(--clay); }}
+    .profile-stat-bar {{
+      display: block; width: min(118px, 100%); height: 4px; margin-top: 6px;
+      background: var(--cloud-light); overflow: hidden;
+    }}
+    .profile-stat-bar span {{ display: block; height: 100%; background: var(--cloud-dark); }}
+    .profile-stat-bar span.elite {{ background: var(--olive); }}
+    .profile-stat-bar span.good {{ background: #8fa866; }}
+    .profile-stat-bar span.weak {{ background: #d78c5f; }}
+    .profile-stat-bar span.low {{ background: var(--clay); }}
     .schedule-page {{ padding-top: 48px; padding-bottom: 48px; }}
     .schedule-hero {{
       display: flex; justify-content: space-between; gap: 24px; align-items: end;
@@ -1272,32 +1804,29 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
   <!-- Header -->
   <header class="topbar">
     <div class="wordmark">Legend Tracker</div>
-    <button class="search-toggle" onclick="toggleSearch()" title="Buscar">
-      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-      </svg>
-    </button>
+    <div id="header-search" class="header-search">
+      <input id="search-input" class="search-input" type="search" placeholder="Buscar jugador..." oninput="refresh()"/>
+      <button class="search-toggle" onclick="toggleSearch()" title="Buscar">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </button>
+    </div>
   </header>
 
   <div id="tabs-viewport" class="tabs-viewport">
     <div class="tabs-track">
       <main id="ranking-tab" class="tab-panel app-shell">
         <section class="hero">
-          <h1>ATP <u>ranking</u> and legend <u>signals</u></h1>
-          <p>Una lectura editorial del circuito: ranking actual, CAPI, edad y traza de Grand Slams en una sola lista compacta.</p>
+          <h1>ATP <u>ranking</u> and circuit <u>level</u></h1>
+          <p>Una lectura editorial del circuito: ranking actual, nivel competitivo, edad y estado de forma en una sola lista compacta.</p>
         </section>
-
-        <!-- Search bar -->
-        <div id="search-bar" class="search-panel">
-          <input id="search-input" class="search-input" type="search" placeholder="Buscar jugador..." oninput="refresh()"/>
-        </div>
 
         <!-- Sort tabs + count bar -->
         <section class="toolbar">
           <div class="toolbar-row">
             <div class="sort-group">
               <button class="sort-btn active" id="sort-rank"  onclick="setSort('rank')">Ranking</button>
-              <button class="sort-btn"        id="sort-score" onclick="setSort('score')">CAPI</button>
               <button class="sort-btn"        id="sort-tour"  onclick="setSort('tour')">Circuito</button>
               <button class="sort-btn"        id="sort-age"   onclick="setSort('age')">Edad</button>
             </div>
@@ -1346,8 +1875,10 @@ function sortPlayers(arr) {{
   return arr.slice().sort((a, b) => {{
     let va, vb;
     if (sortKey === 'rank')       {{ va = a.rank;          vb = b.rank; }}
-    else if (sortKey === 'score') {{ va = a.capi ?? -1;    vb = b.capi ?? -1; }}
-    else if (sortKey === 'tour')  {{ va = a.tourPct ?? -1; vb = b.tourPct ?? -1; }}
+    else if (sortKey === 'tour')  {{
+      va = a.tourPctBySurface?.All ?? a.tourPct ?? -1;
+      vb = b.tourPctBySurface?.All ?? b.tourPct ?? -1;
+    }}
     else                          {{ va = a.age;            vb = b.age; }}
     return sortDir * (va - vb);
   }});
@@ -1361,13 +1892,8 @@ function scoreColor(v) {{
 }}
 
 function getBadge(p) {{
-  if (p.isLegend) return {{ val: '&#8734;', label: 'Leyenda', color: '#141413' }};
-  if (sortKey === 'tour') {{
-    const v = p.tourPct;
-    return {{ val: v != null ? v.toFixed(0) + '%' : '&#8212;', label: 'Circuito', color: scoreColor(v) }};
-  }}
-  const v = p.capi != null ? p.capi : p.sim;
-  return {{ val: v != null ? v.toFixed(0) : '&#8212;', label: 'CAPI', color: scoreColor(v) }};
+  const v = p.tourPctBySurface?.All ?? p.tourPct;
+  return {{ val: v != null ? v.toFixed(0) : '&#8212;', label: 'Nivel', color: scoreColor(v) }};
 }}
 
 function buildList(players) {{
@@ -1443,6 +1969,28 @@ function surfaceTourPct(p) {{
   return p.tourPctBySurface?.[activeSurface] ?? (activeSurface === 'All' ? p.tourPct : null);
 }}
 
+function activeSurfaceSample(p) {{
+  return p.surfaceSamples?.[activeSurface] ?? null;
+}}
+
+function activeEffectiveSample(p) {{
+  return p.effectiveSamples?.[activeSurface] ?? null;
+}}
+
+function activeOfficialSample(p) {{
+  const record = p.liveProfile?.careerRecord;
+  if (!record) return null;
+  if (activeSurface === 'All') return record.matches ?? null;
+  return record.bySurface?.[activeSurface]?.matches ?? null;
+}}
+
+function activeDeepStatsSample(p) {{
+  const samples = p.liveProfile?.statSamples;
+  if (!samples) return activeSurfaceSample(p);
+  if (activeSurface === 'All') return samples.matches ?? activeSurfaceSample(p);
+  return samples.bySurface?.[activeSurface] ?? activeSurfaceSample(p);
+}}
+
 function renderSurfaceSwitcher(p) {{
   return '<div class="surface-switcher" role="tablist" aria-label="Superficie">' +
     SURFACES.map(s => {{
@@ -1485,6 +2033,80 @@ function renderNextMatch(p) {{
   '</' + tag + '>';
 }}
 
+function renderLiveProfile(p) {{
+  const profile = p.liveProfile || {{}};
+  const career = profile.careerRecord || {{}};
+  const season = profile.seasonRecord || {{}};
+  const statSample = profile.statSamples?.matches;
+  const careerText = career.matches
+    ? 'Record ATP disponible ' + (career.wins || 0) + '-' + (career.losses || 0) + ' · ' + career.matches + ' partidos'
+    : 'Record ATP disponible TBD';
+  const seasonText = season.matches
+    ? 'Temporada ' + (season.wins || 0) + '-' + (season.losses || 0)
+    : 'Temporada TBD';
+  const sampleText = statSample != null ? 'Stats profundas ' + statSample : 'Stats profundas TBD';
+  return '<div class="live-profile-chip">' +
+    '<span>' + careerText + '</span>' +
+    '<span>' + seasonText + '</span>' +
+    '<span>' + sampleText + '</span>' +
+  '</div>';
+}}
+
+function renderLevelTrend(p) {{
+  const series = (p.levelTrendBySurface || {{}})[activeSurface] || [];
+  const usable = series
+    .filter(d => d && (d.pct != null || d.value != null))
+    .map(d => ({{ ...d, displayValue: d.pct != null ? d.pct : d.value }}));
+  if (!usable.length) {{
+    return '<section class="level-trend">' +
+      '<div class="level-trend-head">' +
+        '<div class="level-trend-title">Evolución nivel · ' + activeSurfaceLabel() + '</div>' +
+        '<div class="level-trend-delta">Sin histórico suficiente</div>' +
+      '</div>' +
+    '</section>';
+  }}
+  const latest = usable[usable.length - 1];
+  const previous = usable.length > 1 ? usable[usable.length - 2] : null;
+  const delta = previous ? latest.displayValue - previous.displayValue : null;
+  const deltaClass = delta == null ? '' : (delta > 1 ? ' up' : (delta < -1 ? ' down' : ''));
+  const latestLabel = latest.current ? 'Actual' : latest.year;
+  const deltaText = delta == null
+    ? latestLabel + ' · ' + latest.matches + ' partidos'
+    : (delta >= 0 ? '+' : '') + delta.toFixed(1) + ' vs ' + previous.year + ' · ' + latest.matches + ' partidos';
+  const w = 360, h = 118, padX = 16, padY = 14;
+  const minY = Math.max(0, Math.min(...usable.map(d => d.displayValue)) - 8);
+  const maxY = Math.min(100, Math.max(...usable.map(d => d.displayValue)) + 8);
+  const spanY = Math.max(1, maxY - minY);
+  const xFor = (idx) => usable.length === 1 ? w / 2 : padX + idx * ((w - padX * 2) / (usable.length - 1));
+  const yFor = (v) => h - padY - ((v - minY) / spanY) * (h - padY * 2);
+  const pts = usable.map((d, idx) => [xFor(idx), yFor(d.displayValue)]);
+  const line = pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  const area = usable.length > 1
+    ? 'M ' + pts[0][0].toFixed(1) + ' ' + (h - padY) + ' L ' + pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L ') + ' L ' + pts[pts.length - 1][0].toFixed(1) + ' ' + (h - padY) + ' Z'
+    : '';
+  const dots = pts.map((pt, idx) =>
+    '<circle class="trend-dot" cx="' + pt[0].toFixed(1) + '" cy="' + pt[1].toFixed(1) + '" r="' + (idx === pts.length - 1 ? 4.5 : 3.5) + '"></circle>'
+  ).join('');
+  const peak = usable.reduce((best, d) => d.displayValue > best.displayValue ? d : best, usable[0]);
+  const labelPoints = [usable[0], peak, latest].filter((d, idx, arr) =>
+    d && arr.findIndex(x => x.year === d.year) === idx
+  );
+  const labels = labelPoints.map(d => '<span>' + (d.current ? 'Actual' : d.year) + ' · ' + d.displayValue.toFixed(0) + '</span>').join('');
+  return '<section class="level-trend">' +
+    '<div class="level-trend-head">' +
+      '<div class="level-trend-title">Evolución nivel · ' + activeSurfaceLabel() + '</div>' +
+      '<div class="level-trend-delta' + deltaClass + '">' + deltaText + '</div>' +
+    '</div>' +
+    '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="Evolución de nivel">' +
+      '<line class="trend-grid" x1="0" y1="' + yFor(50).toFixed(1) + '" x2="' + w + '" y2="' + yFor(50).toFixed(1) + '"></line>' +
+      (area ? '<path class="trend-area" d="' + area + '"></path>' : '') +
+      '<polyline class="trend-line" points="' + line + '"></polyline>' +
+      dots +
+    '</svg>' +
+    '<div class="trend-labels">' + labels + '</div>' +
+  '</section>';
+}}
+
 function renderPerformanceMetrics(p) {{
   const metrics = surfaceMetrics(p);
   if (!metrics?.rows?.length) {{
@@ -1493,23 +2115,11 @@ function renderPerformanceMetrics(p) {{
       '<div class="metric-table"><div class="metric-row"><div class="metric-name">Sin datos suficientes para esta superficie</div><div></div><div></div><div></div></div></div>' +
     '</section>';
   }}
-  const tourContext = row => {{
-    if (row.tourPct == null || !Number.isFinite(row.tourPct)) {{
-      return {{ cls: 'flat', label: 'Sin contexto ATP', width: 0 }};
-    }}
-    const pct = Math.max(0, Math.min(100, Math.round(row.tourPct)));
-    let cls = 'flat';
-    if (pct >= 85) cls = 'elite';
-    else if (pct >= 65) cls = 'good';
-    else if (pct <= 20) cls = 'low';
-    else if (pct <= 40) cls = 'weak';
-    return {{ cls, label: 'Mejor que ' + pct + '% ATP', width: pct }};
-  }};
   const rows = metrics.rows.map(r => {{
     const cls = r.diff > 0 ? 'up' : r.diff < 0 ? 'down' : 'flat';
     const sign = r.diff > 0 ? '+' : '';
     const mark = r.diff > 0 ? '&#9650;' : r.diff < 0 ? '&#9660;' : '&#8212;';
-    const ctx = tourContext(r);
+    const ctx = metricTourContext(r);
     return '<div class="metric-row">' +
       '<div class="metric-name">' + r.label +
         '<span class="metric-context ' + ctx.cls + '">' + ctx.label + '</span>' +
@@ -1528,6 +2138,19 @@ function renderPerformanceMetrics(p) {{
       rows +
     '</div>' +
   '</section>';
+}}
+
+function metricTourContext(row) {{
+  if (row.tourPct == null || !Number.isFinite(row.tourPct)) {{
+    return {{ cls: 'flat', label: 'Sin contexto ATP', width: 0 }};
+  }}
+  const pct = Math.max(0, Math.min(100, Math.round(row.tourPct)));
+  let cls = 'flat';
+  if (pct >= 85) cls = 'elite';
+  else if (pct >= 65) cls = 'good';
+  else if (pct <= 20) cls = 'low';
+  else if (pct <= 40) cls = 'weak';
+  return {{ cls, label: 'Mejor que ' + pct + '% ATP', width: pct }};
 }}
 
 function profileMetricMap(p) {{
@@ -1634,8 +2257,12 @@ function renderIdentityCard(p) {{
       '<div class="profile-stat-row profile-stat-head"><div>Stat</div><div class="profile-stat-val">Carr.</div><div class="profile-stat-val">Rec.</div><div class="profile-stat-val">Dif</div><div class="profile-stat-label">Estado</div></div>'
     ].concat((group.rows || []).map(row => {{
       const trend = profileTrend(row);
+      const ctx = metricTourContext(row);
       return '<div class="profile-stat-row">' +
-        '<div class="profile-stat-name">' + row.label + '</div>' +
+        '<div class="profile-stat-name">' + row.label +
+          '<span class="profile-stat-context ' + ctx.cls + '">' + ctx.label + '</span>' +
+          '<span class="profile-stat-bar" aria-hidden="true"><span class="' + ctx.cls + '" style="width:' + ctx.width + '%"></span></span>' +
+        '</div>' +
         '<div class="profile-stat-val">' + formatProfileValue(row, row.career) + '</div>' +
         '<div class="profile-stat-val">' + formatProfileValue(row, row.actual) + '</div>' +
         '<div class="profile-stat-val">' + formatProfileDiff(row) + '</div>' +
@@ -1661,21 +2288,29 @@ function renderPlayerDetail() {{
   if (!p || !el) return;
   const tourRaw = surfaceTourPct(p);
   const tour = tourRaw == null ? null : Math.max(0, Math.min(100, tourRaw));
+  const sample = activeDeepStatsSample(p);
+  const effectiveSample = activeEffectiveSample(p);
+  const officialSample = activeOfficialSample(p);
+  const sampleText = sample != null
+    ? ' · oficial ' + (officialSample ?? 'TBD') + ' · stats ' + sample + (effectiveSample != null ? ' · peso ' + effectiveSample : '')
+    : '';
   el.innerHTML =
     '<div>' +
       '<h2>' + p.name + '</h2>' +
       '<div class="player-age">' + p.age + ' a&#241;os</div>' +
+      renderLiveProfile(p) +
     '</div>' +
     renderNextMatch(p) +
     '<div class="tour-ring" style="--pct:' + (tour == null ? '0' : tour.toFixed(1)) + '">' +
       '<div class="tour-ring-inner">' +
         '<div>' +
           '<div class="tour-score">' + (tour == null ? '&#8212;' : tour.toFixed(0)) + '</div>' +
-          '<div class="tour-label">Media circuito · ' + activeSurfaceLabel() + '</div>' +
+          '<div class="tour-label">Nivel circuito · ' + activeSurfaceLabel() + sampleText + '</div>' +
         '</div>' +
       '</div>' +
     '</div>' +
     renderSurfaceSwitcher(p) +
+    renderLevelTrend(p) +
     renderPerformanceMetrics(p) +
     renderIdentityCard(p);
 }}
@@ -1780,7 +2415,7 @@ function renderComparePlayer(p, surface) {{
   return '<div class="compare-player">' +
     '<div class="compare-player-name">' + p.name + '</div>' +
     '<div class="compare-score">' + (pct == null ? '&#8212;' : Math.round(pct)) + '</div>' +
-    '<div class="match-info">Media circuito · ' + activeSurfaceName(surface) + '</div>' +
+    '<div class="match-info">Nivel circuito · ' + activeSurfaceName(surface) + '</div>' +
   '</div>';
 }}
 
@@ -1793,7 +2428,7 @@ function renderMatchComparison(match) {{
   const p1 = findPlayerByMatchName(match.player1);
   const p2 = findPlayerByMatchName(match.player2);
   const stats = [
-    ['tourPct', 'Media circuito'],
+    ['tourPct', 'Nivel circuito'],
     ['totalPtsWon', 'Total Points Won'],
     ['servicePtsWon', 'Service Pts Won'],
     ['returnPtsWon', 'Return Pts Won'],
@@ -1863,6 +2498,11 @@ function refresh() {{
   const filtered = q
     ? ALL_PLAYERS.filter(p => p.name.toLowerCase().includes(q))
     : ALL_PLAYERS;
+  if (q && filtered.length) {{
+    const current = currentPlayer();
+    const currentVisible = current && current.name.toLowerCase().includes(q);
+    if (!currentVisible) activePlayer = sortPlayers(filtered)[0].name;
+  }}
   buildList(sortPlayers(filtered));
   renderPlayerDetail();
   renderSchedule();
@@ -1880,11 +2520,12 @@ window.setPlayerSurface = function(surface) {{
 }};
 
 window.toggleSearch = function() {{
-  const bar = document.getElementById('search-bar');
-  const wasHidden = bar.style.display === 'none';
-  bar.style.display = wasHidden ? 'block' : 'none';
-  if (wasHidden) document.getElementById('search-input').focus();
-  else {{ document.getElementById('search-input').value = ''; refresh(); }}
+  const wrap = document.getElementById('header-search');
+  const input = document.getElementById('search-input');
+  const wasClosed = !wrap.classList.contains('open');
+  wrap.classList.toggle('open', wasClosed);
+  if (wasClosed) input.focus();
+  else {{ input.value = ''; refresh(); }}
 }};
 
 refresh();
@@ -1924,10 +2565,12 @@ def main():
         all_historical_stats = json.load(f)
 
     # Populate module-level regression globals
-    global _REGRESSION_TARGETS, _ALL_STATS, _LEGEND_SIM_BY_AGE
+    global _REGRESSION_TARGETS, _ALL_STATS, _LEGEND_SIM_BY_AGE, _ELO_AGE_REFERENCE
     _ALL_STATS = all_historical_stats
     _REGRESSION_TARGETS = sf.build_regression_targets(all_historical_stats)
     print(f"  Regression targets: {len(_REGRESSION_TARGETS)} historical players")
+    print("Computing age-based Elo references...")
+    _ELO_AGE_REFERENCE = _build_elo_age_reference(use_cache=use_cache)
 
     # Compute legend sim scores by age (for comparison table)
     _LEGEND_SIM_BY_AGE = {}
@@ -1948,6 +2591,9 @@ def main():
     current_year = date.today().year
     years = tuple(range(current_year - years_back, current_year + 1))
     batch_stats = sf.compute_all_players_batch(players, years=years, use_cache=use_cache)
+    trend_years = tuple(range(1991, current_year + 1))
+    print("Computing career-wide level trends...")
+    trend_stats = _trend_only_batch(players, trend_years, use_cache=use_cache)
 
     # 3b. Synthetic 0-GS anchor: average stats of below-average players (sim < 45).
     # Grounds the kernel regression so players unlike any calibration player get pulled to 0.
@@ -1986,7 +2632,13 @@ def main():
         players, range(1991, current_year + 1), use_cache=use_cache
     )
     print(f"  Performance metrics for {len(performance_metrics)} players")
+    print("Computing tournament/opponent quality weights...")
+    effective_counts = _effective_match_counts(players, years, use_cache=use_cache)
     live_schedule = _load_live_schedule()
+    print("Mixing live player profiles...")
+    live_profiles = _live_profiles_for_players(
+        players, range(1991, current_year + 1), live_schedule, use_cache=use_cache
+    )
     schedule_next_matches = _next_matches_from_schedule(live_schedule)
     manual_next_matches = _load_next_matches()
     next_matches = {
@@ -2010,12 +2662,16 @@ def main():
             skipped += 1
             continue
         record = build_player_record(
-            p, stats_by_year, benchmark, gs_wins, elo_ratings, performance_metrics, next_matches
+            p, stats_by_year, benchmark, gs_wins, elo_ratings, performance_metrics,
+            next_matches, effective_counts.get(pid), live_profiles.get(pid),
+            trend_stats.get(pid)
         )
         if record:
             players_data.append(record)
 
     print(f"  {len(players_data)} players with data ({skipped} skipped — no recent matches)")
+
+    _annotate_performance_context(players_data)
 
     # 6b. Tour percentile: rank each player's sim among current players (0-100)
     import bisect
@@ -2038,10 +2694,45 @@ def main():
                 pct_by_surface[surf] = round(idx / len(valid_sims) * 100, 1)
             else:
                 pct_by_surface[surf] = None
-        r["tourPctBySurface"] = pct_by_surface
-        r["tourPct"] = pct_by_surface.get("All")
-
-    _annotate_performance_context(players_data)
+        r["statPctBySurface"] = pct_by_surface
+        level_by_surface = {}
+        level_factors = {}
+        for surf in surface_keys:
+            level, factors = _composite_level(
+                pct_by_surface.get(surf),
+                r.get("rank"),
+                r.get("elo"),
+                r.get("age"),
+                r.get("surfaceSamples") or {},
+                r.get("effectiveSamples") or {},
+                r.get("performanceBySurface") or {},
+                surf,
+            )
+            level_by_surface[surf] = level
+            level_factors[surf] = factors
+        r["tourPctBySurface"] = level_by_surface
+        r["levelFactorsBySurface"] = level_factors
+        for surf, points in (r.get("levelTrendBySurface") or {}).items():
+            valid_sims = valid_sims_by_surface.get(surf) or []
+            for point in points:
+                value = point.get("value")
+                if value is None or not valid_sims:
+                    point["pct"] = None
+                    continue
+                idx = bisect.bisect_left(valid_sims, value)
+                point["pct"] = round(idx / len(valid_sims) * 100, 1)
+            current_pct = level_by_surface.get(surf)
+            current_sample = (r.get("surfaceSamples") or {}).get(surf)
+            current_value = (r.get("simBySurface") or {}).get(surf)
+            if current_pct is not None:
+                points.append({
+                    "year": "Actual",
+                    "value": current_value,
+                    "pct": current_pct,
+                    "matches": current_sample,
+                    "current": True,
+                })
+        r["tourPct"] = level_by_surface.get("All")
 
     # 7. Build legend background datasets
     legend_datasets = []

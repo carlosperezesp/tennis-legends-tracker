@@ -38,16 +38,49 @@ python3 src/legend_trajectory.py --player-name "Carlos Alcaraz" --output-html ex
 
 6. También puedes ver ejemplos integrados de Carlos Alcaraz y Jannik Sinner.
 
-## Actualización diaria de partidos
+## Actualización automática
 
-La pestaña `Partidos` consume `data/live_schedule.json`. Para refrescarla una vez al día:
+El dashboard se puede refrescar entero una vez al día con GitHub Actions. El workflow
+principal es `.github/workflows/update.yml` y hace tres cosas:
+
+- descarga el calendario ATP masculino de hoy y mañana en `data/live_schedule.json`;
+- actualiza perfiles vivos de jugador en `data/player_live_profiles.json`
+  separando record oficial disponible, temporada y muestra con estadísticas;
+- refresca rankings y CSVs de partidos de Jeff Sackmann sin usar caché vieja;
+- regenera `examples/index.html` y commitea los cambios si los hay.
+
+El calendario intenta primero la programación oficial de ATP Tour para los torneos
+configurados, y usa RapidAPI como respaldo. Para activar ese respaldo, añade
+`RAPIDAPI_KEY` como secreto del repo en GitHub:
+
+`Settings → Secrets and variables → Actions → New repository secret`
+
+En local también puedes crear un `.env.local` no versionado con:
+
+```bash
+RAPIDAPI_KEY=tu_clave
+```
+
+Los fetchers lo leen automáticamente.
+
+El workflow está programado para ejecutarse a las 06:00 hora española. GitHub usa
+cron en UTC, así que hay dos disparos (`04:00` y `05:00` UTC) y un guard interno
+que solo deja continuar el run cuando en Madrid son las 06:00.
+
+Actualización manual equivalente:
 
 ```bash
 RAPIDAPI_KEY=tu_clave python3 src/live_schedule_fetcher.py
-python3 src/build_index.py --output examples/index.html
+RAPIDAPI_KEY=tu_clave python3 src/live_profile_fetcher.py --top 200 --no-cache
+python3 src/build_index.py --top 200 --no-cache --output examples/index.html
 ```
 
-Hay un workflow en `.github/workflows/update-live-schedule.yml` preparado para ejecutarlo a las 06:15 hora española en verano, usando el secreto `RAPIDAPI_KEY`.
+Si la API de partidos falla, el fetcher no pisa el calendario bueno con uno vacío:
+el build continúa con el último `data/live_schedule.json` disponible.
+El fetcher de perfiles también funciona sin API: genera una capa derivada desde
+Jeff Sackmann y, cuando hay `RAPIDAPI_KEY`, intenta enriquecerla con proveedores
+RapidAPI. El dashboard usa esa capa para no confundir partidos oficiales
+disponibles con partidos que tienen estadísticas profundas.
 
 ## Qué devuelve
 
