@@ -3,9 +3,10 @@ name: Daily dashboard update
 on:
   schedule:
     # GitHub cron runs in UTC. These two entries cover 06:00 in Spain
-    # in summer time (04:00 UTC) and winter time (05:00 UTC).
-    - cron: '0 4 * * *'
-    - cron: '0 5 * * *'
+    # in summer time (04:17 UTC) and winter time (05:17 UTC).
+    # Avoid minute 0 because GitHub can delay/drop scheduled jobs at peak time.
+    - cron: '17 4 * * *'
+    - cron: '17 5 * * *'
   workflow_dispatch:
 
 concurrency:

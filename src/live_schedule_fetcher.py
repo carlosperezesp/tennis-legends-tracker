@@ -387,7 +387,7 @@ def main() -> int:
 
     schedule = build_schedule(api_key, date.fromisoformat(args.date))
     total_matches = sum(len(day.get("matches", [])) for day in schedule.get("days", []))
-    if total_matches == 0 and schedule.get("errors"):
+    if total_matches == 0:
         print("No matches fetched; keeping existing schedule cache.", file=sys.stderr)
         return 2
 
