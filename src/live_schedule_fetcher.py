@@ -13,11 +13,14 @@ from cron/GitHub Actions/Vercel Cron without changing the frontend.
 from __future__ import annotations
 
 import argparse
+import csv
 import html
 import json
 import os
 import re
 import sys
+import tempfile
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -26,6 +29,7 @@ from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 OUT_PATH = DATA_DIR / "live_schedule.json"
+PLAYERS_CACHE = DATA_DIR / "_csv_cache" / "atp_players.csv"
 
 IMPORTANT_LEVELS = {
     "grand slam", "gs", "olympics", "davis cup", "atp finals",
@@ -120,6 +124,40 @@ def _http_text(url: str) -> str:
         return resp.read().decode("utf-8", errors="replace")
 
 
+def _http_bytes(url: str) -> bytes:
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (compatible; tennis-legends/1.0)",
+        "Accept": "application/pdf,*/*",
+    })
+    with urllib.request.urlopen(req, timeout=18) as resp:
+        return resp.read()
+
+
+def _normalise_lookup(value: str) -> str:
+    value = unicodedata.normalize("NFKD", value)
+    value = "".join(ch for ch in value if not unicodedata.combining(ch))
+    value = re.sub(r"[^a-z0-9]+", " ", value.lower())
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def _known_atp_names() -> set[str]:
+    return set(_known_atp_name_map())
+
+
+def _known_atp_name_map() -> dict[str, str]:
+    if not PLAYERS_CACHE.exists():
+        return {}
+    names = {}
+    with PLAYERS_CACHE.open(newline="", encoding="utf-8") as fh:
+        for row in csv.DictReader(fh):
+            first = (row.get("name_first") or "").strip()
+            last = (row.get("name_last") or "").strip()
+            if first and last:
+                full_name = f"{first} {last}"
+                names[_normalise_lookup(full_name)] = full_name
+    return names
+
+
 def _html_lines(raw: str) -> list[str]:
     raw = re.sub(r"(?is)<script.*?</script>|<style.*?</style>", " ", raw)
     raw = re.sub(r"(?i)<br\s*/?>|</(?:div|li|p|h[1-6]|tr|td|span|a)>", "\n", raw)
@@ -168,6 +206,153 @@ def _player_after(lines: list[str], idx: int) -> str | None:
 def _clean_player_name(name: str) -> str:
     name = re.sub(r"^\((?:\d+|WC|Q|LL|SE|PR|Alt|ALT)\)\s*", "", name).strip()
     return re.sub(r"\s+", " ", name)
+
+
+def _clean_pdf_player_name(name: str) -> str:
+    name = re.sub(r"\[(?:\d+|WC|Q|LL|SE|PR|Alt|ALT)\]\s*", "", name, flags=re.I)
+    name = re.sub(r"\((?:(?:[A-Z]\s*){3}|WC|Q|LL|SE|PR|Alt|ALT)\)", "", name, flags=re.I)
+    name = re.sub(r"\s+", " ", name).strip(" .")
+    parts = name.split()
+    repaired = []
+    idx = 0
+    while idx < len(parts):
+        part = parts[idx]
+        if len(part) == 1 and idx + 1 < len(parts) and parts[idx + 1].islower():
+            repaired.append(part + parts[idx + 1])
+            idx += 2
+            continue
+        if idx + 1 < len(parts) and part.isupper() and len(part) > 2 and len(parts[idx + 1]) == 1 and parts[idx + 1].isupper():
+            repaired.append(part + parts[idx + 1])
+            idx += 2
+            continue
+        repaired.append(part)
+        idx += 1
+    return " ".join(token.capitalize() if token.isupper() else token for token in repaired)
+
+
+def _extract_pdf_text(raw: bytes) -> str:
+    try:
+        from pypdf import PdfReader
+    except ImportError as exc:
+        raise RuntimeError("pypdf is required to read ProTennisLive order-of-play PDFs") from exc
+
+    with tempfile.NamedTemporaryFile(suffix=".pdf") as tmp:
+        tmp.write(raw)
+        tmp.flush()
+        reader = PdfReader(tmp.name)
+        return "\n".join(page.extract_text() or "" for page in reader.pages)
+
+
+def _pdf_order_date(text: str) -> date | None:
+    match = re.search(
+        r"ORDER OF PLAY\s*-\s*[A-Z]+,\s+([A-Z]+)\s+(\d{1,2}),\s+(\d{4})",
+        text,
+        flags=re.I,
+    )
+    if not match:
+        return None
+    month_name, day_num, year_num = match.groups()
+    months = {
+        "january": 1, "february": 2, "march": 3, "april": 4,
+        "may": 5, "june": 6, "july": 7, "august": 8,
+        "september": 9, "october": 10, "november": 11, "december": 12,
+    }
+    month = months.get(month_name.lower())
+    if not month:
+        return None
+    return date(int(year_num), month, int(day_num))
+
+
+def _pdf_order_lines(text: str) -> list[str]:
+    raw_lines = []
+    for line in text.splitlines():
+        line = re.sub(r"(?<=[\w)])vs(?=\w|\[)", "\nvs\n", line)
+        line = re.sub(r"\s+", " ", line)
+        raw_lines.extend(part.strip() for part in line.splitlines())
+    return [line for line in raw_lines if line]
+
+
+def _repair_known_pdf_name(name: str, known_map: dict[str, str]) -> str:
+    norm = _normalise_lookup(name)
+    if norm in known_map:
+        return known_map[norm]
+
+    tokens = name.split()
+    for idx in range(len(tokens) - 1):
+        candidate = " ".join(tokens[:idx] + [tokens[idx] + tokens[idx + 1]] + tokens[idx + 2:])
+        norm_candidate = _normalise_lookup(candidate)
+        if norm_candidate in known_map:
+            return known_map[norm_candidate]
+    return name
+
+
+def _atp_order_pdf_schedule(event: dict, day: date) -> list[dict]:
+    url = f"https://www.protennislive.com/posting/{day.year}/{event['tournament_id']}/op.pdf"
+    text = _extract_pdf_text(_http_bytes(url))
+    if _pdf_order_date(text) != day:
+        return []
+
+    known_map = _known_atp_name_map()
+    known_names = set(known_map)
+    lines = _pdf_order_lines(text)
+    rows = []
+    seen = set()
+    current_time = "TBD"
+
+    def add_match(p1: str, p2: str) -> None:
+        p1_clean = _clean_pdf_player_name(p1)
+        p2_clean = _clean_pdf_player_name(p2)
+        if known_map:
+            p1_clean = _repair_known_pdf_name(p1_clean, known_map)
+            p2_clean = _repair_known_pdf_name(p2_clean, known_map)
+        if not p1_clean or not p2_clean or p1_clean == p2_clean:
+            return
+        if known_names and (
+            _normalise_lookup(p1_clean) not in known_names
+            or _normalise_lookup(p2_clean) not in known_names
+        ):
+            return
+        key_tuple = (p1_clean, p2_clean, current_time)
+        if key_tuple in seen:
+            return
+        seen.add(key_tuple)
+        rows.append({
+            "time": current_time,
+            "player1": p1_clean,
+            "player2": p2_clean,
+            "tournament": event["name"],
+            "level": event["level"],
+            "round": event.get("round", "TBD"),
+            "surface": event["surface"],
+            "status": "scheduled",
+            "provider": "ProTennisLive",
+            "sourceUrl": url,
+        })
+
+    for idx, line in enumerate(lines):
+        starts = re.search(r"Starts At\s+(\d{1,2}:\d{2})", line, flags=re.I)
+        if starts:
+            current_time = starts.group(1)
+            continue
+        not_before = re.search(r"Not Before\s+(\d{1,2}:\d{2})", line, flags=re.I)
+        if not_before:
+            current_time = not_before.group(1)
+            continue
+        if line.lower() == "followed by":
+            current_time = "TBD"
+            continue
+        if re.fullmatch(r"\d+\.", line):
+            continue
+
+        compact = re.sub(r"\s+", " ", line)
+        if re.search(r"vs", compact, flags=re.I) and compact.lower() != "vs":
+            left, right = re.split(r"vs", compact, 1, flags=re.I)
+            add_match(left, right)
+            continue
+        if compact.lower() == "vs" and 0 < idx < len(lines) - 1:
+            add_match(lines[idx - 1], lines[idx + 1])
+
+    return rows
 
 
 def _atp_daily_schedule(event: dict, day: date) -> list[dict]:
@@ -244,6 +429,11 @@ def fetch_atp_official_day(day: date) -> tuple[list[dict], list[str]]:
             rows.extend(_atp_daily_schedule(event, day))
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError) as exc:
             errors.append(f"ATP Tour {event['slug']} {day.isoformat()}: {exc}")
+        if not rows:
+            try:
+                rows.extend(_atp_order_pdf_schedule(event, day))
+            except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError, RuntimeError) as exc:
+                errors.append(f"ProTennisLive {event['slug']} {day.isoformat()}: {exc}")
     return rows, errors
 
 
@@ -389,6 +579,8 @@ def main() -> int:
     total_matches = sum(len(day.get("matches", [])) for day in schedule.get("days", []))
     if total_matches == 0:
         print("No matches fetched; keeping existing schedule cache.", file=sys.stderr)
+        for error in schedule.get("errors", []):
+            print(f"  - {error}", file=sys.stderr)
         return 2
 
     out = Path(args.output)

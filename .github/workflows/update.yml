@@ -44,6 +44,10 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install schedule parser dependencies
+        if: steps.madrid-time.outputs.run == 'true'
+        run: python3 -m pip install pypdf
+
       - name: Fetch live schedule
         if: steps.madrid-time.outputs.run == 'true'
         env:
