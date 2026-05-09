@@ -79,12 +79,40 @@ ELO_REFERENCE_GROUPS = {
     "slam_winners": {
         "label": "Campeones GS recientes",
         "players": [
-            "Gaston Gaudio", "Marat Safin", "Juan Martin del Potro",
-            "Andy Murray", "Stan Wawrinka", "Marin Cilic",
-            "Dominic Thiem", "Daniil Medvedev",
+            "Juan Carlos Ferrero", "Gaston Gaudio", "Marat Safin",
+            "Juan Martin del Potro", "Andy Murray", "Stan Wawrinka",
+            "Marin Cilic", "Dominic Thiem", "Daniil Medvedev",
         ],
     },
 }
+
+LEGEND_PROFILE_GROUPS = [
+    {
+        "name": "Perfil Big 3",
+        "button": "Big 3",
+        "group": "Arquetipo",
+        "players": ["Novak Djokovic", "Rafael Nadal", "Roger Federer"],
+        "gs": 66,
+    },
+    {
+        "name": "Perfil Sampras/Agassi",
+        "button": "Samprassi",
+        "group": "Arquetipo",
+        "players": ["Pete Sampras", "Andre Agassi"],
+        "gs": 22,
+    },
+    {
+        "name": "Perfil campeones 1-3 GS",
+        "button": "1-3 GS",
+        "group": "Arquetipo",
+        "players": [
+            "Juan Carlos Ferrero", "Gaston Gaudio", "Marat Safin",
+            "Juan Martin del Potro", "Andy Murray", "Stan Wawrinka",
+            "Marin Cilic", "Dominic Thiem", "Daniil Medvedev",
+        ],
+        "gs": 15,
+    },
+]
 
 LEGEND_COMPARISON_NAMES = [
     "Novak Djokovic",
@@ -92,6 +120,15 @@ LEGEND_COMPARISON_NAMES = [
     "Roger Federer",
     "Pete Sampras",
     "Andre Agassi",
+    "Juan Carlos Ferrero",
+    "Gaston Gaudio",
+    "Marat Safin",
+    "Juan Martin del Potro",
+    "Andy Murray",
+    "Stan Wawrinka",
+    "Marin Cilic",
+    "Dominic Thiem",
+    "Daniil Medvedev",
 ]
 
 LEGEND_TOTAL_GS = {
@@ -100,6 +137,15 @@ LEGEND_TOTAL_GS = {
     "Roger Federer": 20,
     "Pete Sampras": 14,
     "Andre Agassi": 8,
+    "Juan Carlos Ferrero": 1,
+    "Gaston Gaudio": 1,
+    "Marat Safin": 2,
+    "Juan Martin del Potro": 1,
+    "Andy Murray": 3,
+    "Stan Wawrinka": 3,
+    "Marin Cilic": 1,
+    "Dominic Thiem": 1,
+    "Daniil Medvedev": 1,
 }
 
 
@@ -1455,7 +1501,9 @@ def _legend_elo_history(names: list[str], use_cache: bool = True) -> dict:
 def _legend_group(name: str) -> str:
     if name in {"Novak Djokovic", "Rafael Nadal", "Roger Federer"}:
         return "Big 3"
-    return "Sampras/Agassi"
+    if name in {"Pete Sampras", "Andre Agassi"}:
+        return "Sampras/Agassi"
+    return "Campeones 1-3 GS"
 
 
 def _legend_elo_level_score(elo) -> float | None:
@@ -1463,6 +1511,62 @@ def _legend_elo_level_score(elo) -> float | None:
         return None
     # Historical peak Elo needs more headroom than current top-200 Elo.
     return round(_clamp(60 + (float(elo) - 1800) / 600 * 40), 1)
+
+
+def _aggregate_legend_profile(group: dict, individual_legends: list[dict], active_top: list[dict]) -> dict | None:
+    by_name = {legend["name"]: legend for legend in individual_legends}
+    sources = [by_name[name] for name in group["players"] if name in by_name]
+    if not sources:
+        return None
+
+    by_age = {}
+    for source in sources:
+        for point in source.get("yearly", []):
+            age = point.get("age")
+            if age is None:
+                continue
+            by_age.setdefault(age, []).append(point)
+
+    yearly = []
+    for age in sorted(by_age):
+        points = by_age[age]
+        levels = [p["level"] for p in points if p.get("level") is not None]
+        if not levels:
+            continue
+        yearly.append({
+            "year": min(p.get("year") for p in points if p.get("year") is not None),
+            "age": age,
+            "level": round(sum(levels) / len(levels), 1),
+            "statPct": _avg([p.get("statPct") for p in points]),
+            "sim": _avg([p.get("sim") for p in points]),
+            "elo": round(_avg([p.get("elo") for p in points]) or 0) or None,
+            "matches": round(sum((p.get("matches") or 0) for p in points) / len(points), 0),
+            "sample": len(points),
+        })
+    if not yearly:
+        return None
+    peak = max(yearly, key=lambda row: row["level"])
+    latest = yearly[-1]
+    ahead = sum(1 for p in active_top if p["level"] is not None and p["level"] > peak["level"])
+    return {
+        "name": group["name"],
+        "button": group["button"],
+        "group": group["group"],
+        "gs": group.get("gs"),
+        "peak": peak,
+        "latest": latest,
+        "yearly": yearly,
+        "rankVsActive": ahead + 1,
+        "type": "profile",
+        "members": group["players"],
+    }
+
+
+def _avg(values: list) -> float | None:
+    nums = [float(v) for v in values if v is not None]
+    if not nums:
+        return None
+    return round(sum(nums) / len(nums), 1)
 
 
 def _build_legend_comparison(all_historical_stats: dict, benchmark: dict,
@@ -1526,16 +1630,25 @@ def _build_legend_comparison(all_historical_stats: dict, benchmark: dict,
         ahead = sum(1 for p in active_top if p["level"] is not None and p["level"] > peak["level"])
         legends.append({
             "name": name,
+            "button": name.split(" ")[-1],
             "group": _legend_group(name),
             "gs": LEGEND_TOTAL_GS.get(name),
             "peak": peak,
             "latest": latest,
             "yearly": yearly,
             "rankVsActive": ahead + 1,
+            "type": "player",
         })
     legends.sort(key=lambda row: row["peak"]["level"], reverse=True)
+    profiles = [
+        profile for profile in (
+            _aggregate_legend_profile(group, legends, active_top)
+            for group in LEGEND_PROFILE_GROUPS
+        )
+        if profile
+    ]
     return {
-        "legends": legends,
+        "legends": profiles + legends,
         "activeTop": active_top,
     }
 
@@ -2722,7 +2835,7 @@ function renderLegendComparator(legends) {{
   if (!activeLegend && legends.length) activeLegend = legends[0].name;
   const legend = legends.find(l => l.name === activeLegend) || legends[0];
   const buttons = legends.map(l =>
-    '<button class="' + (l.name === legend.name ? 'active' : '') + '" onclick="setActiveLegend(\\'' + l.name.replace(/'/g, "\\\\'") + '\\')">' + l.name.split(' ').slice(-1)[0] + '</button>'
+    '<button class="' + (l.name === legend.name ? 'active' : '') + '" onclick="setActiveLegend(\\'' + l.name.replace(/'/g, "\\\\'") + '\\')">' + (l.button || l.name.split(' ').slice(-1)[0]) + '</button>'
   ).join('');
   return '<section class="legend-comparator">' +
     '<div class="legend-comparator-head">' +
@@ -2743,10 +2856,11 @@ function renderLegends() {{
     const latest = l.latest || {{}};
     const drift = latest.level != null && peak.level != null ? latest.level - peak.level : null;
     const driftText = drift == null ? '' : ' · final ' + Math.round(latest.level) + ' (' + (drift >= 0 ? '+' : '') + drift.toFixed(0) + ')';
+    const memberText = l.type === 'profile' && l.members?.length ? ' · ' + l.members.length + ' jugadores' : '';
     return '<div class="legend-row">' +
       '<div>' +
         '<div class="legend-name">' + l.name + '</div>' +
-        '<div class="legend-meta">' + l.group + ' · ' + l.gs + ' GS · pico ' + peak.year + ' · ' + peak.age + ' años · Elo ' + (peak.elo || '&#8212;') + driftText + '</div>' +
+        '<div class="legend-meta">' + l.group + memberText + ' · ' + l.gs + ' GS · pico ' + peak.year + ' · ' + peak.age + ' años · Elo ' + (peak.elo || '&#8212;') + driftText + '</div>' +
       '</div>' +
       '<div class="legend-score">' + Math.round(peak.level || 0) + '</div>' +
       '<div class="legend-rank">#' + l.rankVsActive + '<br>vs activos</div>' +
