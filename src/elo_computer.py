@@ -8,8 +8,12 @@ a player's current strength. Only reports players with >= MIN_MATCHES.
 
 import csv
 from pathlib import Path
+import sys
 
 CACHE_DIR = Path(__file__).resolve().parents[1] / "data" / "_csv_cache"
+SRC_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SRC_DIR))
+import live_results_overlay as lro
 
 # K-factor by tournament level (higher = more volatile)
 K_FACTORS = {
@@ -36,9 +40,11 @@ def compute_elo_ratings() -> dict[int, dict]:
     n_matches: dict[int, int] = {}
 
     for path in csv_files:
+        year = _year_from_path(path)
         try:
             with open(path, encoding="utf-8", newline="") as fh:
-                for row in csv.DictReader(fh):
+                rows = lro.merge_overlay_rows(list(csv.DictReader(fh)), year)
+                for row in rows:
                     wid = _int(row.get("winner_id"))
                     lid = _int(row.get("loser_id"))
                     if wid is None or lid is None:
@@ -78,9 +84,11 @@ def compute_elo_ratings_by_surface() -> dict[str, dict[int, dict]]:
     n_matches: dict[str, dict[int, int]] = {surface: {} for surface in surfaces}
 
     for path in csv_files:
+        year = _year_from_path(path)
         try:
             with open(path, encoding="utf-8", newline="") as fh:
-                for row in csv.DictReader(fh):
+                rows = lro.merge_overlay_rows(list(csv.DictReader(fh)), year)
+                for row in rows:
                     wid = _int(row.get("winner_id"))
                     lid = _int(row.get("loser_id"))
                     if wid is None or lid is None:
@@ -120,4 +128,11 @@ def _int(v):
     try:
         return int(v)
     except (TypeError, ValueError):
+        return None
+
+
+def _year_from_path(path: Path):
+    try:
+        return int(path.stem.split("_")[-1])
+    except (ValueError, IndexError):
         return None

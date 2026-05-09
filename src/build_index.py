@@ -15,6 +15,7 @@ GS trajectory, profile stats, and projections vs the legend benchmark.
 from __future__ import annotations
 
 import argparse
+import bisect
 import csv
 import json
 import math
@@ -83,6 +84,22 @@ ELO_REFERENCE_GROUPS = {
             "Dominic Thiem", "Daniil Medvedev",
         ],
     },
+}
+
+LEGEND_COMPARISON_NAMES = [
+    "Novak Djokovic",
+    "Rafael Nadal",
+    "Roger Federer",
+    "Pete Sampras",
+    "Andre Agassi",
+]
+
+LEGEND_TOTAL_GS = {
+    "Novak Djokovic": 24,
+    "Rafael Nadal": 22,
+    "Roger Federer": 20,
+    "Pete Sampras": 14,
+    "Andre Agassi": 8,
 }
 
 
@@ -1396,6 +1413,133 @@ def _load_live_schedule() -> dict:
         return {"asOf": date.today().isoformat(), "days": []}
 
 
+def _legend_elo_history(names: list[str], use_cache: bool = True) -> dict:
+    lookup = _load_player_id_lookup(use_cache)
+    ids = {
+        lookup[name]["id"]: name
+        for name in names
+        if lookup.get(name, {}).get("id")
+    }
+    elo = {}
+    counts = {}
+    history = {name: {} for name in names}
+    for path in sorted((DATA_DIR / "_csv_cache").glob("atp_matches_*.csv")):
+        try:
+            year = int(path.stem.split("_")[-1])
+        except ValueError:
+            continue
+        try:
+            with open(path, encoding="utf-8", newline="") as fh:
+                for row in csv.DictReader(fh):
+                    wid = _safe_int(row.get("winner_id"), None)
+                    lid = _safe_int(row.get("loser_id"), None)
+                    if wid is None or lid is None:
+                        continue
+                    k = ec.K_FACTORS.get((row.get("tourney_level") or "").strip(), ec.DEFAULT_K)
+                    ra = elo.get(wid, ec.INITIAL_ELO)
+                    rb = elo.get(lid, ec.INITIAL_ELO)
+                    ea = 1.0 / (1.0 + 10 ** ((rb - ra) / 400.0))
+                    elo[wid] = ra + k * (1.0 - ea)
+                    elo[lid] = rb + k * (0.0 - (1.0 - ea))
+                    counts[wid] = counts.get(wid, 0) + 1
+                    counts[lid] = counts.get(lid, 0) + 1
+        except OSError:
+            continue
+
+        for pid, name in ids.items():
+            if counts.get(pid, 0) >= 20 and pid in elo:
+                history[name][year] = round(elo[pid], 0)
+    return history
+
+
+def _legend_group(name: str) -> str:
+    if name in {"Novak Djokovic", "Rafael Nadal", "Roger Federer"}:
+        return "Big 3"
+    return "Sampras/Agassi"
+
+
+def _legend_elo_level_score(elo) -> float | None:
+    if elo is None:
+        return None
+    # Historical peak Elo needs more headroom than current top-200 Elo.
+    return round(_clamp(60 + (float(elo) - 1800) / 600 * 40), 1)
+
+
+def _build_legend_comparison(all_historical_stats: dict, benchmark: dict,
+                             players_data: list, valid_sims: list[float],
+                             use_cache: bool = True) -> dict:
+    lookup = _load_player_id_lookup(use_cache)
+    elo_history = _legend_elo_history(LEGEND_COMPARISON_NAMES, use_cache)
+    active_top = sorted(
+        [
+            {
+                "name": p["name"],
+                "rank": p.get("rank"),
+                "age": p.get("age"),
+                "level": (p.get("tourPctBySurface") or {}).get("All") or p.get("tourPct"),
+            }
+            for p in players_data
+            if ((p.get("tourPctBySurface") or {}).get("All") or p.get("tourPct")) is not None
+        ],
+        key=lambda row: row["level"],
+        reverse=True,
+    )[:8]
+
+    legends = []
+    for name in LEGEND_COMPARISON_NAMES:
+        born = sf.PLAYERS.get(name, {}).get("born") or lookup.get(name, {}).get("born")
+        year_data = all_historical_stats.get(name, {})
+        yearly = []
+        for year_key, surfaces in sorted(year_data.items(), key=lambda item: int(item[0])):
+            year = int(year_key)
+            stats = (surfaces or {}).get("All") or {}
+            sim = sf.compute_profile_similarity(stats, benchmark)
+            if sim is None:
+                continue
+            age = stats.get("age") or (_age_at(born, year) if born else None)
+            elo = (elo_history.get(name) or {}).get(year)
+            stat_pct = None
+            if valid_sims:
+                stat_pct = round(bisect.bisect_right(valid_sims, sim) / len(valid_sims) * 100, 1)
+            elo_score = _legend_elo_level_score(elo)
+            volume_score = round(_clamp(math.sqrt((stats.get("matches") or 0) / 70) * 100), 1)
+            level = _blend_available([
+                (stat_pct, 0.50),
+                (elo_score, 0.35),
+                (volume_score, 0.15),
+            ])
+            if level is None:
+                continue
+            yearly.append({
+                "year": year,
+                "age": age,
+                "level": round(level, 1),
+                "statPct": stat_pct,
+                "sim": round(sim, 1),
+                "elo": int(elo) if elo is not None else None,
+                "matches": stats.get("matches") or 0,
+            })
+        if not yearly:
+            continue
+        peak = max(yearly, key=lambda row: row["level"])
+        latest = yearly[-1]
+        ahead = sum(1 for p in active_top if p["level"] is not None and p["level"] > peak["level"])
+        legends.append({
+            "name": name,
+            "group": _legend_group(name),
+            "gs": LEGEND_TOTAL_GS.get(name),
+            "peak": peak,
+            "latest": latest,
+            "yearly": yearly,
+            "rankVsActive": ahead + 1,
+        })
+    legends.sort(key=lambda row: row["peak"]["level"], reverse=True)
+    return {
+        "legends": legends,
+        "activeTop": active_top,
+    }
+
+
 def _next_matches_from_schedule(live_schedule: dict) -> dict:
     result = {}
     for day in live_schedule.get("days", []):
@@ -1418,9 +1562,11 @@ def _next_matches_from_schedule(live_schedule: dict) -> dict:
     return result
 
 
-def render_index(players_data: list, legend_datasets: list, recent_matches: list, live_schedule: dict) -> str:
+def render_index(players_data: list, legend_datasets: list, recent_matches: list,
+                 live_schedule: dict, legend_comparison: dict) -> str:
     players_json = json.dumps(players_data, ensure_ascii=False)
     live_schedule_json = json.dumps(live_schedule, ensure_ascii=False)
+    legend_comparison_json = json.dumps(legend_comparison, ensure_ascii=False)
 
     return f"""<!DOCTYPE html>
 <html class="light" lang="es">
@@ -1453,8 +1599,8 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       width: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
       overscroll-behavior-x: contain;
     }}
-    .tabs-track {{ display: flex; width: 300%; align-items: flex-start; }}
-    .tab-panel {{ width: 33.333333%; min-width: 33.333333%; scroll-snap-align: start; }}
+    .tabs-track {{ display: flex; width: 400%; align-items: flex-start; }}
+    .tab-panel {{ width: 25%; min-width: 25%; scroll-snap-align: start; }}
     .tab-panel.app-shell {{ max-width: none; margin: 0; }}
     .tab-panel.app-shell > * {{ max-width: 1200px; margin-left: auto; margin-right: auto; }}
     .app-shell {{ max-width: 1200px; margin: 0 auto; padding: 0 24px 48px; }}
@@ -1791,6 +1937,81 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
     .compare-val {{ font-family: 'JetBrains Mono', monospace; font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }}
     .compare-val.win {{ color: var(--olive); font-weight: 700; }}
     .empty-schedule {{ padding: 18px; color: var(--cloud-dark); font-size: 14px; }}
+    .legends-page {{ padding-top: 48px; padding-bottom: 48px; }}
+    .legends-hero {{
+      display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: end;
+      padding: 24px 0 28px; border-bottom: 1px solid var(--slate-dark);
+    }}
+    .legends-hero h2 {{
+      margin: 0; font-family: 'Lora', serif; font-size: clamp(44px, 7vw, 84px);
+      line-height: 1; font-weight: 400; letter-spacing: 0;
+    }}
+    .legends-grid {{ display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.7fr); gap: 16px; padding-top: 18px; }}
+    .legend-card, .active-benchmark {{
+      background: var(--ivory-medium); border: 1px solid var(--slate-dark);
+    }}
+    .legend-row {{
+      display: grid; grid-template-columns: minmax(0, 1fr) 72px 76px;
+      gap: 12px; align-items: center; padding: 16px 18px; border-top: 1px solid var(--cloud-light);
+    }}
+    .legend-row:first-child {{ border-top: 0; }}
+    .legend-name {{ font-weight: 700; font-size: 18px; }}
+    .legend-meta {{
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cloud-dark);
+      text-transform: uppercase; margin-top: 5px;
+    }}
+    .legend-score {{ font-family: 'Lora', serif; font-size: 34px; text-align: right; line-height: 1; }}
+    .legend-rank {{
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; text-align: right;
+      color: var(--cloud-dark); text-transform: uppercase;
+    }}
+    .legend-spark {{ grid-column: 1 / -1; height: 54px; margin-top: 8px; }}
+    .legend-spark svg {{ width: 100%; height: 54px; display: block; overflow: visible; }}
+    .legend-spark-line {{ fill: none; stroke: var(--slate-dark); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }}
+    .legend-spark-area {{ fill: rgba(20,20,19,0.07); }}
+    .legend-spark-dot {{ fill: var(--slate-dark); }}
+    .active-benchmark h3 {{
+      margin: 0; padding: 16px 18px; border-bottom: 1px solid var(--slate-dark);
+      font-size: 20px;
+    }}
+    .active-benchmark-row {{
+      display: grid; grid-template-columns: 28px minmax(0, 1fr) 44px;
+      gap: 10px; padding: 12px 18px; border-top: 1px solid var(--cloud-light); align-items: center;
+    }}
+    .active-benchmark-row:first-of-type {{ border-top: 0; }}
+    .active-benchmark-rank {{ font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cloud-dark); }}
+    .active-benchmark-name {{ font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+    .active-benchmark-score {{ font-family: 'Lora', serif; font-size: 24px; text-align: right; }}
+    .legend-comparator {{
+      grid-column: 1 / -1; background: var(--ivory-medium); border: 1px solid var(--slate-dark);
+      padding: 18px 18px 22px; display: grid; gap: 18px;
+    }}
+    .legend-comparator-head {{
+      display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap;
+    }}
+    .legend-comparator h3 {{ margin: 0; font-size: 22px; }}
+    .legend-picker {{ display: flex; flex-wrap: wrap; gap: 8px; }}
+    .legend-picker button {{
+      border: 1px solid var(--slate-dark); background: transparent; color: var(--slate-dark);
+      padding: 8px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      text-transform: uppercase; cursor: pointer;
+    }}
+    .legend-picker button.active {{ background: var(--slate-dark); color: var(--ivory-light); }}
+    .legend-compare-chart {{ width: 100%; height: 300px; }}
+    .legend-compare-chart svg {{ width: 100%; height: 300px; display: block; overflow: visible; }}
+    .legend-axis {{ stroke: var(--cloud-light); stroke-width: 1; }}
+    .legend-band {{ fill: rgba(20,20,19,0.06); }}
+    .legend-line {{ fill: none; stroke: var(--slate-dark); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }}
+    .player-line {{ fill: none; stroke: var(--clay); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }}
+    .legend-dot {{ fill: var(--slate-dark); }}
+    .player-dot {{ fill: var(--clay); }}
+    .legend-compare-legend {{
+      display: grid; gap: 12px; font-family: 'JetBrains Mono', monospace;
+      font-size: 18px; color: var(--cloud-dark); text-transform: uppercase;
+    }}
+    .legend-key {{ display: inline-flex; gap: 12px; align-items: center; }}
+    .legend-key::before {{ content: ""; width: 36px; height: 4px; background: var(--slate-dark); display: inline-block; flex: 0 0 auto; }}
+    .legend-key.player::before {{ background: var(--clay); }}
     @media (max-width: 720px) {{
       .app-shell {{ padding: 0 12px 32px; }}
       .topbar {{ padding: 0 16px; }}
@@ -1824,6 +2045,15 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       .match-level {{ grid-column: 2; justify-self: start; }}
       .compare-row {{ grid-template-columns: minmax(0, 1fr) 56px 56px; }}
       .compare-score {{ font-size: 24px; }}
+      .legends-page {{ padding-top: 28px; }}
+      .legends-hero {{ grid-template-columns: 1fr; }}
+      .legends-grid {{ grid-template-columns: 1fr; }}
+      .legend-row {{ grid-template-columns: minmax(0, 1fr) 58px 62px; padding: 14px; }}
+      .legend-score {{ font-size: 28px; }}
+      .legend-comparator {{ padding: 14px; }}
+      .legend-compare-chart, .legend-compare-chart svg {{ height: 230px; }}
+      .legend-compare-legend {{ font-size: 13px; gap: 8px; }}
+      .legend-key::before {{ width: 26px; }}
     }}
   </style>
 </head>
@@ -1880,12 +2110,24 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
         </section>
         <section id="schedule-days" class="schedule-days"></section>
       </main>
+
+      <main id="legends-tab" class="tab-panel app-shell legends-page">
+        <section class="legends-hero">
+          <h2>Leyendas</h2>
+          <div class="schedule-meta">
+            <div>Control de nivel</div>
+            <div>pico historico vs activos</div>
+          </div>
+        </section>
+        <section id="legends-view" class="legends-grid"></section>
+      </main>
     </div>
   </div>
 
   <script>
 const ALL_PLAYERS = {players_json};
 const LIVE_SCHEDULE = {live_schedule_json};
+const LEGEND_COMPARISON = {legend_comparison_json};
 const SURFACES = [
   {{ key: 'All', label: 'Global' }},
   {{ key: 'Hard', label: 'R&aacute;pida' }},
@@ -1893,7 +2135,7 @@ const SURFACES = [
   {{ key: 'Grass', label: 'Hierba' }},
 ];
 
-let sortKey = 'rank', sortDir = 1, activePlayer = null, activeSurface = 'All';
+let sortKey = 'rank', sortDir = 1, activePlayer = null, activeSurface = 'All', activeLegend = null;
 
 function getQ() {{
   return (document.getElementById('search-input')?.value || '').toLowerCase().trim();
@@ -2382,6 +2624,148 @@ function renderSchedule() {{
   }}).join('');
 }}
 
+function sparkline(points) {{
+  const usable = (points || []).filter(p => p.level != null);
+  if (!usable.length) return '';
+  const w = 320, h = 54, pad = 5;
+  const minY = Math.max(0, Math.min(...usable.map(p => p.level)) - 6);
+  const maxY = Math.min(100, Math.max(...usable.map(p => p.level)) + 4);
+  const spanY = Math.max(1, maxY - minY);
+  const xFor = idx => usable.length === 1 ? w / 2 : pad + idx * ((w - pad * 2) / (usable.length - 1));
+  const yFor = value => h - pad - ((value - minY) / spanY) * (h - pad * 2);
+  const coords = usable.map((p, idx) => [xFor(idx), yFor(p.level)]);
+  const line = coords.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  const area = 'M ' + coords[0][0].toFixed(1) + ' ' + (h - pad) + ' L ' +
+    coords.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L ') +
+    ' L ' + coords[coords.length - 1][0].toFixed(1) + ' ' + (h - pad) + ' Z';
+  const peakIndex = usable.reduce((best, p, idx) => p.level > usable[best].level ? idx : best, 0);
+  const peak = coords[peakIndex];
+  return '<div class="legend-spark">' +
+    '<svg viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true">' +
+      '<path class="legend-spark-area" d="' + area + '"></path>' +
+      '<polyline class="legend-spark-line" points="' + line + '"></polyline>' +
+      '<circle class="legend-spark-dot" cx="' + peak[0].toFixed(1) + '" cy="' + peak[1].toFixed(1) + '" r="3.5"></circle>' +
+    '</svg>' +
+  '</div>';
+}}
+
+function activePlayerLegendSeries(p) {{
+  const byAge = new Map();
+  ((p?.levelTrendBySurface || {{}}).All || [])
+    .filter(d => d && (d.pct != null || d.value != null))
+    .forEach(d => {{
+      const age = d.year === 'Actual' ? p.age : (p.age - ((p.latestYear || new Date().getFullYear()) - d.year));
+      const level = d.pct != null ? d.pct : d.value;
+      if (!Number.isFinite(age) || !Number.isFinite(level)) return;
+      const existing = byAge.get(age);
+      if (!existing || d.current || (!existing.current && String(d.year) > String(existing.year))) {{
+        byAge.set(age, {{ age, level, year: d.year, current: !!d.current }});
+      }}
+    }});
+  return Array.from(byAge.values()).sort((a, b) => a.age - b.age);
+}}
+
+function compareLegendChart(legend, player) {{
+  const legendSeries = (legend?.yearly || []).filter(d => d.age != null && d.level != null);
+  const playerSeries = activePlayerLegendSeries(player);
+  if (!legendSeries.length || !playerSeries.length) {{
+    return '<div class="empty-schedule">Sin histórico suficiente para comparar.</div>';
+  }}
+  const all = legendSeries.concat(playerSeries);
+  const w = 720, h = 300, left = 36, right = 18, top = 24, bottom = 42;
+  const minAge = Math.min(...all.map(d => d.age));
+  const maxAge = Math.max(...all.map(d => d.age));
+  const minLevel = Math.max(0, Math.min(...all.map(d => d.level)) - 8);
+  const maxLevel = Math.min(100, Math.max(...all.map(d => d.level)) + 4);
+  const ageSpan = Math.max(1, maxAge - minAge);
+  const levelSpan = Math.max(1, maxLevel - minLevel);
+  const xFor = age => left + ((age - minAge) / ageSpan) * (w - left - right);
+  const yFor = level => h - bottom - ((level - minLevel) / levelSpan) * (h - top - bottom);
+  const lineFor = series => series.map(d => xFor(d.age).toFixed(1) + ',' + yFor(d.level).toFixed(1)).join(' ');
+  const areaFor = series => {{
+    const coords = series.map(d => [xFor(d.age), yFor(d.level)]);
+    return 'M ' + coords[0][0].toFixed(1) + ' ' + (h - bottom) + ' L ' +
+      coords.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L ') +
+      ' L ' + coords[coords.length - 1][0].toFixed(1) + ' ' + (h - bottom) + ' Z';
+  }};
+  const dotsFor = (series, cls) => series.map(d =>
+    '<circle class="' + cls + '" cx="' + xFor(d.age).toFixed(1) + '" cy="' + yFor(d.level).toFixed(1) + '" r="' + (d.current ? 4.5 : 3) + '"></circle>'
+  ).join('');
+  const legendPeak = legendSeries.reduce((best, d) => d.level > best.level ? d : best, legendSeries[0]);
+  const playerLatest = playerSeries[playerSeries.length - 1];
+  const playerName = player?.name || 'Jugador';
+  return '<div class="legend-compare-chart">' +
+    '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="Comparador de nivel por edad">' +
+      '<path class="legend-band" d="' + areaFor(legendSeries) + '"></path>' +
+      '<line class="legend-axis" x1="' + left + '" y1="' + yFor(50).toFixed(1) + '" x2="' + (w - right) + '" y2="' + yFor(50).toFixed(1) + '"></line>' +
+      '<line class="legend-axis" x1="' + left + '" y1="' + (h - bottom) + '" x2="' + (w - right) + '" y2="' + (h - bottom) + '"></line>' +
+      '<polyline class="legend-line" points="' + lineFor(legendSeries) + '"></polyline>' +
+      '<polyline class="player-line" points="' + lineFor(playerSeries) + '"></polyline>' +
+      dotsFor(legendSeries, 'legend-dot') +
+      dotsFor(playerSeries, 'player-dot') +
+      '<circle class="legend-dot" cx="' + xFor(legendPeak.age).toFixed(1) + '" cy="' + yFor(legendPeak.level).toFixed(1) + '" r="6"></circle>' +
+      '<circle class="player-dot" cx="' + xFor(playerLatest.age).toFixed(1) + '" cy="' + yFor(playerLatest.level).toFixed(1) + '" r="6"></circle>' +
+      '<text x="' + left + '" y="' + (h - 12) + '" font-size="11" fill="#87867f" font-family="JetBrains Mono">edad ' + minAge + '</text>' +
+      '<text x="' + (w - right) + '" y="' + (h - 12) + '" text-anchor="end" font-size="11" fill="#87867f" font-family="JetBrains Mono">edad ' + maxAge + '</text>' +
+      '<text x="' + (xFor(legendPeak.age) + 8).toFixed(1) + '" y="' + (yFor(legendPeak.level) - 10).toFixed(1) + '" font-size="12" fill="#141413" font-family="JetBrains Mono">' + Math.round(legendPeak.level) + '</text>' +
+      '<text x="' + (xFor(playerLatest.age) + 8).toFixed(1) + '" y="' + (yFor(playerLatest.level) + 18).toFixed(1) + '" font-size="12" fill="#d97757" font-family="JetBrains Mono">' + Math.round(playerLatest.level) + '</text>' +
+    '</svg>' +
+  '</div>' +
+  '<div class="legend-compare-legend">' +
+    '<span class="legend-key">' + legend.name + ' · pico ' + Math.round(legendPeak.level) + ' a los ' + legendPeak.age + '</span>' +
+    '<span class="legend-key player">' + playerName + ' · actual ' + Math.round(playerLatest.level) + ' a los ' + playerLatest.age + '</span>' +
+  '</div>';
+}}
+
+function renderLegendComparator(legends) {{
+  const player = currentPlayer();
+  if (!activeLegend && legends.length) activeLegend = legends[0].name;
+  const legend = legends.find(l => l.name === activeLegend) || legends[0];
+  const buttons = legends.map(l =>
+    '<button class="' + (l.name === legend.name ? 'active' : '') + '" onclick="setActiveLegend(\\'' + l.name.replace(/'/g, "\\\\'") + '\\')">' + l.name.split(' ').slice(-1)[0] + '</button>'
+  ).join('');
+  return '<section class="legend-comparator">' +
+    '<div class="legend-comparator-head">' +
+      '<div><h3>' + (player?.name || 'Jugador') + ' vs leyendas</h3><div class="legend-meta">Curva de nivel por edad · global</div></div>' +
+      '<div class="legend-picker">' + buttons + '</div>' +
+    '</div>' +
+    compareLegendChart(legend, player) +
+  '</section>';
+}}
+
+function renderLegends() {{
+  const wrap = document.getElementById('legends-view');
+  if (!wrap) return;
+  const legends = LEGEND_COMPARISON?.legends || [];
+  const activeTop = LEGEND_COMPARISON?.activeTop || [];
+  const legendRows = legends.map(l => {{
+    const peak = l.peak || {{}};
+    const latest = l.latest || {{}};
+    const drift = latest.level != null && peak.level != null ? latest.level - peak.level : null;
+    const driftText = drift == null ? '' : ' · final ' + Math.round(latest.level) + ' (' + (drift >= 0 ? '+' : '') + drift.toFixed(0) + ')';
+    return '<div class="legend-row">' +
+      '<div>' +
+        '<div class="legend-name">' + l.name + '</div>' +
+        '<div class="legend-meta">' + l.group + ' · ' + l.gs + ' GS · pico ' + peak.year + ' · ' + peak.age + ' años · Elo ' + (peak.elo || '&#8212;') + driftText + '</div>' +
+      '</div>' +
+      '<div class="legend-score">' + Math.round(peak.level || 0) + '</div>' +
+      '<div class="legend-rank">#' + l.rankVsActive + '<br>vs activos</div>' +
+      sparkline(l.yearly) +
+    '</div>';
+  }}).join('');
+  const activeRows = activeTop.map((p, idx) =>
+    '<div class="active-benchmark-row">' +
+      '<div class="active-benchmark-rank">' + (idx + 1) + '</div>' +
+      '<div><div class="active-benchmark-name">' + p.name + '</div><div class="legend-meta">ATP ' + p.rank + ' · ' + p.age + ' años</div></div>' +
+      '<div class="active-benchmark-score">' + Math.round(p.level) + '</div>' +
+    '</div>'
+  ).join('');
+  wrap.innerHTML =
+    renderLegendComparator(legends) +
+    '<section class="legend-card">' + legendRows + '</section>' +
+    '<aside class="active-benchmark"><h3>Top activo por nivel</h3>' + activeRows + '</aside>';
+}}
+
 function normaliseName(name) {{
   return (name || '')
     .toLowerCase()
@@ -2534,6 +2918,7 @@ function refresh() {{
   buildList(sortPlayers(filtered));
   renderPlayerDetail();
   renderSchedule();
+  renderLegends();
 }}
 
 window.selectPlayer = function(name) {{
@@ -2545,6 +2930,11 @@ window.selectPlayer = function(name) {{
 window.setPlayerSurface = function(surface) {{
   activeSurface = surface;
   renderPlayerDetail();
+}};
+
+window.setActiveLegend = function(name) {{
+  activeLegend = name;
+  renderLegends();
 }};
 
 window.toggleSearch = function() {{
@@ -2668,7 +3058,7 @@ def main():
     )
     print(f"  Performance metrics for {len(performance_metrics)} players")
     print("Computing tournament/opponent quality weights...")
-    effective_counts = _effective_match_counts(players, years, use_cache=use_cache)
+    effective_counts = _effective_match_counts(players, trend_years, use_cache=use_cache)
     live_schedule = _load_live_schedule()
     print("Mixing live player profiles...")
     live_profiles = _live_profiles_for_players(
@@ -2692,7 +3082,7 @@ def main():
     skipped = 0
     for p in players:
         pid  = p["player_id"]
-        stats_by_year = batch_stats.get(pid)
+        stats_by_year = trend_stats.get(pid) or batch_stats.get(pid)
         if not stats_by_year:
             skipped += 1
             continue
@@ -2709,7 +3099,6 @@ def main():
     _annotate_performance_context(players_data)
 
     # 6b. Tour percentile: rank each player's sim among current players (0-100)
-    import bisect
     surface_keys = ("All", "Hard", "Clay", "Grass")
     valid_sims_by_surface = {
         surf: sorted(
@@ -2769,6 +3158,16 @@ def main():
                 })
         r["tourPct"] = level_by_surface.get("All")
 
+    print("Building legend level comparison...")
+    legend_comparison = _build_legend_comparison(
+        all_historical_stats,
+        benchmark,
+        players_data,
+        valid_sims_by_surface.get("All") or [],
+        use_cache=use_cache,
+    )
+    print(f"  Legend comparison: {len(legend_comparison.get('legends', []))} players")
+
     # 7. Build legend background datasets
     legend_datasets = []
     for name in BACKGROUND_LEGENDS:
@@ -2791,7 +3190,7 @@ def main():
 
     # 9. Render and save
     EXAMPLES_DIR.mkdir(parents=True, exist_ok=True)
-    html = render_index(players_data, legend_datasets, recent_matches, live_schedule)
+    html = render_index(players_data, legend_datasets, recent_matches, live_schedule, legend_comparison)
     out_path = Path(args.output)
     out_path.write_text(html, encoding="utf-8")
     print(f"\nDone! → {out_path}")

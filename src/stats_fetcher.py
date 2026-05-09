@@ -22,6 +22,7 @@ import urllib.error
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
+import live_results_overlay as lro
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 CACHE_DIR = DATA_DIR / "_csv_cache"
@@ -103,7 +104,8 @@ def _fetch_csv(year: int, use_cache: bool) -> list[dict]:
             print(f"  Warning: could not fetch {year}: {e}")
             return []
 
-    return list(csv.DictReader(io.StringIO(raw)))
+    rows = list(csv.DictReader(io.StringIO(raw)))
+    return lro.merge_overlay_rows(rows, year)
 
 
 def _safe(val, cast=float, default=None):

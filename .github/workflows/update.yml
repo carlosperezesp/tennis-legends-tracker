@@ -60,18 +60,28 @@ jobs:
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
         run: python3 src/live_profile_fetcher.py --top 200 --no-cache || echo "Player profile fetch failed (no API key or endpoint error) — continuing with derived data"
 
+      - name: Fetch recent result overlay
+        if: steps.madrid-time.outputs.run == 'true'
+        env:
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+        run: python3 src/live_results_fetcher.py --days-back 21 || echo "Result overlay fetch failed — continuing with Sackmann data"
+
       - name: Build dashboard
         if: steps.madrid-time.outputs.run == 'true'
         run: python3 src/build_index.py --top 200 --no-cache
         # --no-cache refreshes current rankings and Sackmann match CSVs before
         # rebuilding the embedded HTML dashboard.
 
+      - name: Audit data freshness
+        if: steps.madrid-time.outputs.run == 'true'
+        run: python3 src/data_audit.py
+
       - name: Commit updated dashboard
         if: steps.madrid-time.outputs.run == 'true'
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
-          git add examples/index.html data/_csv_cache/ data/live_schedule.json data/player_live_profiles.json
+          git add examples/index.html data/_csv_cache/ data/live_schedule.json data/live_results_overlay.json data/player_live_profiles.json
           git diff --staged --quiet && echo "Nothing changed" && exit 0
           git commit -m "Dashboard update $(date -u +%Y-%m-%d)"
           git push
