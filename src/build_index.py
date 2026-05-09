@@ -1544,30 +1544,14 @@ def _historical_level_point(stats: dict, benchmark: dict, valid_sims: list[float
     }
 
 
-def _active_comparison_point(record: dict, current_year: int) -> dict | None:
-    level = (record.get("tourPctBySurface") or {}).get("All") or record.get("tourPct")
-    if level is None:
-        return None
-    return {
-        "year": current_year,
-        "age": record.get("age"),
-        "level": round(level, 1),
-        "statPct": (record.get("statPctBySurface") or {}).get("All"),
-        "sim": (record.get("simBySurface") or {}).get("All"),
-        "elo": record.get("elo"),
-        "matches": (record.get("surfaceSamples") or {}).get("All") or 0,
-        "current": True,
-        "source": "active",
-    }
-
-
 def _attach_comparison_level_trends(players_data: list[dict], trend_stats: dict,
                                     benchmark: dict, valid_sims: list[float],
                                     use_cache: bool = True) -> None:
     """Attach one comparator series per active player.
 
-    Closed seasons use the same historical formula as legend profiles. The
-    current year is a live active-model point, marked as current.
+    Every season uses the same historical comparator formula. The current year
+    is still live/partial, but it does not switch scale to the active card
+    formula, which keeps the curve coherent.
     """
     current_year = date.today().year
     lookup = _load_player_id_lookup(use_cache)
@@ -1580,8 +1564,6 @@ def _attach_comparison_level_trends(players_data: list[dict], trend_stats: dict,
         series = []
         for year_key, surfaces in sorted((by_year or {}).items(), key=lambda item: int(item[0])):
             year = int(year_key)
-            if year >= current_year:
-                continue
             stats = (surfaces or {}).get("All") or {}
             point = _historical_level_point(
                 stats,
@@ -1594,11 +1576,13 @@ def _attach_comparison_level_trends(players_data: list[dict], trend_stats: dict,
             age = stats.get("age") or (_age_at(born, year) if born else None)
             if age is None:
                 continue
-            point.update({"year": year, "age": age, "source": "historical"})
+            point.update({
+                "year": year,
+                "age": age,
+                "source": "liveHistorical" if year == current_year else "historical",
+                "current": year == current_year,
+            })
             series.append(point)
-        active_point = _active_comparison_point(record, current_year)
-        if active_point and active_point.get("age") is not None:
-            series.append(active_point)
         record["comparisonLevelTrend"] = series
 
 
