@@ -1384,6 +1384,7 @@ def build_player_record(p: dict, stats_by_year: dict, benchmark: dict,
         "surfaceSamples": surface_samples,
         "effectiveSamples": {k: round(v, 1) for k, v in effective_samples.items()},
         "liveProfile": live_profile or {},
+        "playerId": pid,
         "tourPctBySurface": {},
         "nextMatch": (next_matches or {}).get(name),
         "latestYear":   int(latest_year),
@@ -1513,6 +1514,94 @@ def _legend_elo_level_score(elo) -> float | None:
     return round(_clamp(60 + (float(elo) - 1800) / 600 * 40), 1)
 
 
+def _historical_level_point(stats: dict, benchmark: dict, valid_sims: list[float], elo) -> dict | None:
+    """Closed-year level used by the legend comparator.
+
+    The current season gets injected separately from the active-player model so
+    partial-year form can move without rewriting the historical curve.
+    """
+    sim = sf.compute_profile_similarity(stats or {}, benchmark)
+    if sim is None:
+        return None
+    stat_pct = None
+    if valid_sims:
+        stat_pct = round(bisect.bisect_right(valid_sims, sim) / len(valid_sims) * 100, 1)
+    elo_score = _legend_elo_level_score(elo)
+    volume_score = round(_clamp(math.sqrt(((stats or {}).get("matches") or 0) / 70) * 100), 1)
+    level = _blend_available([
+        (stat_pct, 0.50),
+        (elo_score, 0.35),
+        (volume_score, 0.15),
+    ])
+    if level is None:
+        return None
+    return {
+        "level": round(level, 1),
+        "statPct": stat_pct,
+        "sim": round(sim, 1),
+        "elo": int(elo) if elo is not None else None,
+        "matches": (stats or {}).get("matches") or 0,
+    }
+
+
+def _active_comparison_point(record: dict, current_year: int) -> dict | None:
+    level = (record.get("tourPctBySurface") or {}).get("All") or record.get("tourPct")
+    if level is None:
+        return None
+    return {
+        "year": current_year,
+        "age": record.get("age"),
+        "level": round(level, 1),
+        "statPct": (record.get("statPctBySurface") or {}).get("All"),
+        "sim": (record.get("simBySurface") or {}).get("All"),
+        "elo": record.get("elo"),
+        "matches": (record.get("surfaceSamples") or {}).get("All") or 0,
+        "current": True,
+        "source": "active",
+    }
+
+
+def _attach_comparison_level_trends(players_data: list[dict], trend_stats: dict,
+                                    benchmark: dict, valid_sims: list[float],
+                                    use_cache: bool = True) -> None:
+    """Attach one comparator series per active player.
+
+    Closed seasons use the same historical formula as legend profiles. The
+    current year is a live active-model point, marked as current.
+    """
+    current_year = date.today().year
+    lookup = _load_player_id_lookup(use_cache)
+    elo_history = _legend_elo_history([p.get("name") for p in players_data if p.get("name")], use_cache)
+    for record in players_data:
+        name = record.get("name")
+        pid = record.get("playerId")
+        born = sf.PLAYERS.get(name, {}).get("born") or lookup.get(name, {}).get("born")
+        by_year = trend_stats.get(pid) if pid is not None else None
+        series = []
+        for year_key, surfaces in sorted((by_year or {}).items(), key=lambda item: int(item[0])):
+            year = int(year_key)
+            if year >= current_year:
+                continue
+            stats = (surfaces or {}).get("All") or {}
+            point = _historical_level_point(
+                stats,
+                benchmark,
+                valid_sims,
+                (elo_history.get(name) or {}).get(year),
+            )
+            if not point:
+                continue
+            age = stats.get("age") or (_age_at(born, year) if born else None)
+            if age is None:
+                continue
+            point.update({"year": year, "age": age, "source": "historical"})
+            series.append(point)
+        active_point = _active_comparison_point(record, current_year)
+        if active_point and active_point.get("age") is not None:
+            series.append(active_point)
+        record["comparisonLevelTrend"] = series
+
+
 def _aggregate_legend_profile(group: dict, individual_legends: list[dict], active_top: list[dict]) -> dict | None:
     by_name = {legend["name"]: legend for legend in individual_legends}
     sources = [by_name[name] for name in group["players"] if name in by_name]
@@ -1574,6 +1663,8 @@ def _build_legend_comparison(all_historical_stats: dict, benchmark: dict,
                              use_cache: bool = True) -> dict:
     lookup = _load_player_id_lookup(use_cache)
     elo_history = _legend_elo_history(LEGEND_COMPARISON_NAMES, use_cache)
+    current_year = date.today().year
+    active_by_name = {p.get("name"): p for p in players_data if p.get("name")}
     active_top = sorted(
         [
             {
@@ -1593,36 +1684,31 @@ def _build_legend_comparison(all_historical_stats: dict, benchmark: dict,
     for name in LEGEND_COMPARISON_NAMES:
         born = sf.PLAYERS.get(name, {}).get("born") or lookup.get(name, {}).get("born")
         year_data = all_historical_stats.get(name, {})
-        yearly = []
-        for year_key, surfaces in sorted(year_data.items(), key=lambda item: int(item[0])):
-            year = int(year_key)
-            stats = (surfaces or {}).get("All") or {}
-            sim = sf.compute_profile_similarity(stats, benchmark)
-            if sim is None:
-                continue
-            age = stats.get("age") or (_age_at(born, year) if born else None)
-            elo = (elo_history.get(name) or {}).get(year)
-            stat_pct = None
-            if valid_sims:
-                stat_pct = round(bisect.bisect_right(valid_sims, sim) / len(valid_sims) * 100, 1)
-            elo_score = _legend_elo_level_score(elo)
-            volume_score = round(_clamp(math.sqrt((stats.get("matches") or 0) / 70) * 100), 1)
-            level = _blend_available([
-                (stat_pct, 0.50),
-                (elo_score, 0.35),
-                (volume_score, 0.15),
-            ])
-            if level is None:
-                continue
-            yearly.append({
-                "year": year,
-                "age": age,
-                "level": round(level, 1),
-                "statPct": stat_pct,
-                "sim": round(sim, 1),
-                "elo": int(elo) if elo is not None else None,
-                "matches": stats.get("matches") or 0,
-            })
+        active_series = (active_by_name.get(name) or {}).get("comparisonLevelTrend") or []
+        if active_series:
+            yearly = [dict(point) for point in active_series]
+        else:
+            yearly = []
+            for year_key, surfaces in sorted(year_data.items(), key=lambda item: int(item[0])):
+                year = int(year_key)
+                if year >= current_year:
+                    continue
+                stats = (surfaces or {}).get("All") or {}
+                age = stats.get("age") or (_age_at(born, year) if born else None)
+                if age is None:
+                    continue
+                point = _historical_level_point(
+                    stats,
+                    benchmark,
+                    valid_sims,
+                    (elo_history.get(name) or {}).get(year),
+                )
+                if not point:
+                    continue
+                point.update({"year": year, "age": age, "source": "historical"})
+                yearly.append({
+                    **point,
+                })
         if not yearly:
             continue
         peak = max(yearly, key=lambda row: row["level"])
@@ -2763,6 +2849,12 @@ function sparkline(points) {{
 }}
 
 function activePlayerLegendSeries(p) {{
+  const comparisonTrend = (p?.comparisonLevelTrend || [])
+    .filter(d => d && d.age != null && d.level != null)
+    .map(d => ({{ age: d.age, level: d.level, year: d.year, current: !!d.current }}));
+  if (comparisonTrend.length) {{
+    return comparisonTrend.sort((a, b) => a.age - b.age);
+  }}
   const byAge = new Map();
   ((p?.levelTrendBySurface || {{}}).All || [])
     .filter(d => d && (d.pct != null || d.value != null))
@@ -2778,9 +2870,16 @@ function activePlayerLegendSeries(p) {{
   return Array.from(byAge.values()).sort((a, b) => a.age - b.age);
 }}
 
+function samePlayerName(a, b) {{
+  return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+}}
+
 function compareLegendChart(legend, player) {{
   const legendSeries = (legend?.yearly || []).filter(d => d.age != null && d.level != null);
-  const playerSeries = activePlayerLegendSeries(player);
+  const comparesSamePlayer = legend?.type === 'player' && samePlayerName(legend?.name, player?.name);
+  const playerSeries = comparesSamePlayer
+    ? legendSeries.map(d => ({{ ...d, current: d.year === legend?.latest?.year }}))
+    : activePlayerLegendSeries(player);
   if (!legendSeries.length || !playerSeries.length) {{
     return '<div class="empty-schedule">Sin histórico suficiente para comparar.</div>';
   }}
@@ -3271,6 +3370,14 @@ def main():
                     "current": True,
                 })
         r["tourPct"] = level_by_surface.get("All")
+
+    _attach_comparison_level_trends(
+        players_data,
+        trend_stats,
+        benchmark,
+        valid_sims_by_surface.get("All") or [],
+        use_cache=use_cache,
+    )
 
     print("Building legend level comparison...")
     legend_comparison = _build_legend_comparison(
