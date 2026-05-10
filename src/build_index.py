@@ -3,7 +3,7 @@ Generates examples/index.html — a single interactive dashboard for any
 player in the current ATP top N.
 
 Usage:
-  python3 src/build_index.py             # top 200, 3 years of data
+  python3 src/build_index.py             # top 300, 3 years of data
   python3 src/build_index.py --top 100   # faster
   python3 src/build_index.py --no-cache  # force re-download
 
@@ -1783,7 +1783,7 @@ def _next_matches_from_schedule(live_schedule: dict) -> dict:
 
 
 def render_index(players_data: list, legend_datasets: list, recent_matches: list,
-                 live_schedule: dict, legend_comparison: dict) -> str:
+                 live_schedule: dict, legend_comparison: dict, source_count: int) -> str:
     players_json = json.dumps(players_data, ensure_ascii=False)
     live_schedule_json = json.dumps(live_schedule, ensure_ascii=False)
     legend_comparison_json = json.dumps(legend_comparison, ensure_ascii=False)
@@ -1886,6 +1886,7 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
     }}
     .search-input:focus {{ border-color: var(--clay); }}
     .toolbar-row {{ display:flex; align-items:center; gap:16px; }}
+    .surface-row {{ margin-top: 12px; }}
     .sort-group {{ display:flex; gap:8px; overflow-x:auto; flex:1; }}
     .sort-btn {{
       font-size: 15px; font-weight: 500; padding: 12px 18px; border-radius: 0;
@@ -2259,7 +2260,7 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
     .active-compare-controls {{
       display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
     }}
-    .active-compare-controls select {{
+    .active-compare-controls input {{
       border: 1px solid var(--slate-dark); background: var(--ivory-light); color: var(--slate-dark);
       padding: 9px 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px;
       text-transform: uppercase; min-width: 210px;
@@ -2365,6 +2366,9 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
             </div>
             <span id="player-count" class="player-count"></span>
           </div>
+          <div class="toolbar-row surface-row">
+            <div id="ranking-surface-group" class="sort-group"></div>
+          </div>
         </section>
 
         <!-- Player list -->
@@ -2388,7 +2392,7 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
 
       <main id="legends-tab" class="tab-panel app-shell legends-page">
         <section class="legends-hero">
-          <h2>Leyendas</h2>
+          <h2>Comparador</h2>
           <div class="schedule-meta">
             <div>Control de nivel</div>
             <div>pico historico vs activos</div>
@@ -2403,13 +2407,14 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
     <button id="nav-ranking" class="slider-nav-btn active" type="button" onclick="goToTab('ranking-tab')">Ranking</button>
     <button id="nav-player" class="slider-nav-btn" type="button" onclick="goToTab('player-tab')">Jugador</button>
     <button id="nav-schedule" class="slider-nav-btn" type="button" onclick="goToTab('schedule-tab')">Partidos</button>
-    <button id="nav-legends" class="slider-nav-btn" type="button" onclick="goToTab('legends-tab')">Leyendas</button>
+    <button id="nav-legends" class="slider-nav-btn" type="button" onclick="goToTab('legends-tab')">Comparador</button>
   </nav>
 
   <script>
 const ALL_PLAYERS = {players_json};
 const LIVE_SCHEDULE = {live_schedule_json};
 const LEGEND_COMPARISON = {legend_comparison_json};
+const RANKING_SOURCE_COUNT = {source_count};
 const SURFACES = [
   {{ key: 'All', label: 'Global' }},
   {{ key: 'Hard', label: 'R&aacute;pida' }},
@@ -2417,8 +2422,9 @@ const SURFACES = [
   {{ key: 'Grass', label: 'Hierba' }},
 ];
 
-let sortKey = 'rank', sortDir = 1, activePlayer = null, activeSurface = 'All', activeLegend = null;
+let sortKey = 'rank', sortDir = 1, activePlayer = null, activeSurface = 'All', rankingSurface = 'All', activeLegend = null;
 let activeComparePlayerA = null, activeComparePlayerB = null, activeCompareMode = 'age', activeCompareSurface = 'All';
+let activeCompareQueryA = '', activeCompareQueryB = '';
 
 function getQ() {{
   return (document.getElementById('search-input')?.value || '').toLowerCase().trim();
@@ -2429,8 +2435,8 @@ function sortPlayers(arr) {{
     let va, vb;
     if (sortKey === 'rank')       {{ va = a.rank;          vb = b.rank; }}
     else if (sortKey === 'tour')  {{
-      va = a.tourPctBySurface?.All ?? a.tourPct ?? -1;
-      vb = b.tourPctBySurface?.All ?? b.tourPct ?? -1;
+      va = a.tourPctBySurface?.[rankingSurface] ?? (rankingSurface === 'All' ? a.tourPct : -1) ?? -1;
+      vb = b.tourPctBySurface?.[rankingSurface] ?? (rankingSurface === 'All' ? b.tourPct : -1) ?? -1;
     }}
     else                          {{ va = a.age;            vb = b.age; }}
     return sortDir * (va - vb);
@@ -2445,8 +2451,17 @@ function scoreColor(v) {{
 }}
 
 function getBadge(p) {{
-  const v = p.tourPctBySurface?.All ?? p.tourPct;
-  return {{ val: v != null ? v.toFixed(0) : '&#8212;', label: 'Nivel', color: scoreColor(v) }};
+  const v = p.tourPctBySurface?.[rankingSurface] ?? (rankingSurface === 'All' ? p.tourPct : null);
+  const label = rankingSurface === 'All' ? 'Nivel' : surfaceLabel(rankingSurface);
+  return {{ val: v != null ? v.toFixed(0) : '&#8212;', label, color: scoreColor(v) }};
+}}
+
+function renderRankingSurfaceButtons() {{
+  const wrap = document.getElementById('ranking-surface-group');
+  if (!wrap) return;
+  wrap.innerHTML = SURFACES.map(s =>
+    '<button class="sort-btn ' + (rankingSurface === s.key ? 'active' : '') + '" onclick="setRankingSurface(\\'' + s.key + '\\')">' + s.label + '</button>'
+  ).join('');
 }}
 
 function buildList(players) {{
@@ -2476,7 +2491,7 @@ function buildList(players) {{
   }});
   list.innerHTML = '';
   list.appendChild(frag);
-  document.getElementById('player-count').textContent = players.length + ' jugadores';
+  document.getElementById('player-count').textContent = players.length + ' con datos · top ' + RANKING_SOURCE_COUNT;
 }}
 
 function defaultPlayer() {{
@@ -3030,6 +3045,24 @@ function playerByName(name) {{
   return ALL_PLAYERS.find(p => p.name === name) || null;
 }}
 
+function playerSearchOptions(excludeName) {{
+  return ALL_PLAYERS
+    .slice()
+    .sort((a, b) => a.rank - b.rank)
+    .filter(p => p.name !== excludeName)
+    .map(p => '<option value="' + p.name.replace(/"/g, '&quot;') + '">ATP ' + p.rank + '</option>')
+    .join('');
+}}
+
+function findPlayerFromQuery(query, excludeName) {{
+  const q = normaliseName(query);
+  if (!q) return null;
+  const pool = ALL_PLAYERS.filter(p => p.name !== excludeName);
+  return pool.find(p => normaliseName(p.name) === q)
+    || pool.find(p => normaliseName(p.name).includes(q))
+    || null;
+}}
+
 function defaultComparePlayer(excludeName) {{
   return ALL_PLAYERS
     .slice()
@@ -3049,15 +3082,6 @@ function currentComparePlayers() {{
     activeComparePlayerB = playerB?.name || null;
   }}
   return [playerA, playerB];
-}}
-
-function playerOptions(selectedName, excludeName) {{
-  return ALL_PLAYERS
-    .slice()
-    .sort((a, b) => a.rank - b.rank)
-    .filter(p => p.name !== excludeName)
-    .map(p => '<option value="' + p.name.replace(/"/g, '&quot;') + '"' + (p.name === selectedName ? ' selected' : '') + '>' + p.name + ' · ATP ' + p.rank + '</option>')
-    .join('');
 }}
 
 function nearestAgePoint(series, age) {{
@@ -3126,6 +3150,78 @@ function currentLevelFor(p, surface) {{
   return p?.tourPctBySurface?.[surface] ?? (surface === 'All' ? p?.tourPct : null);
 }}
 
+function currentTrendSeries(p, surface) {{
+  const key = surface || 'All';
+  const source = p?.comparisonLevelTrendBySurface?.[key] || (key === 'All' ? p?.comparisonLevelTrend : []);
+  const byYear = new Map();
+  (source || [])
+    .filter(d => d.year != null && d.level != null)
+    .forEach(d => {{
+      const year = Number(d.year);
+      if (!Number.isFinite(year)) return;
+      const existing = byYear.get(year);
+      if (!existing || d.current || year > existing.year) {{
+        byYear.set(year, {{ year, level: d.level, age: d.age, current: !!d.current }});
+      }}
+    }});
+  const currentLevel = currentLevelFor(p, key);
+  if (currentLevel != null) {{
+    const fallbackYear = new Date().getFullYear();
+    const currentYear = Number(p?.latestYear) || Math.max(...Array.from(byYear.keys()), fallbackYear);
+    byYear.set(currentYear, {{
+      year: currentYear,
+      level: currentLevel,
+      age: p?.age,
+      current: true,
+    }});
+  }}
+  return Array.from(byYear.values()).sort((a, b) => a.year - b.year);
+}}
+
+function renderActiveCurrentChart(playerA, playerB) {{
+  const seriesA = currentTrendSeries(playerA, activeCompareSurface);
+  const seriesB = currentTrendSeries(playerB, activeCompareSurface);
+  if (!seriesA.length || !seriesB.length) {{
+    return '<div class="empty-schedule">Sin evolución suficiente para ' + surfaceLabel(activeCompareSurface) + '.</div>';
+  }}
+  const all = seriesA.concat(seriesB);
+  const w = 720, h = 300, left = 42, right = 18, top = 24, bottom = 42;
+  const minYear = Math.min(...all.map(d => d.year));
+  const maxYear = Math.max(...all.map(d => d.year));
+  const minLevel = Math.max(0, Math.min(...all.map(d => d.level)) - 8);
+  const maxLevel = Math.min(100, Math.max(...all.map(d => d.level)) + 4);
+  const yearSpan = Math.max(1, maxYear - minYear);
+  const levelSpan = Math.max(1, maxLevel - minLevel);
+  const xFor = year => left + ((year - minYear) / yearSpan) * (w - left - right);
+  const yFor = level => h - bottom - ((level - minLevel) / levelSpan) * (h - top - bottom);
+  const lineFor = series => series.map(d => xFor(d.year).toFixed(1) + ',' + yFor(d.level).toFixed(1)).join(' ');
+  const dotsFor = (series, cls) => series.map(d =>
+    '<circle class="' + cls + '" cx="' + xFor(d.year).toFixed(1) + '" cy="' + yFor(d.level).toFixed(1) + '" r="' + (d.current ? 5 : 3) + '"></circle>'
+  ).join('');
+  const latestA = seriesA[seriesA.length - 1];
+  const latestB = seriesB[seriesB.length - 1];
+  return '<div class="legend-compare-chart">' +
+    '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="Comparador actual por año">' +
+      '<line class="legend-axis" x1="' + left + '" y1="' + yFor(50).toFixed(1) + '" x2="' + (w - right) + '" y2="' + yFor(50).toFixed(1) + '"></line>' +
+      '<line class="legend-axis" x1="' + left + '" y1="' + (h - bottom) + '" x2="' + (w - right) + '" y2="' + (h - bottom) + '"></line>' +
+      '<polyline class="legend-line" points="' + lineFor(seriesA) + '"></polyline>' +
+      '<polyline class="player-line" points="' + lineFor(seriesB) + '"></polyline>' +
+      dotsFor(seriesA, 'legend-dot') +
+      dotsFor(seriesB, 'player-dot') +
+      '<circle class="legend-dot" cx="' + xFor(latestA.year).toFixed(1) + '" cy="' + yFor(latestA.level).toFixed(1) + '" r="6"></circle>' +
+      '<circle class="player-dot" cx="' + xFor(latestB.year).toFixed(1) + '" cy="' + yFor(latestB.level).toFixed(1) + '" r="6"></circle>' +
+      '<text x="' + left + '" y="' + (h - 12) + '" font-size="11" fill="#87867f" font-family="JetBrains Mono">' + minYear + '</text>' +
+      '<text x="' + (w - right) + '" y="' + (h - 12) + '" text-anchor="end" font-size="11" fill="#87867f" font-family="JetBrains Mono">' + maxYear + '</text>' +
+      '<text x="' + (xFor(latestA.year) + 8).toFixed(1) + '" y="' + (yFor(latestA.level) - 10).toFixed(1) + '" font-size="12" fill="#141413" font-family="JetBrains Mono">' + Math.round(latestA.level) + '</text>' +
+      '<text x="' + (xFor(latestB.year) + 8).toFixed(1) + '" y="' + (yFor(latestB.level) + 18).toFixed(1) + '" font-size="12" fill="#d97757" font-family="JetBrains Mono">' + Math.round(latestB.level) + '</text>' +
+    '</svg>' +
+  '</div>' +
+  '<div class="legend-compare-legend">' +
+    '<span class="legend-key">' + playerA.name + ' · ' + Math.round(latestA.level) + ' en ' + latestA.year + '</span>' +
+    '<span class="legend-key player">' + playerB.name + ' · ' + Math.round(latestB.level) + ' en ' + latestB.year + '</span>' +
+  '</div>';
+}}
+
 function activeCurrentCard(p, other, alt) {{
   const surfaces = SURFACES.map(s => {{
     const value = currentLevelFor(p, s.key);
@@ -3137,24 +3233,25 @@ function activeCurrentCard(p, other, alt) {{
       '<div style="' + (winner ? 'font-weight:800' : '') + '">' + (value != null ? Math.round(value) : '&#8212;') + '</div>' +
     '</div>';
   }}).join('');
-  const global = currentLevelFor(p, 'All');
+  const selected = currentLevelFor(p, activeCompareSurface);
   return '<div class="active-current-card' + (alt ? ' alt' : '') + '">' +
     '<div class="active-current-head">' +
-      '<div><div class="active-current-name">' + p.name + '</div><div class="legend-meta">ATP ' + p.rank + ' · ' + p.age + ' años · Elo ' + (p.elo || '&#8212;') + '</div></div>' +
-      '<div class="active-current-score">' + (global != null ? Math.round(global) : '&#8212;') + '</div>' +
+      '<div><div class="active-current-name">' + p.name + '</div><div class="legend-meta">ATP ' + p.rank + ' · ' + p.age + ' años · ' + surfaceLabel(activeCompareSurface) + '</div></div>' +
+      '<div class="active-current-score">' + (selected != null ? Math.round(selected) : '&#8212;') + '</div>' +
     '</div>' +
     surfaces +
   '</div>';
 }}
 
 function renderActiveCurrentComparison(playerA, playerB) {{
-  const levelA = currentLevelFor(playerA, 'All');
-  const levelB = currentLevelFor(playerB, 'All');
+  const levelA = currentLevelFor(playerA, activeCompareSurface);
+  const levelB = currentLevelFor(playerB, activeCompareSurface);
   const diff = levelA != null && levelB != null ? levelA - levelB : null;
   const headline = diff == null
-    ? 'Foto actual sin datos suficientes'
-    : (Math.abs(diff) < 1 ? 'Empate técnico actual' : (diff > 0 ? playerA.name : playerB.name) + ' llega mejor ahora');
+    ? 'Foto actual sin datos suficientes en ' + surfaceLabel(activeCompareSurface)
+    : (Math.abs(diff) < 1 ? 'Empate técnico actual' : (diff > 0 ? playerA.name : playerB.name) + ' llega mejor ahora en ' + surfaceLabel(activeCompareSurface));
   return '<div class="legend-meta">' + headline + (diff == null ? '' : ' · diferencia ' + (diff >= 0 ? '+' : '') + diff.toFixed(1)) + '</div>' +
+    renderActiveCurrentChart(playerA, playerB) +
     '<div class="active-compare-grid">' +
       activeCurrentCard(playerA, playerB, false) +
       activeCurrentCard(playerB, playerA, true) +
@@ -3164,8 +3261,10 @@ function renderActiveCurrentComparison(playerA, playerB) {{
 function renderActiveComparator() {{
   const [player, other] = currentComparePlayers();
   if (!player || !other) return '';
-  const optionsA = playerOptions(player.name, other.name);
-  const optionsB = playerOptions(other.name, player.name);
+  if (!activeCompareQueryA) activeCompareQueryA = player.name;
+  if (!activeCompareQueryB) activeCompareQueryB = other.name;
+  const optionsA = playerSearchOptions(other.name);
+  const optionsB = playerSearchOptions(player.name);
   const surfaceButtons = SURFACES.map(s =>
     '<button class="' + (activeCompareSurface === s.key ? 'active' : '') + '" onclick="setActiveCompareSurface(\\'' + s.key + '\\')">' + s.label + '</button>'
   ).join('');
@@ -3176,8 +3275,10 @@ function renderActiveComparator() {{
     '<div class="legend-comparator-head">' +
       '<div><h3>Comparador de activos</h3><div class="legend-meta">Trayectoria por edad y foto actual</div></div>' +
       '<div class="active-compare-controls">' +
-        '<select aria-label="Jugador A" onchange="setActiveComparePlayerA(this.value)">' + optionsA + '</select>' +
-        '<select aria-label="Jugador B" onchange="setActiveComparePlayerB(this.value)">' + optionsB + '</select>' +
+        '<input aria-label="Jugador A" list="active-player-options-a" value="' + activeCompareQueryA.replace(/"/g, '&quot;') + '" onfocus="this.select()" oninput="setActiveCompareQuery(\\'A\\', this.value)" onchange="commitActiveCompareQuery(\\'A\\', this.value)">' +
+        '<datalist id="active-player-options-a">' + optionsA + '</datalist>' +
+        '<input aria-label="Jugador B" list="active-player-options-b" value="' + activeCompareQueryB.replace(/"/g, '&quot;') + '" onfocus="this.select()" oninput="setActiveCompareQuery(\\'B\\', this.value)" onchange="commitActiveCompareQuery(\\'B\\', this.value)">' +
+        '<datalist id="active-player-options-b">' + optionsB + '</datalist>' +
         '<div class="legend-picker">' +
           '<button class="' + (activeCompareMode === 'age' ? 'active' : '') + '" onclick="setActiveCompareMode(\\'age\\')">Por edad</button>' +
           '<button class="' + (activeCompareMode === 'current' ? 'active' : '') + '" onclick="setActiveCompareMode(\\'current\\')">Actual</button>' +
@@ -3430,6 +3531,7 @@ function refresh() {{
     if (!currentVisible) activePlayer = sortPlayers(filtered)[0].name;
   }}
   buildList(sortPlayers(filtered));
+  renderRankingSurfaceButtons();
   renderPlayerDetail();
   renderSchedule();
   renderLegends();
@@ -3446,6 +3548,12 @@ window.setPlayerSurface = function(surface) {{
   renderPlayerDetail();
 }};
 
+window.setRankingSurface = function(surface) {{
+  rankingSurface = surface;
+  if (sortKey === 'tour') sortDir = -1;
+  refresh();
+}};
+
 window.setActiveLegend = function(name) {{
   activeLegend = name;
   renderLegends();
@@ -3453,18 +3561,38 @@ window.setActiveLegend = function(name) {{
 
 window.setActiveComparePlayerA = function(name) {{
   activeComparePlayerA = name;
+  activeCompareQueryA = name;
   if (activeComparePlayerB === name) {{
     activeComparePlayerB = defaultComparePlayer(name)?.name || null;
+    activeCompareQueryB = activeComparePlayerB || '';
   }}
   renderLegends();
 }};
 
 window.setActiveComparePlayerB = function(name) {{
   activeComparePlayerB = name;
+  activeCompareQueryB = name;
   if (activeComparePlayerA === name) {{
     activeComparePlayerA = defaultComparePlayer(name)?.name || null;
+    activeCompareQueryA = activeComparePlayerA || '';
   }}
   renderLegends();
+}};
+
+window.setActiveCompareQuery = function(slot, value) {{
+  if (slot === 'A') activeCompareQueryA = value;
+  else activeCompareQueryB = value;
+}};
+
+window.commitActiveCompareQuery = function(slot, value) {{
+  const exclude = slot === 'A' ? activeComparePlayerB : activeComparePlayerA;
+  const player = findPlayerFromQuery(value, exclude);
+  if (!player) {{
+    renderLegends();
+    return;
+  }}
+  if (slot === 'A') setActiveComparePlayerA(player.name);
+  else setActiveComparePlayerB(player.name);
 }};
 
 window.setActiveCompareMode = function(mode) {{
@@ -3500,7 +3628,7 @@ document.getElementById('tabs-viewport')?.addEventListener('scroll', () => {{
 
 def main():
     parser = argparse.ArgumentParser(description="Build the ATP scout index.html")
-    parser.add_argument("--top",       type=int, default=200, help="Number of ranked players (default: 200)")
+    parser.add_argument("--top",       type=int, default=300, help="Number of ranked players (default: 300)")
     parser.add_argument("--years-back",type=int, default=3,   help="Years of match data to analyse (default: 3)")
     parser.add_argument("--no-cache",  action="store_true",   help="Re-download all CSVs")
     parser.add_argument("--output",    default=str(EXAMPLES_DIR / "index.html"), help="Output path")
@@ -3638,7 +3766,7 @@ def main():
         if record:
             players_data.append(record)
 
-    print(f"  {len(players_data)} players with data ({skipped} skipped — no recent matches)")
+    print(f"  {len(players_data)} players with data ({skipped} skipped — insufficient ATP match data)")
 
     _annotate_performance_context(players_data)
 
@@ -3742,7 +3870,7 @@ def main():
 
     # 9. Render and save
     EXAMPLES_DIR.mkdir(parents=True, exist_ok=True)
-    html = render_index(players_data, legend_datasets, recent_matches, live_schedule, legend_comparison)
+    html = render_index(players_data, legend_datasets, recent_matches, live_schedule, legend_comparison, top_n)
     out_path = Path(args.output)
     out_path.write_text(html, encoding="utf-8")
     print(f"\nDone! → {out_path}")

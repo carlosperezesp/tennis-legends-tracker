@@ -39,7 +39,7 @@ jobs:
       - name: Fetch live player profiles
         env:
           RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
-        run: python3 src/live_profile_fetcher.py --top 200 --no-cache || echo "Player profile fetch failed (no API key or endpoint error) — continuing with derived data"
+        run: python3 src/live_profile_fetcher.py --top 300 --no-cache || echo "Player profile fetch failed (no API key or endpoint error) — continuing with derived data"
 
       - name: Fetch recent result overlay
         env:
@@ -47,7 +47,7 @@ jobs:
         run: python3 src/live_results_fetcher.py --days-back 21 || echo "Result overlay fetch failed — continuing with Sackmann data"
 
       - name: Build dashboard
-        run: python3 src/build_index.py --top 200 --no-cache
+        run: python3 src/build_index.py --top 300 --no-cache
         # --no-cache refreshes current rankings and Sackmann match CSVs before
         # rebuilding the embedded HTML dashboard.
 
