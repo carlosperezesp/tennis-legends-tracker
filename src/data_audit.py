@@ -73,7 +73,7 @@ def latest_ranking_date() -> tuple[date | None, int]:
     return parse_yyyymmdd(latest), sum(1 for r in rows if r.get("ranking_date") == latest)
 
 
-def latest_match_date(year: int) -> tuple[date | None, int]:
+def latest_match_tournament_start(year: int) -> tuple[date | None, int]:
     path = CACHE / f"atp_matches_{year}.csv"
     if not path.exists():
         return None, 0
@@ -157,12 +157,11 @@ def main() -> int:
         f"{rank_day or 'missing'} ({rank_age if rank_age is not None else '?'} days old, {rank_rows} rows)",
     )
 
-    match_day, match_rows = latest_match_date(today.year)
-    match_age = age_days(match_day, today)
+    match_day, match_rows = latest_match_tournament_start(today.year)
     line(
-        status_from_age(match_age, warn_after=14, fail_after=45),
+        "OK" if match_rows else "FAIL",
         "Sackmann matches",
-        f"{match_day or 'missing'} ({match_age if match_age is not None else '?'} days old, {match_rows} rows)",
+        f"latest tournament start {match_day or 'missing'} ({match_rows} rows; tourney_date is not match date)",
     )
 
     profile_day, profile_count, profile_errors = profile_status()
