@@ -1550,9 +1550,9 @@ def _attach_comparison_level_trends(players_data: list[dict], trend_stats: dict,
                                     use_cache: bool = True) -> None:
     """Attach one comparator series per active player.
 
-    Every season uses the same historical comparator formula. The current year
-    is still live/partial, but it does not switch scale to the active card
-    formula, which keeps the curve coherent.
+    Closed seasons use the historical comparator formula. The live/current
+    point uses the same composite level shown on the player card so comparison
+    charts and profile cards agree on "actual".
     """
     current_year = date.today().year
     lookup = _load_player_id_lookup(use_cache)
@@ -1588,6 +1588,25 @@ def _attach_comparison_level_trends(players_data: list[dict], trend_stats: dict,
                     "current": year == current_year,
                 })
                 series.append(point)
+            current_level = ((record.get("tourPctBySurface") or {}).get(surf)
+                             if surf != "All" else record.get("tourPct"))
+            if current_level is not None and record.get("age") is not None:
+                series = [
+                    point for point in series
+                    if not (point.get("year") == current_year or point.get("current"))
+                ]
+                series.append({
+                    "level": current_level,
+                    "statPct": (record.get("statPctBySurface") or {}).get(surf),
+                    "sim": (record.get("simBySurface") or {}).get(surf),
+                    "elo": (record.get("eloBySurface") or {}).get(surf) if surf != "All" else record.get("elo"),
+                    "matches": (record.get("surfaceSamples") or {}).get(surf),
+                    "year": current_year,
+                    "age": record.get("age"),
+                    "surface": surf,
+                    "source": "liveComposite",
+                    "current": True,
+                })
             by_surface[surf] = series
         record["comparisonLevelTrend"] = by_surface.get("All") or []
         record["comparisonLevelTrendBySurface"] = by_surface
@@ -2953,6 +2972,17 @@ function surfaceLabel(surface) {{
   return (SURFACES.find(s => s.key === surface) || SURFACES[0]).label;
 }}
 
+function currentPlayerPoint(p, surface) {{
+  const level = currentLevelFor(p, surface || 'All');
+  if (level == null || p?.age == null) return null;
+  return {{
+    age: p.age,
+    level,
+    year: new Date().getFullYear(),
+    current: true,
+  }};
+}}
+
 function activePlayerLegendSeries(p, surface = 'All') {{
   const source = surface === 'All'
     ? (p?.comparisonLevelTrend || [])
@@ -2961,7 +2991,11 @@ function activePlayerLegendSeries(p, surface = 'All') {{
     .filter(d => d && d.age != null && d.level != null)
     .map(d => ({{ age: d.age, level: d.level, year: d.year, current: !!d.current }}));
   if (comparisonTrend.length) {{
-    return comparisonTrend.sort((a, b) => a.age - b.age);
+    const current = currentPlayerPoint(p, surface);
+    const merged = current
+      ? comparisonTrend.filter(d => !d.current && Number(d.year) !== current.year).concat(current)
+      : comparisonTrend;
+    return merged.sort((a, b) => a.age - b.age || Number(a.year) - Number(b.year));
   }}
   const byAge = new Map();
   ((p?.levelTrendBySurface || {{}})[surface] || [])
@@ -3166,8 +3200,7 @@ function currentTrendSeries(p, surface) {{
     }});
   const currentLevel = currentLevelFor(p, key);
   if (currentLevel != null) {{
-    const fallbackYear = new Date().getFullYear();
-    const currentYear = Number(p?.latestYear) || Math.max(...Array.from(byYear.keys()), fallbackYear);
+    const currentYear = new Date().getFullYear();
     byYear.set(currentYear, {{
       year: currentYear,
       level: currentLevel,

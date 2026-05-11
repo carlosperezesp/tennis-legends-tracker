@@ -115,6 +115,10 @@ def _api_get(host: str, path: str, key: str) -> dict | list:
         return json.load(resp)
 
 
+def _tennisapi1_get(path: str, key: str) -> dict | list:
+    return _api_get("tennisapi1.p.rapidapi.com", f"/api/tennis{path}", key)
+
+
 def _http_text(url: str) -> str:
     req = urllib.request.Request(url, headers={
         "User-Agent": "Mozilla/5.0 (compatible; tennis-legends/1.0)",
@@ -509,6 +513,120 @@ def _normalise_row(row: dict, day: date, provider: str) -> dict | None:
     }
 
 
+def _status_description(value) -> str:
+    if isinstance(value, dict):
+        return str(_first(value, "description", "type", "status") or "scheduled")
+    return str(value or "scheduled")
+
+
+def _timestamp_to_time(value) -> str:
+    if not isinstance(value, int):
+        return "TBD"
+    from datetime import datetime
+    return datetime.fromtimestamp(value).strftime("%H:%M")
+
+
+def _surface_for_tournament(tournament: dict) -> str:
+    name = _normalise_lookup(str(tournament.get("name") or ""))
+    slug = _normalise_lookup(str(tournament.get("slug") or ""))
+    for event in ATP_OFFICIAL_EVENTS:
+        if (
+            _normalise_lookup(event["name"]) in name
+            or _normalise_lookup(event["slug"]) in slug
+        ):
+            return event["surface"]
+    return "TBD"
+
+
+def _level_for_tournament(tournament: dict) -> str:
+    name = _normalise_lookup(str(tournament.get("name") or ""))
+    slug = _normalise_lookup(str(tournament.get("slug") or ""))
+    for event in ATP_OFFICIAL_EVENTS:
+        if (
+            _normalise_lookup(event["name"]) in name
+            or _normalise_lookup(event["slug"]) in slug
+        ):
+            return event["level"]
+    return "ATP"
+
+
+def _tennisapi1_player(team: dict | None) -> str | None:
+    if not isinstance(team, dict):
+        return None
+    name = _first(team, "name", "shortName", "displayName", "fullName")
+    return str(name).strip() if name else None
+
+
+def _looks_like_singles_players(p1: str, p2: str) -> bool:
+    text = f"{p1} {p2}".lower()
+    if any(token in text for token in ("/", " & ", " doubles", " double")):
+        return False
+    return bool(p1 and p2 and p1 != p2)
+
+
+def _tennisapi1_match(event: dict, day: date) -> dict | None:
+    tournament = event.get("tournament") if isinstance(event.get("tournament"), dict) else {}
+    p1 = _tennisapi1_player(event.get("homeTeam"))
+    p2 = _tennisapi1_player(event.get("awayTeam"))
+    if not p1 or not p2 or not _looks_like_singles_players(p1, p2):
+        return None
+
+    return {
+        "time": _timestamp_to_time(event.get("startTimestamp")),
+        "player1": p1,
+        "player2": p2,
+        "tournament": str(tournament.get("name") or "Tournament TBD"),
+        "level": _level_for_tournament(tournament),
+        "round": _status_description(event.get("roundInfo")) if event.get("roundInfo") else "TBD",
+        "surface": _surface_for_tournament(tournament),
+        "status": _status_description(event.get("status")),
+        "provider": "TennisAPI1",
+        "sourceUrl": (
+            "https://rapidapi.com/"
+            "tipsters/api/tennisapi1"
+        ),
+    }
+
+
+def fetch_tennisapi1_day(day: date, key: str) -> tuple[list[dict], list[str]]:
+    """Fetch ATP schedules from TennisAPI1's date -> tournaments -> schedules flow."""
+    errors = []
+    calendar_path = f"/calendar/{day.day}/{day.month}/{day.year}/categories"
+    try:
+        calendar = _tennisapi1_get(calendar_path, key)
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+        return [], [f"TennisAPI1 {calendar_path}: {exc}"]
+
+    tournament_ids = []
+    for category in (calendar or {}).get("categories", []):
+        category_name = (((category or {}).get("category") or {}).get("name") or "").strip().lower()
+        if category_name != "atp":
+            continue
+        tournament_ids.extend(category.get("uniqueTournamentIds") or [])
+
+    rows = []
+    seen = set()
+    for tournament_id in dict.fromkeys(tournament_ids):
+        schedule_path = f"/tournament/{tournament_id}/schedules/{day.day}/{day.month}/{day.year}"
+        try:
+            payload = _tennisapi1_get(schedule_path, key)
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+            errors.append(f"TennisAPI1 {schedule_path}: {exc}")
+            continue
+        for event in (payload or {}).get("events", []):
+            if not isinstance(event, dict):
+                continue
+            match = _tennisapi1_match(event, day)
+            if not match:
+                continue
+            key_tuple = (match["tournament"], match["player1"], match["player2"], match["time"])
+            if key_tuple in seen:
+                continue
+            seen.add(key_tuple)
+            rows.append(match)
+    return rows, errors
+
+
 def fetch_day(day: date, key: str) -> tuple[list[dict], list[str]]:
     errors = []
     for provider in RAPIDAPI_PROVIDERS:
@@ -542,8 +660,15 @@ def build_schedule(api_key: str | None, today: date) -> dict:
     source = "ATP Tour official schedule"
     for offset, label in ((0, "Hoy"), (1, "Mañana")):
         day = today + timedelta(days=offset)
-        matches, errors = fetch_atp_official_day(day)
-        all_errors.extend(errors)
+        matches = []
+        if api_key:
+            matches, errors = fetch_tennisapi1_day(day, api_key)
+            all_errors.extend(errors)
+            if matches:
+                source = "TennisAPI1 RapidAPI"
+        if not matches:
+            matches, errors = fetch_atp_official_day(day)
+            all_errors.extend(errors)
         if not matches and api_key:
             matches, errors = fetch_day(day, api_key)
             all_errors.extend(errors)
