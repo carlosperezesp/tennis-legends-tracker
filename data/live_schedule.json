@@ -9,7 +9,7 @@
     "FlashScore /api/flashscore/v2/events/list?sport_id=tennis&date=2026-05-13: HTTP Error 404: Not Found",
     "SofaScore /api/sofascore/v1/sport/tennis/scheduled-events/2026-05-13: HTTP Error 404: Not Found",
     "SofaScore /api/sofascore/v1/events/schedule/tennis/2026-05-13: HTTP Error 404: Not Found",
-    "Tennisprodata /live-results/2026-05-13/: HTTP Error 503: Service Temporarily Unavailable",
+    "Tennisprodata /live-results/2026-05-13/: HTTP Error 401: Unauthorized",
     "Tennisprodata /fixtures/2026-05-13/: HTTP Error 404: Not Found"
   ],
   "days": [
