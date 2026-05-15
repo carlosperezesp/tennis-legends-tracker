@@ -2,7 +2,16 @@
   "asOf": "2026-05-15",
   "timezone": "Europe/Rome",
   "source": "TennisAPI1 RapidAPI",
-  "errors": [],
+  "errors": [
+    "Tennis API - ATP WTA ITF /tennis/v2/atp/matches/date/2026-05-16: HTTP Error 404: Not Found",
+    "Tennis API - ATP WTA ITF /tennis/v2/atp/calendar/2026-05-16: HTTP Error 404: Not Found",
+    "FlashScore /api/flashscore/v2/matches/list-by-date?sport_id=tennis&date=2026-05-16: HTTP Error 403: Forbidden",
+    "FlashScore /api/flashscore/v2/events/list?sport_id=tennis&date=2026-05-16: HTTP Error 404: Not Found",
+    "SofaScore /api/sofascore/v1/sport/tennis/scheduled-events/2026-05-16: HTTP Error 404: Not Found",
+    "SofaScore /api/sofascore/v1/events/schedule/tennis/2026-05-16: HTTP Error 404: Not Found",
+    "Tennisprodata /live-results/2026-05-16/: HTTP Error 401: Unauthorized",
+    "Tennisprodata /fixtures/2026-05-16/: HTTP Error 404: Not Found"
+  ],
   "days": [
     {
       "date": "2026-05-15",
@@ -49,32 +58,7 @@
     {
       "date": "2026-05-16",
       "label": "Mañana",
-      "matches": [
-        {
-          "time": "15:30",
-          "player1": "Ruud",
-          "player2": "L.",
-          "tournament": "Internazionali BNL d'Italia",
-          "level": "ATP 1000",
-          "round": "R64",
-          "surface": "Clay",
-          "status": "scheduled",
-          "provider": "ATP Tour",
-          "sourceUrl": "https://www.atptour.com/en/scores/current/rome/416/daily-schedule?day=13"
-        },
-        {
-          "time": "19:00",
-          "player1": "Sinner",
-          "player2": "D.",
-          "tournament": "Internazionali BNL d'Italia",
-          "level": "ATP 1000",
-          "round": "R64",
-          "surface": "Clay",
-          "status": "scheduled",
-          "provider": "ATP Tour",
-          "sourceUrl": "https://www.atptour.com/en/scores/current/rome/416/daily-schedule?day=13"
-        }
-      ]
+      "matches": []
     }
   ]
 }
