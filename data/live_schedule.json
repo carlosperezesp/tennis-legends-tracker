@@ -2,7 +2,16 @@
   "asOf": "2026-05-16",
   "timezone": "Europe/Rome",
   "source": "TennisAPI1 RapidAPI",
-  "errors": [],
+  "errors": [
+    "Tennis API - ATP WTA ITF /tennis/v2/atp/matches/date/2026-05-17: HTTP Error 404: Not Found",
+    "Tennis API - ATP WTA ITF /tennis/v2/atp/calendar/2026-05-17: HTTP Error 404: Not Found",
+    "FlashScore /api/flashscore/v2/matches/list-by-date?sport_id=tennis&date=2026-05-17: HTTP Error 403: Forbidden",
+    "FlashScore /api/flashscore/v2/events/list?sport_id=tennis&date=2026-05-17: HTTP Error 404: Not Found",
+    "SofaScore /api/sofascore/v1/sport/tennis/scheduled-events/2026-05-17: HTTP Error 404: Not Found",
+    "SofaScore /api/sofascore/v1/events/schedule/tennis/2026-05-17: HTTP Error 404: Not Found",
+    "Tennisprodata /live-results/2026-05-17/: HTTP Error 401: Unauthorized",
+    "Tennisprodata /fixtures/2026-05-17/: HTTP Error 404: Not Found"
+  ],
   "days": [
     {
       "date": "2026-05-16",
@@ -337,104 +346,7 @@
     {
       "date": "2026-05-17",
       "label": "Mañana",
-      "matches": [
-        {
-          "time": "09:00",
-          "player1": "Alejandro Tabilo",
-          "player2": "Stan Wawrinka",
-          "tournament": "Geneva, Switzerland",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
-          "player1": "Marco Trungelliti",
-          "player2": "Mariano Navone",
-          "tournament": "Geneva, Switzerland",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
-          "player1": "Sebastián Báez",
-          "player2": "Alex Michelsen",
-          "tournament": "Geneva, Switzerland",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
-          "player1": "Arthur Rinderknech",
-          "player2": "Thiago Agustin Tirante",
-          "tournament": "Geneva, Switzerland",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
-          "player1": "Laslo Djere",
-          "player2": "Juan Manuel Cerundolo",
-          "tournament": "Geneva, Switzerland",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
-          "player1": "Adrian Mannarino",
-          "player2": "Raphael Collignon",
-          "tournament": "Geneva, Switzerland",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
-          "player1": "Stefanos Tsitsipas",
-          "player2": "Giovanni Mpetshi Perricard",
-          "tournament": "Geneva, Switzerland",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
-          "player1": "Jenson Brooksby",
-          "player2": "Casper Ruud",
-          "tournament": "Geneva, Switzerland",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        }
-      ]
+      "matches": []
     }
   ]
 }
