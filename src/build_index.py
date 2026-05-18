@@ -1824,13 +1824,36 @@ def _grand_slam_winners(use_cache: bool = True) -> list:
     return winners
 
 
+def _latest_ranking_source_date() -> date | None:
+    path = DATA_DIR / "_csv_cache" / "atp_rankings_current.csv"
+    if not path.exists():
+        return None
+    with path.open(encoding="utf-8", newline="") as f:
+        latest = max((row.get("ranking_date", "") for row in csv.DictReader(f)), default="")
+    if not latest:
+        return None
+    try:
+        return date(int(latest[:4]), int(latest[4:6]), int(latest[6:8]))
+    except (TypeError, ValueError):
+        return None
+
+
+def _format_spanish_date(day: date | None) -> str:
+    if not day:
+        return "fecha no disponible"
+    months = ("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic")
+    return f"{day.day} {months[day.month - 1]} {day.year}"
+
+
 def render_index(players_data: list, legend_datasets: list, recent_matches: list,
                  live_schedule: dict, legend_comparison: dict, source_count: int,
-                 grand_slam_winners: list | None = None) -> str:
+                 grand_slam_winners: list | None = None,
+                 level_updated_date: date | None = None) -> str:
     players_json = json.dumps(players_data, ensure_ascii=False)
     live_schedule_json = json.dumps(live_schedule, ensure_ascii=False)
     legend_comparison_json = json.dumps(legend_comparison, ensure_ascii=False)
     grand_slam_winners_json = json.dumps(grand_slam_winners or [], ensure_ascii=False)
+    level_updated_label = escape(_format_spanish_date(level_updated_date))
 
     return f"""<!DOCTYPE html>
 <html class="light" lang="es">
@@ -1891,6 +1914,12 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
     .wordmark {{
       font-weight: 700; font-size: 16px; letter-spacing: 0; color: var(--slate-dark);
       text-transform: uppercase;
+    }}
+    .brand-lockup {{ display: flex; align-items: baseline; gap: 14px; min-width: 0; }}
+    .level-updated {{
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1;
+      color: var(--slate-light); text-transform: uppercase; white-space: nowrap;
+      border-left: 1px solid var(--cloud-light); padding-left: 14px;
     }}
     .search-toggle {{
       background: var(--ivory-light); color: var(--slate-dark); border: 1px solid var(--slate-dark);
@@ -2338,6 +2367,8 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
     @media (max-width: 720px) {{
       .app-shell {{ padding: 0 12px 32px; }}
       .topbar {{ padding: 0 16px; }}
+      .brand-lockup {{ flex-direction: column; align-items: flex-start; gap: 4px; }}
+      .level-updated {{ border-left: 0; padding-left: 0; font-size: 10px; white-space: normal; line-height: 1.2; }}
       .hero {{ grid-template-columns: 1fr; gap: 16px; padding: 40px 0 24px; }}
       .hero p {{ font-size: 16px; }}
       .toolbar {{ padding: 16px; border-radius: 16px; }}
@@ -2388,7 +2419,10 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
 
   <!-- Header -->
   <header class="topbar">
-    <div class="wordmark">Legend Tracker</div>
+    <div class="brand-lockup">
+      <div class="wordmark">Legend Tracker</div>
+      <div class="level-updated">Niveles actualizados hasta {level_updated_label}</div>
+    </div>
     <div id="header-search" class="header-search">
       <input id="search-input" class="search-input" type="search" placeholder="Buscar jugador..." oninput="refresh()"/>
       <button class="search-toggle" onclick="toggleSearch()" title="Buscar">
@@ -3988,6 +4022,8 @@ def main():
     print(f"  {len(grand_slam_winners)} Grand Slam winners")
     live_match_count = sum(len(day.get("matches", [])) for day in live_schedule.get("days", []))
     print(f"  Live schedule matches: {live_match_count}")
+    level_updated_date = _latest_ranking_source_date()
+    print(f"  Level freshness: {_format_spanish_date(level_updated_date)}")
 
     # 9. Render and save
     EXAMPLES_DIR.mkdir(parents=True, exist_ok=True)
@@ -3999,6 +4035,7 @@ def main():
         legend_comparison,
         top_n,
         grand_slam_winners,
+        level_updated_date,
     )
     out_path = Path(args.output)
     out_path.write_text(html, encoding="utf-8")
