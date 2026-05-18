@@ -45,18 +45,6 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "09:30",
-          "player1": "Yannick Hanfmann",
-          "player2": "Joao Fonseca",
-          "tournament": "Hamburg, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Canceled",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "10:00",
           "player1": "Francisco Cerundolo",
           "player2": "Alex de Minaur",
@@ -141,30 +129,6 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "12:35",
-          "player1": "Diego Dedura-Palomero",
-          "player2": "Frances Tiafoe",
-          "tournament": "Hamburg, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Ended",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "14:35",
-          "player1": "Tommy Paul",
-          "player2": "Ethan Quinn",
-          "tournament": "Hamburg, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Ended",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "13:00",
           "player1": "Daniel Altmaier",
           "player2": "Rinky Hijikata",
@@ -233,6 +197,42 @@
           "round": "TBD",
           "surface": "TBD",
           "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:30",
+          "player1": "Yannick Hanfmann",
+          "player2": "Joao Fonseca",
+          "tournament": "Hamburg, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Canceled",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "12:35",
+          "player1": "Diego Dedura-Palomero",
+          "player2": "Frances Tiafoe",
+          "tournament": "Hamburg, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "14:35",
+          "player1": "Tommy Paul",
+          "player2": "Ethan Quinn",
+          "tournament": "Hamburg, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -1090,18 +1090,6 @@
         },
         {
           "time": "08:30",
-          "player1": "Sebastián Báez",
-          "player2": "Alex Michelsen",
-          "tournament": "Geneva, Switzerland",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "08:30",
           "player1": "Laslo Djere",
           "player2": "Juan Manuel Cerundolo",
           "tournament": "Geneva, Switzerland",
@@ -1188,6 +1176,18 @@
           "time": "16:00",
           "player1": "Raul Brancaccio",
           "player2": "Stan Wawrinka",
+          "tournament": "Geneva, Switzerland",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "08:30",
+          "player1": "Sebastián Báez",
+          "player2": "Alex Michelsen",
           "tournament": "Geneva, Switzerland",
           "level": "ATP",
           "round": "TBD",
