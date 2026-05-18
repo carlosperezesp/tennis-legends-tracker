@@ -120,6 +120,8 @@ LEGEND_COMPARISON_NAMES = [
     "Roger Federer",
     "Pete Sampras",
     "Andre Agassi",
+    "Gustavo Kuerten",
+    "Albert Costa",
     "Juan Carlos Ferrero",
     "Gaston Gaudio",
     "Marat Safin",
@@ -137,6 +139,8 @@ LEGEND_TOTAL_GS = {
     "Roger Federer": 20,
     "Pete Sampras": 14,
     "Andre Agassi": 8,
+    "Gustavo Kuerten": 3,
+    "Albert Costa": 1,
     "Juan Carlos Ferrero": 1,
     "Gaston Gaudio": 1,
     "Marat Safin": 2,
@@ -1779,6 +1783,314 @@ def _build_legend_comparison(all_historical_stats: dict, benchmark: dict,
     }
 
 
+def _player_universe_from_matches(years_range, use_cache: bool = True) -> list[dict]:
+    """Return player configs for everyone seen in cached ATP matches."""
+    lookup = _load_player_id_lookup(use_cache)
+    by_id = {
+        info["id"]: {"player_id": info["id"], "name": name, "born": info.get("born")}
+        for name, info in lookup.items()
+        if info.get("id") and info.get("born")
+    }
+    seen = set()
+    for year in years_range:
+        for row in sf._fetch_csv(year, use_cache):
+            for key in ("winner_id", "loser_id"):
+                pid = _safe_int(row.get(key), None)
+                if pid in by_id:
+                    seen.add(pid)
+    return [by_id[pid] for pid in sorted(seen)]
+
+
+def _nearest_threshold(age: int, thresholds: dict[int, float]) -> float | None:
+    if age in thresholds:
+        return thresholds[age]
+    if not thresholds:
+        return None
+    nearest = min(thresholds, key=lambda candidate: abs(candidate - age))
+    return thresholds[nearest]
+
+
+def _rg_start_dates(years_range, use_cache: bool = True) -> dict[int, int]:
+    starts = {}
+    for year in years_range:
+        dates = []
+        for row in sf._fetch_csv(year, use_cache):
+            if (row.get("tourney_name") or "").strip() != "Roland Garros":
+                continue
+            d = _safe_int(row.get("tourney_date"), None)
+            if d:
+                dates.append(d)
+        if dates:
+            starts[year] = min(dates)
+    return starts
+
+
+def _snapshot_stats_for_rg_windows(players: list[dict], years_range,
+                                   use_cache: bool = True) -> dict[int, dict[int, dict]]:
+    """Stats by edition using previous RG inclusive through current RG exclusive."""
+    player_ids = {p["player_id"] for p in players}
+    born_by_pid = {p["player_id"]: p.get("born") for p in players if p.get("born")}
+    years = tuple(years_range)
+    rows_by_year = {year: sf._fetch_csv(year, use_cache) for year in years}
+    rg_starts = _rg_start_dates(years, use_cache)
+    current_year = date.today().year
+    snapshots = {}
+
+    for edition_year in range(min(years) + 1, max(years) + 1):
+        start = rg_starts.get(edition_year - 1) or ((edition_year - 1) * 10000 + 101)
+        end = rg_starts.get(edition_year)
+        if not end:
+            end = int(date.today().strftime("%Y%m%d")) + 1 if edition_year == current_year else edition_year * 10000 + 1232
+        accum_by_pid = {
+            pid: {surface: sf._AccumStats() for surface in sf.SURFACES}
+            for pid in player_ids
+        }
+        for year in range(edition_year - 1, edition_year + 1):
+            for row in rows_by_year.get(year, []):
+                d = _safe_int(row.get("tourney_date"), None)
+                if d is None or d < start or d >= end:
+                    continue
+                wid = _safe_int(row.get("winner_id"), None)
+                lid = _safe_int(row.get("loser_id"), None)
+                surface = (row.get("surface") or "").strip() or "Unknown"
+                surface_keys = (surface, "All")
+                if wid in player_ids:
+                    for key in surface_keys:
+                        if key not in accum_by_pid[wid]:
+                            accum_by_pid[wid][key] = sf._AccumStats()
+                        accum_by_pid[wid][key].add_as_winner(row)
+                if lid in player_ids:
+                    for key in surface_keys:
+                        if key not in accum_by_pid[lid]:
+                            accum_by_pid[lid][key] = sf._AccumStats()
+                        accum_by_pid[lid][key].add_as_loser(row)
+        by_pid = {}
+        for pid, surfaces in accum_by_pid.items():
+            born = born_by_pid.get(pid)
+            if not born:
+                continue
+            surface_stats = {}
+            for surface, acc in surfaces.items():
+                stats = acc.to_dict()
+                if not stats:
+                    continue
+                stats["age"] = _age_at(born, edition_year)
+                surface_stats[surface] = stats
+            if surface_stats:
+                by_pid[pid] = surface_stats
+        snapshots[edition_year] = by_pid
+    return snapshots
+
+
+def _snapshot_stats_before_rg(players: list[dict], years_range,
+                              use_cache: bool = True) -> dict[int, dict[int, dict]]:
+    """Career-to-date stats by edition, ending before that year's Roland Garros."""
+    player_ids = {p["player_id"] for p in players}
+    born_by_pid = {p["player_id"]: p.get("born") for p in players if p.get("born")}
+    years = tuple(years_range)
+    rows_by_year = {year: sf._fetch_csv(year, use_cache) for year in years}
+    rg_starts = _rg_start_dates(years, use_cache)
+    current_year = date.today().year
+    snapshots = {}
+
+    for edition_year in range(min(years) + 1, max(years) + 1):
+        end = rg_starts.get(edition_year)
+        if not end:
+            end = int(date.today().strftime("%Y%m%d")) + 1 if edition_year == current_year else edition_year * 10000 + 1232
+        accum_by_pid = {
+            pid: {surface: sf._AccumStats() for surface in sf.SURFACES}
+            for pid in player_ids
+        }
+        for year in range(min(years), edition_year + 1):
+            for row in rows_by_year.get(year, []):
+                d = _safe_int(row.get("tourney_date"), None)
+                if d is None or d >= end:
+                    continue
+                wid = _safe_int(row.get("winner_id"), None)
+                lid = _safe_int(row.get("loser_id"), None)
+                surface = (row.get("surface") or "").strip() or "Unknown"
+                surface_keys = (surface, "All")
+                if wid in player_ids:
+                    for key in surface_keys:
+                        if key not in accum_by_pid[wid]:
+                            accum_by_pid[wid][key] = sf._AccumStats()
+                        accum_by_pid[wid][key].add_as_winner(row)
+                if lid in player_ids:
+                    for key in surface_keys:
+                        if key not in accum_by_pid[lid]:
+                            accum_by_pid[lid][key] = sf._AccumStats()
+                        accum_by_pid[lid][key].add_as_loser(row)
+        by_pid = {}
+        for pid, surfaces in accum_by_pid.items():
+            born = born_by_pid.get(pid)
+            if not born:
+                continue
+            surface_stats = {}
+            for surface, acc in surfaces.items():
+                stats = acc.to_dict()
+                if not stats:
+                    continue
+                stats["age"] = _age_at(born, edition_year)
+                surface_stats[surface] = stats
+            if surface_stats:
+                by_pid[pid] = surface_stats
+        snapshots[edition_year] = by_pid
+    return snapshots
+
+
+def _build_rg_requests_data(players_data: list[dict], benchmark: dict,
+                            valid_sims_by_surface: dict, use_cache: bool = True) -> dict:
+    """Build the REQUESTS tab payload for Roland Garros contender density."""
+    current_year = date.today().year
+    years = range(1991, current_year + 1)
+    print("Building Roland Garros requests data...")
+    universe = _player_universe_from_matches(years, use_cache)
+    print(f"  RG contender universe: {len(universe)} players")
+    rg_starts = _rg_start_dates(years, use_cache)
+    career_snapshot_stats = _snapshot_stats_before_rg(universe, years, use_cache=use_cache)
+    recent_snapshot_stats = _snapshot_stats_for_rg_windows(universe, years, use_cache=use_cache)
+    by_name = {p["name"]: p for p in universe}
+    active_by_name = {p.get("name"): p for p in players_data if p.get("name")}
+    valid_clay_sims = valid_sims_by_surface.get("Clay") or []
+
+    rg_winners = [
+        row for row in _grand_slam_winners(use_cache=use_cache)
+        if row.get("tournament") == "Roland Garros" and 1991 <= int(row.get("year", 0)) <= current_year - 1
+    ]
+    winner_points = []
+    for slam in rg_winners:
+        info = by_name.get(slam.get("winner"))
+        if not info:
+            continue
+        stats = ((career_snapshot_stats.get(slam["year"]) or {}).get(info["player_id"]) or {}).get("Clay") or {}
+        point = _historical_level_point(stats, benchmark, valid_clay_sims, None, "Clay")
+        if not point or stats.get("age") is None:
+            continue
+        winner_points.append({
+            "year": slam["year"],
+            "winner": slam["winner"],
+            "age": int(stats["age"]),
+            "level": round(point["level"], 1),
+        })
+
+    def thresholds_from(points: list[dict]) -> dict[int, float]:
+        by_age: dict[int, list[float]] = {}
+        for point in points:
+            by_age.setdefault(point["age"], []).append(point["level"])
+        return {
+            age: round(sum(values) / len(values), 1)
+            for age, values in by_age.items()
+            if values
+        }
+
+    final_thresholds = thresholds_from(winner_points)
+    final_threshold_samples = {}
+    for point in winner_points:
+        final_threshold_samples[point["age"]] = final_threshold_samples.get(point["age"], 0) + 1
+
+    editions = []
+    for edition_year in range(1999, current_year + 1):
+        window_start = rg_starts.get(edition_year - 1) or ((edition_year - 1) * 10000 + 101)
+        window_end = rg_starts.get(edition_year)
+        if not window_end:
+            window_end = int(date.today().strftime("%Y%m%d")) + 1 if edition_year == current_year else edition_year * 10000 + 1232
+        career_start = min(years) * 10000 + 101
+        prior_winner_points = [point for point in winner_points if point["year"] < edition_year]
+        thresholds = thresholds_from(prior_winner_points) or final_thresholds
+        contenders = []
+        snapshot_rows = []
+        for p in universe:
+            if edition_year == current_year and p.get("name") not in active_by_name:
+                continue
+            career_stats = ((career_snapshot_stats.get(edition_year) or {}).get(p["player_id"]) or {}).get("Clay") or {}
+            recent_stats = ((recent_snapshot_stats.get(edition_year) or {}).get(p["player_id"]) or {}).get("Clay") or {}
+            if (recent_stats.get("matches") or 0) < 3:
+                continue
+            age = career_stats.get("age")
+            if age is None:
+                continue
+            point = _historical_level_point(career_stats, benchmark, valid_clay_sims, None, "Clay")
+            if not point:
+                continue
+            threshold = _nearest_threshold(int(age), thresholds)
+            if threshold is None:
+                continue
+            active_row = active_by_name.get(p.get("name")) or {}
+            career_level = round(point["level"], 1)
+            level = career_level
+            if edition_year == current_year:
+                active_level = (active_row.get("tourPctBySurface") or {}).get("Clay")
+                if active_level is None:
+                    continue
+                level = round(active_level, 1)
+            row = {
+                "name": p.get("name"),
+                "rank": active_row.get("rank") if edition_year == current_year else None,
+                "age": int(age),
+                "level": level,
+                "careerClayLevel": career_level,
+                "threshold": threshold,
+                "delta": round(level - threshold, 1),
+                "score": round(level - threshold, 1),
+                "careerClayMatches": career_stats.get("matches") or 0,
+                "recentClayMatches": recent_stats.get("matches") or 0,
+            }
+            snapshot_rows.append(row)
+        favorites = sorted(snapshot_rows, key=lambda row: row["level"], reverse=True)[:10]
+        for idx, row in enumerate(favorites, start=1):
+            row["favoriteRank"] = idx
+        contender_names = {row["name"] for row in favorites}
+        contenders = [
+            row for row in favorites
+            if row["name"] in contender_names
+            and row["score"] >= 0
+            and (edition_year != current_year or (row.get("rank") is not None and row["rank"] <= 32))
+        ]
+        contenders.sort(key=lambda row: (row["level"], row["delta"]), reverse=True)
+        top3 = favorites[:3]
+        top10_levels = [row["level"] for row in favorites]
+        difficulty = None
+        if top10_levels:
+            avg_top3 = sum(row["level"] for row in top3) / len(top3)
+            avg_top10 = sum(top10_levels) / len(top10_levels)
+            depth = min(top10_levels)
+            difficulty = round((avg_top3 * 0.5) + (avg_top10 * 0.3) + (depth * 0.2), 1)
+        editions.append({
+            "year": edition_year,
+            "snapshotYear": edition_year,
+            "careerStart": career_start,
+            "windowStart": window_start,
+            "windowEndExclusive": window_end,
+            "difficulty": difficulty,
+            "count": len(contenders),
+            "contenders": contenders[:12],
+            "favorites": favorites,
+        })
+
+    current = next((row for row in editions if row["year"] == current_year), {"count": 0, "contenders": []})
+    difficulty_ranked = sorted(
+        [row for row in editions if row.get("difficulty") is not None],
+        key=lambda row: row["difficulty"],
+        reverse=True,
+    )
+    for rank, row in enumerate(difficulty_ranked, start=1):
+        row["difficultyRank"] = rank
+    max_count = max((row["count"] for row in editions), default=0)
+    densest = [row for row in editions if row["count"] == max_count]
+    return {
+        "currentYear": current_year,
+        "current": current,
+        "densest": densest,
+        "editions": editions,
+        "thresholds": [
+            {"age": age, "level": level, "sample": final_threshold_samples.get(age, 0)}
+            for age, level in sorted(final_thresholds.items())
+        ],
+        "winnerSample": winner_points,
+        "method": "Indice aspirante = estar en el Top 10 de nivel en tierra de esa edicion, tener actividad reciente y superar el corte historico previo de campeones de Roland Garros a esa edad. Las ediciones historicas usan carrera previa en tierra; la edicion actual usa el nivel activo actual y muestra la carrera previa como contexto. En la edicion actual se exige tambien ranking top 32. La dificultad pondera Top 3, promedio Top 10 y profundidad del decimo favorito.",
+    }
+
+
 def _next_matches_from_schedule(live_schedule: dict) -> dict:
     result = {}
     for day in live_schedule.get("days", []):
@@ -1848,11 +2160,13 @@ def _format_spanish_date(day: date | None) -> str:
 def render_index(players_data: list, legend_datasets: list, recent_matches: list,
                  live_schedule: dict, legend_comparison: dict, source_count: int,
                  grand_slam_winners: list | None = None,
-                 level_updated_date: date | None = None) -> str:
+                 level_updated_date: date | None = None,
+                 requests_data: dict | None = None) -> str:
     players_json = json.dumps(players_data, ensure_ascii=False)
     live_schedule_json = json.dumps(live_schedule, ensure_ascii=False)
     legend_comparison_json = json.dumps(legend_comparison, ensure_ascii=False)
     grand_slam_winners_json = json.dumps(grand_slam_winners or [], ensure_ascii=False)
+    requests_data_json = json.dumps(requests_data or {}, ensure_ascii=False)
     level_updated_label = escape(_format_spanish_date(level_updated_date))
 
     return f"""<!DOCTYPE html>
@@ -1887,14 +2201,14 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       width: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
       overscroll-behavior-x: contain;
     }}
-    .tabs-track {{ display: flex; width: 400%; align-items: flex-start; }}
-    .tab-panel {{ width: 25%; min-width: 25%; scroll-snap-align: start; }}
+    .tabs-track {{ display: flex; width: 500%; align-items: flex-start; }}
+    .tab-panel {{ width: 20%; min-width: 20%; scroll-snap-align: start; }}
     .tab-panel.app-shell {{ max-width: none; margin: 0; }}
     .tab-panel.app-shell > * {{ max-width: 1200px; margin-left: auto; margin-right: auto; }}
     .app-shell {{ max-width: 1200px; margin: 0 auto; padding: 0 24px 48px; }}
     .slider-nav {{
       position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 60;
-      display: grid; grid-template-columns: repeat(4, minmax(94px, 1fr)); gap: 8px;
+      display: grid; grid-template-columns: repeat(5, minmax(84px, 1fr)); gap: 8px;
       width: min(620px, calc(100vw - 24px)); padding: 8px;
       background: rgba(240, 238, 230, 0.92); border: 1px solid var(--slate-dark);
       backdrop-filter: blur(10px);
@@ -2364,6 +2678,65 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
     .active-current-bar {{ height: 8px; background: var(--cloud-light); position: relative; overflow: hidden; }}
     .active-current-fill {{ height: 100%; background: var(--slate-dark); }}
     .active-current-card.alt .active-current-fill {{ background: var(--clay); }}
+    .requests-page {{ padding-top: 48px; padding-bottom: 48px; }}
+    .requests-hero {{
+      display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: end;
+      padding: 24px 0 28px; border-bottom: 1px solid var(--slate-dark);
+    }}
+    .requests-hero h2 {{
+      margin: 0; font-family: 'Lora', serif; font-size: clamp(44px, 7vw, 84px);
+      line-height: 1; font-weight: 400; letter-spacing: 0;
+    }}
+    .requests-grid {{ display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr); gap: 16px; padding-top: 18px; }}
+    .request-card {{ background: var(--ivory-medium); border: 1px solid var(--slate-dark); }}
+    .request-card.wide {{ grid-column: 1 / -1; }}
+    .request-card h3 {{ margin: 0; padding: 16px 18px; border-bottom: 1px solid var(--slate-dark); font-size: 20px; }}
+    .request-card-head {{
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 14px 18px; border-bottom: 1px solid var(--slate-dark);
+    }}
+    .request-card-head h3 {{ padding: 0; border: 0; }}
+    .request-sort {{
+      height: 34px; border: 1px solid var(--slate-dark); background: var(--ivory-light);
+      color: var(--slate-dark); font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      text-transform: uppercase; padding: 0 10px;
+    }}
+    .request-hero-number {{ font-family: 'Lora', serif; font-size: clamp(72px, 12vw, 132px); line-height: 0.9; padding: 22px 18px 8px; }}
+    .request-copy {{ margin: 0; padding: 0 18px 18px; color: var(--slate-light); line-height: 1.45; }}
+    .request-row {{
+      display: grid; grid-template-columns: 42px minmax(0, 1fr) 52px 58px 58px;
+      gap: 10px; align-items: center; padding: 12px 18px; border-top: 1px solid var(--cloud-light);
+    }}
+    .request-row:first-of-type {{ border-top: 0; }}
+    .request-rank, .request-meta, .request-num {{
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cloud-dark); text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }}
+    .request-name {{ font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+    .request-num {{ text-align: right; color: var(--slate-dark); }}
+    .request-delta {{ color: var(--olive); font-weight: 800; }}
+    .request-edition {{ border-top: 1px solid var(--cloud-light); }}
+    .request-edition:first-of-type {{ border-top: 0; }}
+    .request-edition summary {{ list-style: none; cursor: pointer; }}
+    .request-edition summary::-webkit-details-marker {{ display: none; }}
+    .request-edition[open] .request-edition-row {{ background: var(--oat); }}
+    .request-edition-row {{
+      display: grid; grid-template-columns: 58px minmax(0, 1fr) 52px;
+      gap: 12px; align-items: center; padding: 13px 18px;
+    }}
+    .request-edition-year {{ font-family: 'JetBrains Mono', monospace; color: var(--cloud-dark); font-size: 12px; }}
+    .request-bar {{ height: 8px; background: var(--cloud-light); overflow: hidden; }}
+    .request-bar span {{ display: block; height: 100%; background: var(--slate-dark); }}
+    .request-edition-players {{ display: grid; padding: 4px 0 8px; border-top: 1px solid var(--cloud-light); background: rgba(250,249,245,0.42); }}
+    .request-window {{
+      padding: 10px 18px 4px; font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: var(--cloud-dark); text-transform: uppercase; line-height: 1.45;
+    }}
+    .request-mini-row {{
+      display: grid; grid-template-columns: minmax(0, 1fr) 44px 50px 56px;
+      gap: 8px; align-items: center; padding: 8px 18px; font-size: 12px;
+    }}
+    .request-note {{ grid-column: 1 / -1; font-family: 'JetBrains Mono', monospace; color: var(--cloud-dark); font-size: 10px; text-transform: uppercase; line-height: 1.45; }}
     @media (max-width: 720px) {{
       .app-shell {{ padding: 0 12px 32px; }}
       .topbar {{ padding: 0 16px; }}
@@ -2391,7 +2764,7 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       .profile-stat-name {{ font-size: 12px; }}
       .profile-stat-val {{ font-size: 11px; }}
       .profile-stat-label {{ font-size: 9px; }}
-      .slider-nav {{ grid-template-columns: repeat(4, 1fr); gap: 5px; bottom: 8px; width: calc(100vw - 16px); padding: 6px; }}
+      .slider-nav {{ grid-template-columns: repeat(5, 1fr); gap: 5px; bottom: 8px; width: calc(100vw - 16px); padding: 6px; }}
       .slider-nav-btn {{ font-size: 9px; padding: 9px 3px; }}
       .schedule-page {{ padding-top: 28px; }}
       .schedule-hero {{ align-items: flex-start; flex-direction: column; }}
@@ -2412,6 +2785,13 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       .legend-key::before {{ width: 26px; }}
       .active-compare-summary {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
       .active-compare-grid {{ grid-template-columns: 1fr; }}
+      .requests-page {{ padding-top: 28px; }}
+      .requests-hero {{ grid-template-columns: 1fr; }}
+      .requests-grid {{ grid-template-columns: 1fr; }}
+      .request-row {{ grid-template-columns: 32px minmax(0, 1fr) 42px; padding: 12px 14px; }}
+      .request-row .request-num:nth-last-child(-n+2) {{ display: none; }}
+      .request-mini-row {{ grid-template-columns: minmax(0, 1fr) 42px; padding: 8px 14px; }}
+      .request-mini-row .request-num:nth-last-child(-n+2) {{ display: none; }}
     }}
   </style>
 </head>
@@ -2485,6 +2865,17 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
         </section>
         <section id="legends-view" class="legends-grid"></section>
       </main>
+
+      <main id="requests-tab" class="tab-panel app-shell requests-page">
+        <section class="requests-hero">
+          <h2>Reports</h2>
+          <div class="schedule-meta">
+            <div>Roland Garros 2026</div>
+            <div>zona aspirantes por edad</div>
+          </div>
+        </section>
+        <section id="requests-view" class="requests-grid"></section>
+      </main>
     </div>
   </div>
 
@@ -2493,12 +2884,14 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
     <button id="nav-player" class="slider-nav-btn" type="button" onclick="goToTab('player-tab')">Jugador</button>
     <button id="nav-schedule" class="slider-nav-btn" type="button" onclick="goToTab('schedule-tab')">Partidos</button>
     <button id="nav-legends" class="slider-nav-btn" type="button" onclick="goToTab('legends-tab')">Comparador</button>
+    <button id="nav-requests" class="slider-nav-btn" type="button" onclick="goToTab('requests-tab')">Reports</button>
   </nav>
 
   <script>
 const ALL_PLAYERS = {players_json};
 const LIVE_SCHEDULE = {live_schedule_json};
 const LEGEND_COMPARISON = {legend_comparison_json};
+const REQUESTS_DATA = {requests_data_json};
 const RANKING_SOURCE_COUNT = {source_count};
 const SURFACES = [
   {{ key: 'All', label: 'Global' }},
@@ -3492,6 +3885,106 @@ function renderLegends() {{
     '<aside class="active-benchmark"><h3>Top activo por nivel</h3>' + activeRows + '</aside>';
 }}
 
+function renderRequests() {{
+  const wrap = document.getElementById('requests-view');
+  if (!wrap) return;
+  const data = REQUESTS_DATA || {{}};
+  const current = data.current || {{}};
+  const contenders = current.contenders || [];
+  const densest = (data.densest || [])[0] || {{}};
+  const favoriteSort = window.requestsFavoriteSort || 'difficulty';
+  const editions = (data.editions || []).slice().sort((a, b) => b.count - a.count || b.year - a.year).slice(0, 10);
+  const favoriteEditions = (data.editions || []).slice().sort((a, b) => {{
+    if (favoriteSort === 'year') return b.year - a.year;
+    return (b.difficulty || 0) - (a.difficulty || 0) || b.year - a.year;
+  }});
+  const maxCount = Math.max(1, ...editions.map(row => row.count || 0));
+  const maxDifficulty = Math.max(1, ...favoriteEditions.map(row => row.difficulty || 0));
+  const signed = value => (value >= 0 ? '+' : '') + value.toFixed(1);
+  const formatCompactDate = value => {{
+    const text = String(value || '');
+    if (text.length !== 8) return '';
+    return text.slice(6, 8) + '/' + text.slice(4, 6) + '/' + text.slice(0, 4);
+  }};
+  const windowLabel = row => {{
+    const start = formatCompactDate(row.careerStart || row.windowStart);
+    const end = formatCompactDate(row.windowEndExclusive);
+    const difficulty = row.difficulty != null ? ' · dificultad ' + row.difficulty.toFixed(1) + (row.difficultyRank ? ' (#' + row.difficultyRank + ')' : '') : '';
+    return start && end ? 'Nivel: carrera en tierra desde ' + start + ' hasta antes de ' + end + difficulty : '';
+  }};
+  const contenderRows = contenders.length ? contenders.map((p, idx) =>
+    '<div class="request-row">' +
+      '<div class="request-rank">' + (idx + 1) + '</div>' +
+      '<div><div class="request-name">' + p.name + '</div><div class="request-meta">ATP ' + (p.rank || '&#8212;') + ' · ' + p.age + ' años</div></div>' +
+      '<div class="request-num">' + Math.round(p.level) + '</div>' +
+      '<div class="request-num">' + Math.round(p.threshold) + '</div>' +
+      '<div class="request-num request-delta">' + signed(p.score ?? p.delta) + '</div>' +
+    '</div>'
+  ).join('') : '<div class="empty-schedule">Sin jugadores por encima del umbral con datos suficientes.</div>';
+  const playerRowsForEdition = (row, key) => {{
+    const rows = row[key] || [];
+    if (!rows.length) return '<div class="empty-schedule">Sin nombres disponibles para esta edicion.</div>';
+    const meta = windowLabel(row);
+    return '<div class="request-edition-players">' + (meta ? '<div class="request-window">' + meta + '</div>' : '') + rows.map(p =>
+      '<div class="request-mini-row">' +
+        '<div><div class="request-name">' + p.name + '</div><div class="request-meta">' + p.age + ' años · indice ' + signed(p.score ?? p.delta) + ' · tierra ' + (p.careerClayMatches || 0) + 'p' + (p.careerClayLevel != null ? ' · carrera ' + p.careerClayLevel.toFixed(1) : '') + '</div></div>' +
+        '<div class="request-num">' + Math.round(p.level) + '</div>' +
+        '<div class="request-num">' + Math.round(p.threshold) + '</div>' +
+        '<div class="request-num request-delta">' + signed(p.score ?? p.delta) + '</div>' +
+      '</div>'
+    ).join('') + '</div>';
+  }};
+  const editionRows = editions.map((row, idx) =>
+    '<details class="request-edition" ' + (idx === 0 ? 'open' : '') + '>' +
+      '<summary class="request-edition-row">' +
+        '<div class="request-edition-year">' + row.year + '</div>' +
+        '<div class="request-bar"><span style="width:' + Math.min(100, (row.count || 0) / maxCount * 100).toFixed(0) + '%"></span></div>' +
+        '<div class="request-num">' + row.count + '</div>' +
+      '</summary>' +
+      playerRowsForEdition(row, 'contenders') +
+    '</details>'
+  ).join('');
+  const favoriteRows = favoriteEditions.map((row, idx) =>
+    '<details class="request-edition" ' + (idx === 0 ? 'open' : '') + '>' +
+      '<summary class="request-edition-row">' +
+        '<div class="request-edition-year">' + row.year + '</div>' +
+        '<div class="request-bar"><span style="width:' + Math.min(100, ((row.difficulty || 0) / maxDifficulty) * 100).toFixed(0) + '%"></span></div>' +
+        '<div class="request-num">' + (row.difficulty != null ? row.difficulty.toFixed(1) : '&#8212;') + '</div>' +
+      '</summary>' +
+      playerRowsForEdition(row, 'favorites') +
+    '</details>'
+  ).join('');
+  const topNames = (densest.contenders || []).slice(0, 5).map(p => p.name).join(', ');
+  wrap.innerHTML =
+    '<section class="request-card">' +
+      '<h3>Aspirantes reales RG ' + (data.currentYear || 2026) + '</h3>' +
+      '<div class="request-hero-number">' + (current.count || 0) + '</div>' +
+      '<p class="request-copy">Jugadores en el Top 10 de nivel en tierra que tambien superan el corte historico previo para su edad. En 2026 usa nivel activo actual.</p>' +
+      '<div class="request-row" style="font-family:JetBrains Mono,monospace;text-transform:uppercase;color:var(--cloud-dark);font-size:10px">' +
+        '<div>#</div><div>Jugador</div><div class="request-num">Nivel</div><div class="request-num">Corte</div><div class="request-num">Indice</div>' +
+      '</div>' +
+      contenderRows +
+    '</section>' +
+    '<section class="request-card">' +
+      '<h3>Edicion con mas aspirantes</h3>' +
+      '<div class="request-hero-number">' + (densest.year || '&#8212;') + '</div>' +
+      '<p class="request-copy">' + (densest.year ? densest.count + ' jugadores en zona aspirantes. ' + (topNames ? 'Cabeza de lista: ' + topNames + '.' : '') : 'Sin historico suficiente.') + '</p>' +
+      editionRows +
+      '<p class="request-copy request-note">' + (data.method || '') + '</p>' +
+    '</section>' +
+    '<section class="request-card wide">' +
+      '<div class="request-card-head">' +
+        '<h3>Top 10 favoritos por nivel + dificultad</h3>' +
+        '<select class="request-sort" onchange="window.requestsFavoriteSort=this.value; renderRequests()">' +
+          '<option value="difficulty" ' + (favoriteSort === 'difficulty' ? 'selected' : '') + '>Ranking dificultad</option>' +
+          '<option value="year" ' + (favoriteSort === 'year' ? 'selected' : '') + '>Año</option>' +
+        '</select>' +
+      '</div>' +
+      '<p class="request-copy">Ordenado por dificultad: 50% promedio Top 3, 30% promedio Top 10 y 20% nivel del decimo favorito. En 2026 usa nivel activo actual.</p>' +
+      favoriteRows +
+    '</section>';
+}}
+
 function normaliseName(name) {{
   return (name || '')
     .toLowerCase()
@@ -3644,7 +4137,7 @@ function goToTab(id) {{
 function updateSliderNav() {{
   const viewport = document.getElementById('tabs-viewport');
   if (!viewport) return;
-  const ids = ['ranking-tab', 'player-tab', 'schedule-tab', 'legends-tab'];
+  const ids = ['ranking-tab', 'player-tab', 'schedule-tab', 'legends-tab', 'requests-tab'];
   const index = Math.max(0, Math.min(ids.length - 1, Math.round(viewport.scrollLeft / Math.max(1, viewport.clientWidth))));
   const activeId = ids[index];
   for (const id of ids) {{
@@ -3683,6 +4176,7 @@ function refresh() {{
   renderPlayerDetail();
   renderSchedule();
   renderLegends();
+  renderRequests();
 }}
 
 window.selectPlayer = function(name) {{
@@ -4020,6 +4514,16 @@ def main():
     print(f"  {len(recent_matches)} recent matches (GS/Masters/500/250/Davis)")
     grand_slam_winners = _grand_slam_winners(use_cache=use_cache)
     print(f"  {len(grand_slam_winners)} Grand Slam winners")
+    requests_data = _build_rg_requests_data(
+        players_data,
+        benchmark,
+        valid_sims_by_surface,
+        use_cache=use_cache,
+    )
+    print(
+        "  RG 2026 aspirants: "
+        f"{requests_data.get('current', {}).get('count', 0)}"
+    )
     live_match_count = sum(len(day.get("matches", [])) for day in live_schedule.get("days", []))
     print(f"  Live schedule matches: {live_match_count}")
     level_updated_date = _latest_ranking_source_date()
@@ -4036,6 +4540,7 @@ def main():
         top_n,
         grand_slam_winners,
         level_updated_date,
+        requests_data,
     )
     out_path = Path(args.output)
     out_path.write_text(html, encoding="utf-8")
