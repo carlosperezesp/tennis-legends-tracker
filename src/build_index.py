@@ -1801,11 +1801,36 @@ def _next_matches_from_schedule(live_schedule: dict) -> dict:
     return result
 
 
+def _grand_slam_winners(use_cache: bool = True) -> list:
+    """Read men's Grand Slam champions from Sackmann finals."""
+    winners = []
+    for year in range(1990, date.today().year + 1):
+        try:
+            rows = sf._fetch_csv(year, use_cache)
+        except Exception:
+            continue
+        for row in rows:
+            if (row.get("tourney_level") or "").strip() != "G":
+                continue
+            if (row.get("round") or "").strip() != "F":
+                continue
+            winners.append({
+                "year": year,
+                "tournament": (row.get("tourney_name") or "").title(),
+                "surface": (row.get("surface") or "").strip(),
+                "winner": row.get("winner_name") or "",
+            })
+    winners.sort(key=lambda row: (row["year"], row["tournament"]))
+    return winners
+
+
 def render_index(players_data: list, legend_datasets: list, recent_matches: list,
-                 live_schedule: dict, legend_comparison: dict, source_count: int) -> str:
+                 live_schedule: dict, legend_comparison: dict, source_count: int,
+                 grand_slam_winners: list | None = None) -> str:
     players_json = json.dumps(players_data, ensure_ascii=False)
     live_schedule_json = json.dumps(live_schedule, ensure_ascii=False)
     legend_comparison_json = json.dumps(legend_comparison, ensure_ascii=False)
+    grand_slam_winners_json = json.dumps(grand_slam_winners or [], ensure_ascii=False)
 
     return f"""<!DOCTYPE html>
 <html class="light" lang="es">
@@ -2269,6 +2294,13 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
     .player-line {{ fill: none; stroke: var(--clay); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }}
     .legend-dot {{ fill: var(--slate-dark); }}
     .player-dot {{ fill: var(--clay); }}
+    .slam-star {{
+      font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700;
+      text-anchor: middle; dominant-baseline: central; paint-order: stroke;
+      stroke: var(--ivory-medium); stroke-width: 4px;
+    }}
+    .slam-star.legend {{ fill: var(--slate-dark); }}
+    .slam-star.player {{ fill: var(--clay); }}
     .legend-compare-legend {{
       display: grid; gap: 12px; font-family: 'JetBrains Mono', monospace;
       font-size: 18px; color: var(--cloud-dark); text-transform: uppercase;
@@ -2440,10 +2472,15 @@ const SURFACES = [
   {{ key: 'Clay', label: 'Tierra' }},
   {{ key: 'Grass', label: 'Hierba' }},
 ];
+const GRAND_SLAM_WINNERS = {grand_slam_winners_json};
+const PROFILE_SLAM_MEMBERS = {{
+  'Perfil Big 3': ['Novak Djokovic', 'Rafael Nadal', 'Roger Federer'],
+  'Perfil Sampras/Agassi': ['Pete Sampras', 'Andre Agassi'],
+}};
 
 let sortKey = 'rank', sortDir = 1, activePlayer = null, activeSurface = 'All', rankingSurface = 'All', activeLegend = null;
 let activeComparePlayerA = null, activeComparePlayerB = null, activeCompareMode = 'age', activeCompareSurface = 'All';
-let activeCompareQueryA = '', activeCompareQueryB = '';
+let activeCompareQueryA = '', activeCompareQueryB = '', showGrandSlamMarks = false;
 
 function getQ() {{
   return (document.getElementById('search-input')?.value || '').toLowerCase().trim();
@@ -2972,6 +3009,44 @@ function surfaceLabel(surface) {{
   return (SURFACES.find(s => s.key === surface) || SURFACES[0]).label;
 }}
 
+function slamSurfaceMatches(slam, surface) {{
+  return surface === 'All' || slam.surface === surface;
+}}
+
+function slamEntityNames(entity) {{
+  if (!entity) return [];
+  return entity.members || PROFILE_SLAM_MEMBERS[entity.name] || [entity.name];
+}}
+
+function hasSlamInYear(entity, year, surface) {{
+  const slamYear = Number(year);
+  if (!Number.isFinite(slamYear)) return false;
+  const names = new Set(slamEntityNames(entity).map(normaliseName).filter(Boolean));
+  if (!names.size) return false;
+  return GRAND_SLAM_WINNERS.some(slam =>
+    slam.year === slamYear &&
+    slamSurfaceMatches(slam, surface) &&
+    names.has(normaliseName(slam.winner))
+  );
+}}
+
+function slamStarsFor(series, entity, xFor, yFor, xKey, cls) {{
+  if (!showGrandSlamMarks) return '';
+  const seen = new Set();
+  return series.map(point => {{
+    const year = Number(point.year);
+    if (!Number.isFinite(year) || !hasSlamInYear(entity, year, activeCompareSurface)) return '';
+    const key = year + ':' + point[xKey] + ':' + Math.round(point.level * 10);
+    if (seen.has(key)) return '';
+    seen.add(key);
+    return '<text class="slam-star ' + cls + '" x="' + xFor(point[xKey]).toFixed(1) + '" y="' + (yFor(point.level) - 15).toFixed(1) + '">&#9733;</text>';
+  }}).join('');
+}}
+
+function slamToggleButton() {{
+  return '<button class="' + (showGrandSlamMarks ? 'active' : '') + '" onclick="toggleGrandSlamMarks()" title="Marcar años con Grand Slam">GS &#9733;</button>';
+}}
+
 function currentPlayerPoint(p, surface) {{
   const level = currentLevelFor(p, surface || 'All');
   if (level == null || p?.age == null) return null;
@@ -3061,6 +3136,8 @@ function compareLegendChart(legend, player) {{
       '<polyline class="player-line" points="' + lineFor(playerSeries) + '"></polyline>' +
       dotsFor(legendSeries, 'legend-dot') +
       dotsFor(playerSeries, 'player-dot') +
+      slamStarsFor(legendSeries, legend, xFor, yFor, 'age', 'legend') +
+      slamStarsFor(playerSeries, player, xFor, yFor, 'age', 'player') +
       '<circle class="legend-dot" cx="' + xFor(legendPeak.age).toFixed(1) + '" cy="' + yFor(legendPeak.level).toFixed(1) + '" r="6"></circle>' +
       '<circle class="player-dot" cx="' + xFor(playerLatest.age).toFixed(1) + '" cy="' + yFor(playerLatest.level).toFixed(1) + '" r="6"></circle>' +
       '<text x="' + left + '" y="' + (h - 12) + '" font-size="11" fill="#87867f" font-family="JetBrains Mono">edad ' + minAge + '</text>' +
@@ -3167,6 +3244,8 @@ function renderActiveAgeComparison(playerA, playerB) {{
       '<polyline class="player-line" points="' + lineFor(seriesB) + '"></polyline>' +
       dotsFor(seriesA, 'legend-dot') +
       dotsFor(seriesB, 'player-dot') +
+      slamStarsFor(seriesA, playerA, xFor, yFor, 'age', 'legend') +
+      slamStarsFor(seriesB, playerB, xFor, yFor, 'age', 'player') +
       '<circle class="legend-dot" cx="' + xFor(peakA.age).toFixed(1) + '" cy="' + yFor(peakA.level).toFixed(1) + '" r="6"></circle>' +
       '<circle class="player-dot" cx="' + xFor(peakB.age).toFixed(1) + '" cy="' + yFor(peakB.level).toFixed(1) + '" r="6"></circle>' +
       '<text x="' + left + '" y="' + (h - 12) + '" font-size="11" fill="#87867f" font-family="JetBrains Mono">edad ' + minAge + '</text>' +
@@ -3241,6 +3320,8 @@ function renderActiveCurrentChart(playerA, playerB) {{
       '<polyline class="player-line" points="' + lineFor(seriesB) + '"></polyline>' +
       dotsFor(seriesA, 'legend-dot') +
       dotsFor(seriesB, 'player-dot') +
+      slamStarsFor(seriesA, playerA, xFor, yFor, 'year', 'legend') +
+      slamStarsFor(seriesB, playerB, xFor, yFor, 'year', 'player') +
       '<circle class="legend-dot" cx="' + xFor(latestA.year).toFixed(1) + '" cy="' + yFor(latestA.level).toFixed(1) + '" r="6"></circle>' +
       '<circle class="player-dot" cx="' + xFor(latestB.year).toFixed(1) + '" cy="' + yFor(latestB.level).toFixed(1) + '" r="6"></circle>' +
       '<text x="' + left + '" y="' + (h - 12) + '" font-size="11" fill="#87867f" font-family="JetBrains Mono">' + minYear + '</text>' +
@@ -3316,7 +3397,7 @@ function renderActiveComparator() {{
           '<button class="' + (activeCompareMode === 'age' ? 'active' : '') + '" onclick="setActiveCompareMode(\\'age\\')">Por edad</button>' +
           '<button class="' + (activeCompareMode === 'current' ? 'active' : '') + '" onclick="setActiveCompareMode(\\'current\\')">Actual</button>' +
         '</div>' +
-        '<div class="legend-picker">' + surfaceButtons + '</div>' +
+        '<div class="legend-picker">' + surfaceButtons + slamToggleButton() + '</div>' +
       '</div>' +
     '</div>' +
     body +
@@ -3336,7 +3417,7 @@ function renderLegendComparator(legends) {{
   return '<section class="legend-comparator">' +
     '<div class="legend-comparator-head">' +
       '<div><h3>' + (player?.name || 'Jugador') + ' vs leyendas</h3><div class="legend-meta">Curva de nivel por edad · ' + surfaceLabel(activeCompareSurface) + '</div></div>' +
-      '<div class="active-compare-controls"><div class="legend-picker">' + buttons + '</div><div class="legend-picker">' + surfaceButtons + '</div></div>' +
+      '<div class="active-compare-controls"><div class="legend-picker">' + buttons + '</div><div class="legend-picker">' + surfaceButtons + slamToggleButton() + '</div></div>' +
     '</div>' +
     compareLegendChart(legend, player) +
   '</section>';
@@ -3638,6 +3719,11 @@ window.setActiveCompareSurface = function(surface) {{
   renderLegends();
 }};
 
+window.toggleGrandSlamMarks = function() {{
+  showGrandSlamMarks = !showGrandSlamMarks;
+  renderLegends();
+}};
+
 window.toggleSearch = function() {{
   const wrap = document.getElementById('header-search');
   const input = document.getElementById('search-input');
@@ -3898,12 +3984,22 @@ def main():
     print("Reading recent matches...")
     recent_matches = _recent_matches()
     print(f"  {len(recent_matches)} recent matches (GS/Masters/500/250/Davis)")
+    grand_slam_winners = _grand_slam_winners(use_cache=use_cache)
+    print(f"  {len(grand_slam_winners)} Grand Slam winners")
     live_match_count = sum(len(day.get("matches", [])) for day in live_schedule.get("days", []))
     print(f"  Live schedule matches: {live_match_count}")
 
     # 9. Render and save
     EXAMPLES_DIR.mkdir(parents=True, exist_ok=True)
-    html = render_index(players_data, legend_datasets, recent_matches, live_schedule, legend_comparison, top_n)
+    html = render_index(
+        players_data,
+        legend_datasets,
+        recent_matches,
+        live_schedule,
+        legend_comparison,
+        top_n,
+        grand_slam_winners,
+    )
     out_path = Path(args.output)
     out_path.write_text(html, encoding="utf-8")
     print(f"\nDone! → {out_path}")

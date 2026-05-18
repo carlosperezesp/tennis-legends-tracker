@@ -2,11 +2,14 @@ name: Daily dashboard update
 
 on:
   schedule:
-    # GitHub cron runs in UTC. These two entries cover 06:00 in Spain
-    # in summer time (04:17 UTC) and winter time (05:17 UTC).
+    # GitHub cron runs in UTC. The morning slots cover 06:00 in Spain
+    # across summer/winter time; the later slots poll Sackmann again so new
+    # tournament results, e.g. Rome once merged upstream, refresh the same day.
     # Avoid minute 0 because GitHub can delay/drop scheduled jobs at peak time.
     - cron: '17 4 * * *'
     - cron: '17 5 * * *'
+    - cron: '47 11 * * *'
+    - cron: '47 17 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -49,7 +52,8 @@ jobs:
       - name: Build dashboard
         run: python3 src/build_index.py --top 300 --no-cache
         # --no-cache refreshes current rankings and Sackmann match CSVs before
-        # rebuilding the embedded HTML dashboard.
+        # rebuilding the embedded HTML dashboard. When upstream adds completed
+        # tournaments such as Rome, this step recalculates all player levels.
 
       - name: Audit data freshness
         run: python3 src/data_audit.py
