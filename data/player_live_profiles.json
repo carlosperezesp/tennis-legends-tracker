@@ -1,8 +1,8 @@
 {
-  "asOf": "2026-05-17",
+  "asOf": "2026-05-18",
   "players": {
     "Jannik Sinner": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -68,7 +68,7 @@
       }
     },
     "Carlos Alcaraz": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -134,7 +134,7 @@
       }
     },
     "Alexander Zverev": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -200,7 +200,7 @@
       }
     },
     "Novak Djokovic": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -266,7 +266,7 @@
       }
     },
     "Felix Auger Aliassime": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -326,7 +326,7 @@
       "latestMatchDate": "20260422"
     },
     "Ben Shelton": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -392,7 +392,7 @@
       }
     },
     "Taylor Fritz": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -451,14 +451,14 @@
         }
       },
       "latestMatchDate": "20260318",
-      "liveRank": 7,
+      "liveRank": 8,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 136042
       }
     },
     "Alex De Minaur": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -517,14 +517,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 8,
+      "liveRank": 9,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 201239
       }
     },
     "Daniil Medvedev": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -583,14 +583,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 9,
+      "liveRank": 7,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 163504
       }
     },
     "Lorenzo Musetti": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -649,14 +649,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 10,
+      "liveRank": 11,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 261015
       }
     },
     "Alexander Bublik": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -715,14 +715,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 11,
+      "liveRank": 10,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 163480
       }
     },
     "Flavio Cobolli": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -788,7 +788,7 @@
       }
     },
     "Jiri Lehecka": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -848,7 +848,7 @@
       "latestMatchDate": "20260422"
     },
     "Andrey Rublev": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -907,14 +907,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 14,
+      "liveRank": 13,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 106755
       }
     },
     "Karen Khachanov": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -980,7 +980,7 @@
       }
     },
     "Valentin Vacherot": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1039,14 +1039,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 16,
+      "liveRank": 18,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 158912
       }
     },
     "Arthur Fils": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1105,14 +1105,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 17,
+      "liveRank": 19,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 338500
       }
     },
     "Tommy Paul": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1171,14 +1171,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 18,
+      "liveRank": 26,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 138546
       }
     },
     "Cameron Norrie": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1237,14 +1237,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 19,
+      "liveRank": 22,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 95935
       }
     },
     "Luciano Darderi": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1303,14 +1303,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 20,
+      "liveRank": 16,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 308084
       }
     },
     "Learner Tien": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1369,14 +1369,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 21,
+      "liveRank": 20,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 412818
       }
     },
     "Frances Tiafoe": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1435,14 +1435,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 22,
+      "liveRank": 21,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 101101
       }
     },
     "Alejandro Davidovich Fokina": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1508,7 +1508,7 @@
       }
     },
     "Arthur Rinderknech": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1574,7 +1574,7 @@
       }
     },
     "Casper Ruud": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1633,14 +1633,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 25,
+      "liveRank": 17,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 119248
       }
     },
     "Tomas Martin Etcheverry": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1699,14 +1699,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 26,
+      "liveRank": 25,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 169496
       }
     },
     "Francisco Cerundolo": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1772,7 +1772,7 @@
       }
     },
     "Jakub Mensik": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -1832,7 +1832,7 @@
       "latestMatchDate": "20260422"
     },
     "Joao Fonseca": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1891,14 +1891,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 29,
+      "liveRank": 30,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 403869
       }
     },
     "Corentin Moutet": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -1957,14 +1957,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 30,
+      "liveRank": 32,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 175014
       }
     },
     "Tallon Griekspoor": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2030,7 +2030,7 @@
       }
     },
     "Brandon Nakashima": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2089,14 +2089,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 32,
+      "liveRank": 33,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 235576
       }
     },
     "Ugo Humbert": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2155,14 +2155,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 33,
+      "liveRank": 34,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 185388
       }
     },
     "Rafael Jodar": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2221,14 +2221,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 34,
+      "liveRank": 29,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 458834
       }
     },
     "Alejandro Tabilo": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2294,7 +2294,7 @@
       }
     },
     "Alexander Blockx": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2360,7 +2360,7 @@
       }
     },
     "Denis Shapovalov": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2426,7 +2426,7 @@
       }
     },
     "Jaume Munar": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2485,14 +2485,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 38,
+      "liveRank": 39,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 126356
       }
     },
     "Zizou Bergs": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2551,14 +2551,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 39,
+      "liveRank": 38,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 170946
       }
     },
     "Holger Rune": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2617,14 +2617,14 @@
         }
       },
       "latestMatchDate": "20251013",
-      "liveRank": 40,
+      "liveRank": 43,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 283070
       }
     },
     "Tomas Machac": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -2684,7 +2684,7 @@
       "latestMatchDate": "20260422"
     },
     "Alex Michelsen": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2743,14 +2743,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 42,
+      "liveRank": 41,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 406728
       }
     },
     "Sebastian Korda": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2809,14 +2809,14 @@
         }
       },
       "latestMatchDate": "20260318",
-      "liveRank": 43,
+      "liveRank": 46,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 195840
       }
     },
     "Mariano Navone": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2875,14 +2875,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 44,
+      "liveRank": 42,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 271389
       }
     },
     "Adrian Mannarino": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -2941,14 +2941,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 45,
+      "liveRank": 44,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 15894
       }
     },
     "Gabriel Diallo": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -3007,14 +3007,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 46,
+      "liveRank": 48,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 280151
       }
     },
     "Marin Cilic": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -3074,7 +3074,7 @@
       "latestMatchDate": "20260422"
     },
     "Ethan Quinn": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -3133,14 +3133,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 48,
+      "liveRank": 49,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 334293
       }
     },
     "Fabian Marozsan": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -3200,7 +3200,7 @@
       "latestMatchDate": "20260422"
     },
     "Jack Draper": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -3259,14 +3259,14 @@
         }
       },
       "latestMatchDate": "20260413",
-      "liveRank": 50,
+      "liveRank": 74,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 258749
       }
     },
     "Terence Atmane": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -3332,7 +3332,7 @@
       }
     },
     "Nuno Borges": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -3391,14 +3391,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 52,
+      "liveRank": 50,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 125006
       }
     },
     "Hubert Hurkacz": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -3457,14 +3457,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 53,
+      "liveRank": 78,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 158896
       }
     },
     "Botic Van De Zandschulp": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -3523,14 +3523,14 @@
         }
       },
       "latestMatchDate": "20260413",
-      "liveRank": 54,
+      "liveRank": 53,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 102339
       }
     },
     "Vit Kopriva": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -3590,7 +3590,7 @@
       "latestMatchDate": "20260422"
     },
     "Roman Andres Burruchaga": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -3649,14 +3649,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 56,
+      "liveRank": 66,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 287181
       }
     },
     "Marton Fucsovics": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -3715,14 +3715,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 57,
+      "liveRank": 59,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 47770
       }
     },
     "Giovanni Mpetshi Perricard": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -3781,14 +3781,14 @@
         }
       },
       "latestMatchDate": "20260318",
-      "liveRank": 58,
+      "liveRank": 80,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 289146
       }
     },
     "Yannick Hanfmann": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -3847,14 +3847,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 59,
+      "liveRank": 55,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 47975
       }
     },
     "Alexei Popyrin": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -3913,14 +3913,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 60,
+      "liveRank": 61,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 128552
       }
     },
     "Camilo Ugo Carabelli": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -3979,14 +3979,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 61,
+      "liveRank": 68,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 196122
       }
     },
     "Ignacio Buse": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -4045,14 +4045,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 62,
+      "liveRank": 57,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 322082
       }
     },
     "Jenson Brooksby": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -4111,14 +4111,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 63,
+      "liveRank": 60,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 191873
       }
     },
     "Daniel Altmaier": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -4177,14 +4177,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 64,
+      "liveRank": 65,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 127208
       }
     },
     "Sebastian Baez": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -4244,7 +4244,7 @@
       "latestMatchDate": "20260422"
     },
     "Lorenzo Sonego": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -4303,14 +4303,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 66,
+      "liveRank": 69,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 104847
       }
     },
     "Hamad Medjedovic": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -4370,7 +4370,7 @@
       "latestMatchDate": "20260413"
     },
     "Raphael Collignon": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -4429,14 +4429,14 @@
         }
       },
       "latestMatchDate": "20260318",
-      "liveRank": 68,
+      "liveRank": 64,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 355525
       }
     },
     "Thiago Agustin Tirante": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -4495,14 +4495,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 69,
+      "liveRank": 58,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 221515
       }
     },
     "Miomir Kecmanovic": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -4562,7 +4562,7 @@
       "latestMatchDate": "20260422"
     },
     "Valentin Royer": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -4621,14 +4621,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 71,
+      "liveRank": 73,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 255449
       }
     },
     "Juan Manuel Cerundolo": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -4687,14 +4687,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 72,
+      "liveRank": 54,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 248861
       }
     },
     "Arthur Cazaux": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -4753,14 +4753,14 @@
         }
       },
       "latestMatchDate": "20260318",
-      "liveRank": 73,
+      "liveRank": 76,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 287803
       }
     },
     "Reilly Opelka": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -4819,14 +4819,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 74,
+      "liveRank": 75,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 130400
       }
     },
     "Stefanos Tsitsipas": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -4885,14 +4885,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 75,
+      "liveRank": 82,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 122366
       }
     },
     "Kamil Majchrzak": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -4951,14 +4951,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 76,
+      "liveRank": 77,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 108709
       }
     },
     "Marcos Giron": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -5017,14 +5017,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 77,
+      "liveRank": 84,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 42379
       }
     },
     "Marco Trungelliti": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -5083,14 +5083,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 78,
+      "liveRank": 81,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 38517
       }
     },
     "Dino Prizmic": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -5150,7 +5150,7 @@
       "latestMatchDate": "20260422"
     },
     "Mattia Bellucci": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -5209,14 +5209,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 80,
+      "liveRank": 72,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 294337
       }
     },
     "James Duckworth": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -5275,14 +5275,14 @@
         }
       },
       "latestMatchDate": "20260318",
-      "liveRank": 81,
+      "liveRank": 83,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 39711
       }
     },
     "Sebastian Ofner": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -5341,14 +5341,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 82,
+      "liveRank": 91,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 83397
       }
     },
     "Jan Lennard Struff": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -5408,7 +5408,7 @@
       "latestMatchDate": "20260422"
     },
     "Adolfo Daniel Vallejo": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -5467,14 +5467,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 84,
+      "liveRank": 70,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 326949
       }
     },
     "Alexander Shevchenko": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -5533,14 +5533,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 85,
+      "liveRank": 89,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 264344
       }
     },
     "Daniel Merida Aguilar": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -5600,7 +5600,7 @@
       "latestMatchDate": "20260422"
     },
     "Damir Dzumhur": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -5660,7 +5660,7 @@
       "latestMatchDate": "20260422"
     },
     "Yibing Wu": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -5719,14 +5719,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 88,
+      "liveRank": 93,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 194186
       }
     },
     "Patrick Kypson": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -5785,14 +5785,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 89,
+      "liveRank": 95,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 210490
       }
     },
     "Zachary Svajda": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -5851,14 +5851,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 90,
+      "liveRank": 85,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 298247
       }
     },
     "Pablo Carreno Busta": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -5918,7 +5918,7 @@
       "latestMatchDate": "20260422"
     },
     "Eliot Spizzirri": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -5984,7 +5984,7 @@
       }
     },
     "Quentin Halys": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6043,14 +6043,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 93,
+      "liveRank": 88,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 90798
       }
     },
     "Martin Landaluce": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6109,14 +6109,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 94,
+      "liveRank": 67,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 417196
       }
     },
     "Aleksandar Kovacevic": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6175,14 +6175,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 95,
+      "liveRank": 94,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 187608
       }
     },
     "Rinky Hijikata": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6241,14 +6241,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 96,
+      "liveRank": 102,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 237452
       }
     },
     "Luca Van Assche": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6307,14 +6307,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 97,
+      "liveRank": 103,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 335102
       }
     },
     "Roberto Bautista Agut": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6373,14 +6373,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 98,
+      "liveRank": 99,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 16720
       }
     },
     "Aleksandar Vukic": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -6440,7 +6440,7 @@
       "latestMatchDate": "20260330"
     },
     "Matteo Berrettini": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6499,14 +6499,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 100,
+      "liveRank": 107,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 112783
       }
     },
     "Benjamin Bonzi": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6565,14 +6565,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 101,
+      "liveRank": 98,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 94485
       }
     },
     "Jesper De Jong": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6631,14 +6631,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 102,
+      "liveRank": 109,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 244420
       }
     },
     "Adam Walton": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6697,14 +6697,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 103,
+      "liveRank": 101,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 207575
       }
     },
     "Cristian Garin": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6763,14 +6763,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 104,
+      "liveRank": 116,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 64570
       }
     },
     "Alexandre Muller": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6829,14 +6829,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 105,
+      "liveRank": 108,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 88992
       }
     },
     "Matteo Arnaldi": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6895,14 +6895,14 @@
         }
       },
       "latestMatchDate": "20260405",
-      "liveRank": 106,
+      "liveRank": 96,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 299538
       }
     },
     "Sho Shimabukuro": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -6961,14 +6961,14 @@
         }
       },
       "latestMatchDate": "20260304",
-      "liveRank": 107,
+      "liveRank": 105,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 216154
       }
     },
     "Emilio Nava": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -7027,14 +7027,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 108,
+      "liveRank": 97,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 232057
       }
     },
     "Titouan Droguet": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -7093,14 +7093,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 109,
+      "liveRank": 110,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 243925
       }
     },
     "Coleman Wong": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -7159,14 +7159,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 110,
+      "liveRank": 113,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 289106
       }
     },
     "Filip Misolic": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -7225,14 +7225,14 @@
         }
       },
       "latestMatchDate": "20260119",
-      "liveRank": 111,
+      "liveRank": 129,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 216488
       }
     },
     "Francesco Maestrelli": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -7291,14 +7291,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 112,
+      "liveRank": 128,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 261017
       }
     },
     "Alex Molcan": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -7358,7 +7358,7 @@
       "latestMatchDate": "20260413"
     },
     "Francisco Comesana": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -7418,7 +7418,7 @@
       "latestMatchDate": "20260422"
     },
     "Martin Damm": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -7478,7 +7478,7 @@
       "latestMatchDate": "20260422"
     },
     "Dalibor Svrcina": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -7538,7 +7538,7 @@
       "latestMatchDate": "20260304"
     },
     "Nikoloz Basilashvili": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -7597,14 +7597,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 117,
+      "liveRank": 115,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 26204
       }
     },
     "Hugo Gaston": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -7663,14 +7663,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 118,
+      "liveRank": 120,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 205906
       }
     },
     "Jaime Faria": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -7729,14 +7729,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 119,
+      "liveRank": 117,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 341818
       }
     },
     "Henrique Rocha": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -7795,14 +7795,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 120,
+      "liveRank": 118,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 341820
       }
     },
     "Vilius Gaubas": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -7861,14 +7861,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 121,
+      "liveRank": 133,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 322022
       }
     },
     "Jan Choinski": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -7927,14 +7927,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 122,
+      "liveRank": 104,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 105607
       }
     },
     "Jacob Fearnley": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -7993,14 +7993,14 @@
         }
       },
       "latestMatchDate": "20260318",
-      "liveRank": 123,
+      "liveRank": 122,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 275948
       }
     },
     "Nicolai Budkov Kjaer": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -8059,14 +8059,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 124,
+      "liveRank": 123,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 483188
       }
     },
     "Stan Wawrinka": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -8125,14 +8125,14 @@
         }
       },
       "latestMatchDate": "20260413",
-      "liveRank": 125,
+      "liveRank": 119,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 14548
       }
     },
     "Tristan Schoolkate": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -8191,14 +8191,14 @@
         }
       },
       "latestMatchDate": "20260304",
-      "liveRank": 126,
+      "liveRank": 125,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 275471
       }
     },
     "Otto Virtanen": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -8257,14 +8257,14 @@
         }
       },
       "latestMatchDate": "20260413",
-      "liveRank": 127,
+      "liveRank": 134,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 229218
       }
     },
     "Leandro Riedi": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -8323,14 +8323,14 @@
         }
       },
       "latestMatchDate": "20260206",
-      "liveRank": 128,
+      "liveRank": 121,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 321788
       }
     },
     "Mackenzie Mcdonald": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -8389,14 +8389,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 129,
+      "liveRank": 127,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 63438
       }
     },
     "Shintaro Mochizuki": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -8462,7 +8462,7 @@
       }
     },
     "Carlos Taberner": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -8521,14 +8521,14 @@
         }
       },
       "latestMatchDate": "20260119",
-      "liveRank": 131,
+      "liveRank": 145,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 108559
       }
     },
     "Dusan Lajovic": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -8588,7 +8588,7 @@
       "latestMatchDate": "20260422"
     },
     "Hugo Dellien": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -8647,14 +8647,14 @@
         }
       },
       "latestMatchDate": "20260209",
-      "liveRank": 133,
+      "liveRank": 139,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 57289
       }
     },
     "Tomas Barrios Vera": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -8714,7 +8714,7 @@
       "latestMatchDate": "20260318"
     },
     "Dane Sweeny": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -8773,14 +8773,14 @@
         }
       },
       "latestMatchDate": "20260119",
-      "liveRank": 135,
+      "liveRank": 131,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 233126
       }
     },
     "Pedro Martinez": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -8839,14 +8839,14 @@
         }
       },
       "latestMatchDate": "20260413",
-      "liveRank": 136,
+      "liveRank": 141,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 77223
       }
     },
     "Jack Pinnington Jones": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -8905,14 +8905,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 137,
+      "liveRank": 132,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 321790
       }
     },
     "Alex Bolt": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -8971,14 +8971,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 138,
+      "liveRank": 151,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 58369
       }
     },
     "Pablo Llamas Ruiz": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -9037,14 +9037,14 @@
         }
       },
       "latestMatchDate": "20250825",
-      "liveRank": 139,
+      "liveRank": 124,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 264358
       }
     },
     "Moez Echargui": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -9103,14 +9103,14 @@
         }
       },
       "latestMatchDate": "20260223",
-      "liveRank": 140,
+      "liveRank": 138,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 153826
       }
     },
     "Stefano Travaglia": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -9169,14 +9169,14 @@
         }
       },
       "latestMatchDate": "20230828",
-      "liveRank": 141,
+      "liveRank": 137,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 36300
       }
     },
     "Jordan Thompson": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -9235,14 +9235,14 @@
         }
       },
       "latestMatchDate": "20260119",
-      "liveRank": 142,
+      "liveRank": 148,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 87690
       }
     },
     "Arthur Gea": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -9301,14 +9301,14 @@
         }
       },
       "latestMatchDate": "20260202",
-      "liveRank": 143,
+      "liveRank": 140,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 383987
       }
     },
     "Roman Safiullin": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -9367,14 +9367,14 @@
         }
       },
       "latestMatchDate": "20250825",
-      "liveRank": 144,
+      "liveRank": 142,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 124930
       }
     },
     "Francesco Passaro": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -9433,14 +9433,14 @@
         }
       },
       "latestMatchDate": "20260223",
-      "liveRank": 145,
+      "liveRank": 161,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 258908
       }
     },
     "Lloyd Harris": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -9499,14 +9499,14 @@
         }
       },
       "latestMatchDate": "20250825",
-      "liveRank": 146,
+      "liveRank": 144,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 157808
       }
     },
     "Kyrian Jacquet": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -9572,7 +9572,7 @@
       }
     },
     "Billy Harris": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -9631,14 +9631,14 @@
         }
       },
       "latestMatchDate": "20260105",
-      "liveRank": 148,
+      "liveRank": 149,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 111837
       }
     },
     "Michael Zheng": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -9697,14 +9697,14 @@
         }
       },
       "latestMatchDate": "20260304",
-      "liveRank": 149,
+      "liveRank": 146,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 385285
       }
     },
     "Christopher Oconnell": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -9764,7 +9764,7 @@
       "latestMatchDate": "20260330"
     },
     "Luca Nardi": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -9823,14 +9823,14 @@
         }
       },
       "latestMatchDate": "20260223",
-      "liveRank": 151,
+      "liveRank": 163,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 289233
       }
     },
     "Bu Yunchaokete": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -9890,7 +9890,7 @@
       "latestMatchDate": "20260206"
     },
     "Elmer Moller": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -9949,14 +9949,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 153,
+      "liveRank": 143,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 499834
       }
     },
     "Nishesh Basavareddy": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10015,14 +10015,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 154,
+      "liveRank": 156,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 407164
       }
     },
     "Andrea Pellegrino": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10081,14 +10081,14 @@
         }
       },
       "latestMatchDate": "20260223",
-      "liveRank": 155,
+      "liveRank": 126,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 93597
       }
     },
     "Rei Sakamoto": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10147,14 +10147,14 @@
         }
       },
       "latestMatchDate": "20260318",
-      "liveRank": 156,
+      "liveRank": 152,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 413296
       }
     },
     "Arthur Fery": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10213,14 +10213,14 @@
         }
       },
       "latestMatchDate": "20260318",
-      "liveRank": 157,
+      "liveRank": 153,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 321789
       }
     },
     "Mark Lajal": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10279,14 +10279,14 @@
         }
       },
       "latestMatchDate": "20260207",
-      "liveRank": 158,
+      "liveRank": 157,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 383991
       }
     },
     "Lukas Klein": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10345,14 +10345,14 @@
         }
       },
       "latestMatchDate": "20250912",
-      "liveRank": 159,
+      "liveRank": 168,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 163636
       }
     },
     "Jurij Rodionov": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10411,14 +10411,14 @@
         }
       },
       "latestMatchDate": "20260206",
-      "liveRank": 160,
+      "liveRank": 158,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 200159
       }
     },
     "Toby Samuel": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10477,14 +10477,14 @@
         }
       },
       "latestMatchDate": null,
-      "liveRank": 161,
+      "liveRank": 159,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 321791
       }
     },
     "Ugo Blanchet": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10543,14 +10543,14 @@
         }
       },
       "latestMatchDate": "20260202",
-      "liveRank": 162,
+      "liveRank": 160,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 200777
       }
     },
     "Zsombor Piros": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10609,14 +10609,14 @@
         }
       },
       "latestMatchDate": "20260207",
-      "liveRank": 163,
+      "liveRank": 175,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 205795
       }
     },
     "Giulio Zeppieri": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10675,14 +10675,14 @@
         }
       },
       "latestMatchDate": "20251013",
-      "liveRank": 164,
+      "liveRank": 173,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 237188
       }
     },
     "Zdenek Kolar": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10741,14 +10741,14 @@
         }
       },
       "latestMatchDate": "20220627",
-      "liveRank": 165,
+      "liveRank": 162,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 132558
       }
     },
     "Chris Rodesch": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10814,7 +10814,7 @@
       }
     },
     "August Holmgren": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10873,14 +10873,14 @@
         }
       },
       "latestMatchDate": "20260206",
-      "liveRank": 167,
+      "liveRank": 155,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 207089
       }
     },
     "Clement Tabur": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -10939,14 +10939,14 @@
         }
       },
       "latestMatchDate": "20251102",
-      "liveRank": 168,
+      "liveRank": 165,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 206602
       }
     },
     "Chun Hsin Tseng": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -11006,7 +11006,7 @@
       "latestMatchDate": "20260304"
     },
     "Grigor Dimitrov": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11072,7 +11072,7 @@
       }
     },
     "Liam Draxl": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11131,14 +11131,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 171,
+      "liveRank": 164,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 223513
       }
     },
     "Joel Schwaerzler": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11197,14 +11197,14 @@
         }
       },
       "latestMatchDate": "20250721",
-      "liveRank": 172,
+      "liveRank": 169,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 448184
       }
     },
     "Nicolas Jarry": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11263,14 +11263,14 @@
         }
       },
       "latestMatchDate": "20260223",
-      "liveRank": 173,
+      "liveRank": 182,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 89632
       }
     },
     "Nicolas Mejia": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11329,14 +11329,14 @@
         }
       },
       "latestMatchDate": "20260207",
-      "liveRank": 174,
+      "liveRank": 171,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 187218
       }
     },
     "Yoshihito Nishioka": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11395,14 +11395,14 @@
         }
       },
       "latestMatchDate": "20260206",
-      "liveRank": 175,
+      "liveRank": 176,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 59281
       }
     },
     "Elias Ymer": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11461,14 +11461,14 @@
         }
       },
       "latestMatchDate": "20260223",
-      "liveRank": 176,
+      "liveRank": 179,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 83661
       }
     },
     "Borna Gojo": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11527,14 +11527,14 @@
         }
       },
       "latestMatchDate": "20250518",
-      "liveRank": 177,
+      "liveRank": 172,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 124916
       }
     },
     "Daniil Glinka": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11593,14 +11593,14 @@
         }
       },
       "latestMatchDate": "20250912",
-      "liveRank": 178,
+      "liveRank": 174,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 210033
       }
     },
     "Facundo Diaz Acosta": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11659,14 +11659,14 @@
         }
       },
       "latestMatchDate": "20260209",
-      "liveRank": 179,
+      "liveRank": 150,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 264372
       }
     },
     "Juan Carlos Prado Angelo": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11725,14 +11725,14 @@
         }
       },
       "latestMatchDate": "20260207",
-      "liveRank": 180,
+      "liveRank": 178,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 392072
       }
     },
     "Clement Chidekh": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11791,14 +11791,14 @@
         }
       },
       "latestMatchDate": "20250210",
-      "liveRank": 181,
+      "liveRank": 177,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 231620
       }
     },
     "Marco Cecchinato": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11857,14 +11857,14 @@
         }
       },
       "latestMatchDate": "20230828",
-      "liveRank": 182,
+      "liveRank": 180,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 44549
       }
     },
     "Gauthier Onclin": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11923,14 +11923,14 @@
         }
       },
       "latestMatchDate": "20250113",
-      "liveRank": 183,
+      "liveRank": 184,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 233700
       }
     },
     "Gonzalo Bueno": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -11989,14 +11989,14 @@
         }
       },
       "latestMatchDate": "20260206",
-      "liveRank": 184,
+      "liveRank": 185,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 299765
       }
     },
     "Justin Engel": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12055,14 +12055,14 @@
         }
       },
       "latestMatchDate": "20260413",
-      "liveRank": 185,
+      "liveRank": 190,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 403148
       }
     },
     "Federico Agustin Gomez": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12121,14 +12121,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 186,
+      "liveRank": 181,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 146040
       }
     },
     "Jerome Kym": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12187,14 +12187,14 @@
         }
       },
       "latestMatchDate": "20260206",
-      "liveRank": 187,
+      "liveRank": 193,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 309071
       }
     },
     "Timofey Skatov": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12253,14 +12253,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 188,
+      "liveRank": 191,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 229275
       }
     },
     "Alex Barrena": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12319,14 +12319,14 @@
         }
       },
       "latestMatchDate": "20260223",
-      "liveRank": 189,
+      "liveRank": 192,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 303307
       }
     },
     "Colton Smith": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12385,14 +12385,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 190,
+      "liveRank": 186,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 391865
       }
     },
     "Lukas Neumayer": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12451,14 +12451,14 @@
         }
       },
       "latestMatchDate": "20260206",
-      "liveRank": 191,
+      "liveRank": 188,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 339450
       }
     },
     "Alexis Galarneau": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12517,14 +12517,14 @@
         }
       },
       "latestMatchDate": "20260304",
-      "liveRank": 192,
+      "liveRank": 194,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 187236
       }
     },
     "Vitaliy Sachko": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12583,14 +12583,14 @@
         }
       },
       "latestMatchDate": "20260413",
-      "liveRank": 193,
+      "liveRank": 207,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 100069
       }
     },
     "Bernard Tomic": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12649,14 +12649,14 @@
         }
       },
       "latestMatchDate": "20251013",
-      "liveRank": 194,
+      "liveRank": 195,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 17080
       }
     },
     "Guy Den Ouden": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12715,14 +12715,14 @@
         }
       },
       "latestMatchDate": "20260209",
-      "liveRank": 195,
+      "liveRank": 214,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 355526
       }
     },
     "Gianluca Cadenasso": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12781,14 +12781,14 @@
         }
       },
       "latestMatchDate": null,
-      "liveRank": 196,
+      "liveRank": 197,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 425525
       }
     },
     "Fajing Sun": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12847,14 +12847,14 @@
         }
       },
       "latestMatchDate": "20250917",
-      "liveRank": 197,
+      "liveRank": 263,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 163438
       }
     },
     "Luka Mikrut": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -12913,14 +12913,14 @@
         }
       },
       "latestMatchDate": "20240722",
-      "liveRank": 198,
+      "liveRank": 196,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 349090
       }
     },
     "Roberto Carballes Baena": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -12980,7 +12980,7 @@
       "latestMatchDate": "20260216"
     },
     "Stefanos Sakellaridis": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13039,14 +13039,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 200,
+      "liveRank": 198,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 302567
       }
     },
     "Matej Dodig": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13105,14 +13105,14 @@
         }
       },
       "latestMatchDate": "20260206",
-      "liveRank": 201,
+      "liveRank": 202,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 420876
       }
     },
     "Joao Lucas Reis Da Silva": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13171,14 +13171,14 @@
         }
       },
       "latestMatchDate": "20260216",
-      "liveRank": 202,
+      "liveRank": 200,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 212762
       }
     },
     "Juan Pablo Ficovich": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13244,7 +13244,7 @@
       }
     },
     "Rio Noguchi": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13310,7 +13310,7 @@
       }
     },
     "Lorenzo Giustino": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13376,7 +13376,7 @@
       }
     },
     "Daniel Evans": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13435,14 +13435,14 @@
         }
       },
       "latestMatchDate": "20250721",
-      "liveRank": 206,
+      "liveRank": 211,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 16375
       }
     },
     "Jay Clarke": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13501,14 +13501,14 @@
         }
       },
       "latestMatchDate": "20250630",
-      "liveRank": 207,
+      "liveRank": 199,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 197809
       }
     },
     "Gilles Arnaud Bailly": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13574,7 +13574,7 @@
       }
     },
     "Gustavo Heide": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13633,14 +13633,14 @@
         }
       },
       "latestMatchDate": "20260216",
-      "liveRank": 209,
+      "liveRank": 187,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 302582
       }
     },
     "Harold Mayot": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13699,14 +13699,14 @@
         }
       },
       "latestMatchDate": "20250423",
-      "liveRank": 210,
+      "liveRank": 217,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 248846
       }
     },
     "Remy Bertola": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13765,14 +13765,14 @@
         }
       },
       "latestMatchDate": "20251020",
-      "liveRank": 211,
+      "liveRank": 209,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 145108
       }
     },
     "Yu Hsiou Hsu": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13831,14 +13831,14 @@
         }
       },
       "latestMatchDate": "20240203",
-      "liveRank": 212,
+      "liveRank": 213,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 204329
       }
     },
     "Pierre Hugues Herbert": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -13898,7 +13898,7 @@
       "latestMatchDate": "20260216"
     },
     "Genaro Alberto Olivieri": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -13957,14 +13957,14 @@
         }
       },
       "latestMatchDate": "20230529",
-      "liveRank": 214,
+      "liveRank": 225,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 169486
       }
     },
     "Andres Andrade": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14023,14 +14023,14 @@
         }
       },
       "latestMatchDate": "20260207",
-      "liveRank": 215,
+      "liveRank": 210,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 168420
       }
     },
     "Lautaro Midon": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14089,14 +14089,14 @@
         }
       },
       "latestMatchDate": "20260209",
-      "liveRank": 216,
+      "liveRank": 215,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 397014
       }
     },
     "Kimmer Coppejans": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14155,14 +14155,14 @@
         }
       },
       "latestMatchDate": "20230920",
-      "liveRank": 217,
+      "liveRank": 212,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 54955
       }
     },
     "Michael Mmoh": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14228,7 +14228,7 @@
       }
     },
     "Tom Gentzsch": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14294,7 +14294,7 @@
       }
     },
     "Yi Zhou": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14360,7 +14360,7 @@
       }
     },
     "Luka Pavlovic": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14419,14 +14419,14 @@
         }
       },
       "latestMatchDate": "20260209",
-      "liveRank": 221,
+      "liveRank": 240,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 224534
       }
     },
     "Gael Monfils": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14485,14 +14485,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 222,
+      "liveRank": 221,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 14844
       }
     },
     "Liam Broady": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14551,14 +14551,14 @@
         }
       },
       "latestMatchDate": "20240701",
-      "liveRank": 223,
+      "liveRank": 222,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 47764
       }
     },
     "Hugo Grenier": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14624,7 +14624,7 @@
       }
     },
     "Federico Cina": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -14684,7 +14684,7 @@
       "latestMatchDate": "20260422"
     },
     "Harry Wendelken": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14743,14 +14743,14 @@
         }
       },
       "latestMatchDate": null,
-      "liveRank": 226,
+      "liveRank": 228,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 267242
       }
     },
     "Dan Added": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14809,14 +14809,14 @@
         }
       },
       "latestMatchDate": "20251102",
-      "liveRank": 227,
+      "liveRank": 230,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 191842
       }
     },
     "Darwin Blanch": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14875,14 +14875,14 @@
         }
       },
       "latestMatchDate": "20260318",
-      "liveRank": 228,
+      "liveRank": 229,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 407392
       }
     },
     "Pedro Boscardin Dias": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -14941,14 +14941,14 @@
         }
       },
       "latestMatchDate": null,
-      "liveRank": 229,
+      "liveRank": 232,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 284096
       }
     },
     "Alvaro Guillen Meza": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -15007,14 +15007,14 @@
         }
       },
       "latestMatchDate": "20260207",
-      "liveRank": 230,
+      "liveRank": 260,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 269909
       }
     },
     "Oliver Crawford": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -15073,14 +15073,14 @@
         }
       },
       "latestMatchDate": "20250630",
-      "liveRank": 231,
+      "liveRank": 243,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 213057
       }
     },
     "Matteo Gigante": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -15139,14 +15139,14 @@
         }
       },
       "latestMatchDate": "20250727",
-      "liveRank": 232,
+      "liveRank": 250,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 326111
       }
     },
     "James Mccabe": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -15212,199 +15212,7 @@
       }
     },
     "Felix Gill": {
-      "asOf": "2026-05-17",
-      "sources": [
-        "Jeff Sackmann records",
-        "Jeff Sackmann point stats",
-        "TennisApi"
-      ],
-      "careerRecord": {
-        "matches": 0,
-        "wins": 0,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "seasonRecord": {
-        "matches": 0,
-        "wins": 0,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "statSamples": {
-        "matches": 0,
-        "bySurface": {
-          "Hard": 0,
-          "Clay": 0,
-          "Grass": 0
-        }
-      },
-      "latestMatchDate": null,
-      "liveRank": 234,
-      "liveRankPoints": null,
-      "apiIds": {
-        "TennisApi": 298057
-      }
-    },
-    "Nerman Fatic": {
-      "asOf": "2026-05-17",
-      "sources": [
-        "Jeff Sackmann records",
-        "Jeff Sackmann point stats"
-      ],
-      "careerRecord": {
-        "matches": 10,
-        "wins": 4,
-        "losses": 6,
-        "bySurface": {
-          "Hard": {
-            "matches": 6,
-            "wins": 3,
-            "losses": 3
-          },
-          "Clay": {
-            "matches": 4,
-            "wins": 1,
-            "losses": 3
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "seasonRecord": {
-        "matches": 0,
-        "wins": 0,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "statSamples": {
-        "matches": 4,
-        "bySurface": {
-          "Hard": 3,
-          "Clay": 1,
-          "Grass": 0
-        }
-      },
-      "latestMatchDate": "20250913"
-    },
-    "Max Houkes": {
-      "asOf": "2026-05-17",
-      "sources": [
-        "Jeff Sackmann records",
-        "Jeff Sackmann point stats",
-        "TennisApi"
-      ],
-      "careerRecord": {
-        "matches": 0,
-        "wins": 0,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "seasonRecord": {
-        "matches": 0,
-        "wins": 0,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "statSamples": {
-        "matches": 0,
-        "bySurface": {
-          "Hard": 0,
-          "Clay": 0,
-          "Grass": 0
-        }
-      },
-      "latestMatchDate": null,
-      "liveRank": 236,
-      "liveRankPoints": null,
-      "apiIds": {
-        "TennisApi": 277179
-      }
-    },
-    "Pol Martin Tiffon": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -15466,11 +15274,203 @@
       "liveRank": 237,
       "liveRankPoints": null,
       "apiIds": {
+        "TennisApi": 298057
+      }
+    },
+    "Nerman Fatic": {
+      "asOf": "2026-05-18",
+      "sources": [
+        "Jeff Sackmann records",
+        "Jeff Sackmann point stats"
+      ],
+      "careerRecord": {
+        "matches": 10,
+        "wins": 4,
+        "losses": 6,
+        "bySurface": {
+          "Hard": {
+            "matches": 6,
+            "wins": 3,
+            "losses": 3
+          },
+          "Clay": {
+            "matches": 4,
+            "wins": 1,
+            "losses": 3
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "seasonRecord": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "statSamples": {
+        "matches": 4,
+        "bySurface": {
+          "Hard": 3,
+          "Clay": 1,
+          "Grass": 0
+        }
+      },
+      "latestMatchDate": "20250913"
+    },
+    "Max Houkes": {
+      "asOf": "2026-05-18",
+      "sources": [
+        "Jeff Sackmann records",
+        "Jeff Sackmann point stats",
+        "TennisApi"
+      ],
+      "careerRecord": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "seasonRecord": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "statSamples": {
+        "matches": 0,
+        "bySurface": {
+          "Hard": 0,
+          "Clay": 0,
+          "Grass": 0
+        }
+      },
+      "latestMatchDate": null,
+      "liveRank": 234,
+      "liveRankPoints": null,
+      "apiIds": {
+        "TennisApi": 277179
+      }
+    },
+    "Pol Martin Tiffon": {
+      "asOf": "2026-05-18",
+      "sources": [
+        "Jeff Sackmann records",
+        "Jeff Sackmann point stats",
+        "TennisApi"
+      ],
+      "careerRecord": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "seasonRecord": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "statSamples": {
+        "matches": 0,
+        "bySurface": {
+          "Hard": 0,
+          "Clay": 0,
+          "Grass": 0
+        }
+      },
+      "latestMatchDate": null,
+      "liveRank": 231,
+      "liveRankPoints": null,
+      "apiIds": {
         "TennisApi": 217448
       }
     },
     "Frederico Ferreira Silva": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -15529,14 +15529,14 @@
         }
       },
       "latestMatchDate": "20210208",
-      "liveRank": 238,
+      "liveRank": 235,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 66484
       }
     },
     "Zhizhen Zhang": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -15595,14 +15595,14 @@
         }
       },
       "latestMatchDate": "20260422",
-      "liveRank": 239,
+      "liveRank": 226,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 75813
       }
     },
     "Raul Brancaccio": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -15661,14 +15661,14 @@
         }
       },
       "latestMatchDate": "20210524",
-      "liveRank": 240,
+      "liveRank": 241,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 201847
       }
     },
     "Charles Broom": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -15727,14 +15727,14 @@
         }
       },
       "latestMatchDate": "20240701",
-      "liveRank": 241,
+      "liveRank": 264,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 202181
       }
     },
     "Alejandro Moro Canas": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -15800,7 +15800,7 @@
       }
     },
     "Kaichi Uchida": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -15859,14 +15859,14 @@
         }
       },
       "latestMatchDate": "20221003",
-      "liveRank": 243,
+      "liveRank": 244,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 82579
       }
     },
     "Nikolas Sanchez Izquierdo": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -15925,14 +15925,14 @@
         }
       },
       "latestMatchDate": "20240520",
-      "liveRank": 244,
+      "liveRank": 239,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 193644
       }
     },
     "Ilia Simakin": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -15991,14 +15991,14 @@
         }
       },
       "latestMatchDate": null,
-      "liveRank": 245,
+      "liveRank": 259,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 342909
       }
     },
     "Stefano Napolitano": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -16064,7 +16064,7 @@
       }
     },
     "Thiago Seyboth Wild": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -16123,14 +16123,404 @@
         }
       },
       "latestMatchDate": "20260209",
-      "liveRank": 247,
+      "liveRank": 294,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 161262
       }
     },
     "Andrea Guerrieri": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
+      "sources": [
+        "Jeff Sackmann records",
+        "Jeff Sackmann point stats",
+        "TennisApi"
+      ],
+      "careerRecord": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "seasonRecord": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "statSamples": {
+        "matches": 0,
+        "bySurface": {
+          "Hard": 0,
+          "Clay": 0,
+          "Grass": 0
+        }
+      },
+      "latestMatchDate": null,
+      "liveRank": 252,
+      "liveRankPoints": null,
+      "apiIds": {
+        "TennisApi": 190877
+      }
+    },
+    "David Goffin": {
+      "asOf": "2026-05-18",
+      "sources": [
+        "Jeff Sackmann records",
+        "Jeff Sackmann point stats",
+        "TennisApi"
+      ],
+      "careerRecord": {
+        "matches": 632,
+        "wins": 357,
+        "losses": 275,
+        "bySurface": {
+          "Hard": {
+            "matches": 410,
+            "wins": 231,
+            "losses": 179
+          },
+          "Clay": {
+            "matches": 165,
+            "wins": 96,
+            "losses": 69
+          },
+          "Grass": {
+            "matches": 57,
+            "wins": 30,
+            "losses": 27
+          }
+        }
+      },
+      "seasonRecord": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "statSamples": {
+        "matches": 610,
+        "bySurface": {
+          "Hard": 395,
+          "Clay": 158,
+          "Grass": 57
+        }
+      },
+      "latestMatchDate": "20251020",
+      "liveRank": 247,
+      "liveRankPoints": null,
+      "apiIds": {
+        "TennisApi": 25838
+      }
+    },
+    "George Loffhagen": {
+      "asOf": "2026-05-18",
+      "sources": [
+        "Jeff Sackmann records",
+        "Jeff Sackmann point stats",
+        "TennisApi"
+      ],
+      "careerRecord": {
+        "matches": 4,
+        "wins": 0,
+        "losses": 4,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 4,
+            "wins": 0,
+            "losses": 4
+          }
+        }
+      },
+      "seasonRecord": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "statSamples": {
+        "matches": 4,
+        "bySurface": {
+          "Hard": 0,
+          "Clay": 0,
+          "Grass": 4
+        }
+      },
+      "latestMatchDate": "20250630",
+      "liveRank": 267,
+      "liveRankPoints": null,
+      "apiIds": {
+        "TennisApi": 258978
+      }
+    },
+    "Marko Topo": {
+      "asOf": "2026-05-18",
+      "sources": [
+        "Jeff Sackmann records",
+        "Jeff Sackmann point stats",
+        "TennisApi"
+      ],
+      "careerRecord": {
+        "matches": 7,
+        "wins": 0,
+        "losses": 7,
+        "bySurface": {
+          "Hard": {
+            "matches": 1,
+            "wins": 0,
+            "losses": 1
+          },
+          "Clay": {
+            "matches": 6,
+            "wins": 0,
+            "losses": 6
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "seasonRecord": {
+        "matches": 1,
+        "wins": 0,
+        "losses": 1,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 1,
+            "wins": 0,
+            "losses": 1
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "statSamples": {
+        "matches": 7,
+        "bySurface": {
+          "Hard": 1,
+          "Clay": 6,
+          "Grass": 0
+        }
+      },
+      "latestMatchDate": "20260413",
+      "liveRank": 272,
+      "liveRankPoints": null,
+      "apiIds": {
+        "TennisApi": 348701
+      }
+    },
+    "Soon Woo Kwon": {
+      "asOf": "2026-05-18",
+      "sources": [
+        "Jeff Sackmann records",
+        "Jeff Sackmann point stats"
+      ],
+      "careerRecord": {
+        "matches": 140,
+        "wins": 67,
+        "losses": 73,
+        "bySurface": {
+          "Hard": {
+            "matches": 107,
+            "wins": 53,
+            "losses": 54
+          },
+          "Clay": {
+            "matches": 21,
+            "wins": 9,
+            "losses": 12
+          },
+          "Grass": {
+            "matches": 12,
+            "wins": 5,
+            "losses": 7
+          }
+        }
+      },
+      "seasonRecord": {
+        "matches": 2,
+        "wins": 2,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 2,
+            "wins": 2,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "statSamples": {
+        "matches": 125,
+        "bySurface": {
+          "Hard": 92,
+          "Clay": 21,
+          "Grass": 12
+        }
+      },
+      "latestMatchDate": "20260207"
+    },
+    "Pavel Kotov": {
+      "asOf": "2026-05-18",
+      "sources": [
+        "Jeff Sackmann records",
+        "Jeff Sackmann point stats",
+        "TennisApi"
+      ],
+      "careerRecord": {
+        "matches": 82,
+        "wins": 36,
+        "losses": 46,
+        "bySurface": {
+          "Hard": {
+            "matches": 45,
+            "wins": 17,
+            "losses": 28
+          },
+          "Clay": {
+            "matches": 33,
+            "wins": 17,
+            "losses": 16
+          },
+          "Grass": {
+            "matches": 4,
+            "wins": 2,
+            "losses": 2
+          }
+        }
+      },
+      "seasonRecord": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "statSamples": {
+        "matches": 82,
+        "bySurface": {
+          "Hard": 45,
+          "Clay": 33,
+          "Grass": 4
+        }
+      },
+      "latestMatchDate": "20250331",
+      "liveRank": 251,
+      "liveRankPoints": null,
+      "apiIds": {
+        "TennisApi": 203258
+      }
+    },
+    "Florent Bax": {
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -16192,401 +16582,11 @@
       "liveRank": 248,
       "liveRankPoints": null,
       "apiIds": {
-        "TennisApi": 190877
-      }
-    },
-    "David Goffin": {
-      "asOf": "2026-05-17",
-      "sources": [
-        "Jeff Sackmann records",
-        "Jeff Sackmann point stats",
-        "TennisApi"
-      ],
-      "careerRecord": {
-        "matches": 632,
-        "wins": 357,
-        "losses": 275,
-        "bySurface": {
-          "Hard": {
-            "matches": 410,
-            "wins": 231,
-            "losses": 179
-          },
-          "Clay": {
-            "matches": 165,
-            "wins": 96,
-            "losses": 69
-          },
-          "Grass": {
-            "matches": 57,
-            "wins": 30,
-            "losses": 27
-          }
-        }
-      },
-      "seasonRecord": {
-        "matches": 0,
-        "wins": 0,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "statSamples": {
-        "matches": 610,
-        "bySurface": {
-          "Hard": 395,
-          "Clay": 158,
-          "Grass": 57
-        }
-      },
-      "latestMatchDate": "20251020",
-      "liveRank": 249,
-      "liveRankPoints": null,
-      "apiIds": {
-        "TennisApi": 25838
-      }
-    },
-    "George Loffhagen": {
-      "asOf": "2026-05-17",
-      "sources": [
-        "Jeff Sackmann records",
-        "Jeff Sackmann point stats",
-        "TennisApi"
-      ],
-      "careerRecord": {
-        "matches": 4,
-        "wins": 0,
-        "losses": 4,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 4,
-            "wins": 0,
-            "losses": 4
-          }
-        }
-      },
-      "seasonRecord": {
-        "matches": 0,
-        "wins": 0,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "statSamples": {
-        "matches": 4,
-        "bySurface": {
-          "Hard": 0,
-          "Clay": 0,
-          "Grass": 4
-        }
-      },
-      "latestMatchDate": "20250630",
-      "liveRank": 250,
-      "liveRankPoints": null,
-      "apiIds": {
-        "TennisApi": 258978
-      }
-    },
-    "Marko Topo": {
-      "asOf": "2026-05-17",
-      "sources": [
-        "Jeff Sackmann records",
-        "Jeff Sackmann point stats",
-        "TennisApi"
-      ],
-      "careerRecord": {
-        "matches": 7,
-        "wins": 0,
-        "losses": 7,
-        "bySurface": {
-          "Hard": {
-            "matches": 1,
-            "wins": 0,
-            "losses": 1
-          },
-          "Clay": {
-            "matches": 6,
-            "wins": 0,
-            "losses": 6
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "seasonRecord": {
-        "matches": 1,
-        "wins": 0,
-        "losses": 1,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 1,
-            "wins": 0,
-            "losses": 1
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "statSamples": {
-        "matches": 7,
-        "bySurface": {
-          "Hard": 1,
-          "Clay": 6,
-          "Grass": 0
-        }
-      },
-      "latestMatchDate": "20260413",
-      "liveRank": 251,
-      "liveRankPoints": null,
-      "apiIds": {
-        "TennisApi": 348701
-      }
-    },
-    "Soon Woo Kwon": {
-      "asOf": "2026-05-17",
-      "sources": [
-        "Jeff Sackmann records",
-        "Jeff Sackmann point stats"
-      ],
-      "careerRecord": {
-        "matches": 140,
-        "wins": 67,
-        "losses": 73,
-        "bySurface": {
-          "Hard": {
-            "matches": 107,
-            "wins": 53,
-            "losses": 54
-          },
-          "Clay": {
-            "matches": 21,
-            "wins": 9,
-            "losses": 12
-          },
-          "Grass": {
-            "matches": 12,
-            "wins": 5,
-            "losses": 7
-          }
-        }
-      },
-      "seasonRecord": {
-        "matches": 2,
-        "wins": 2,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 2,
-            "wins": 2,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "statSamples": {
-        "matches": 125,
-        "bySurface": {
-          "Hard": 92,
-          "Clay": 21,
-          "Grass": 12
-        }
-      },
-      "latestMatchDate": "20260207"
-    },
-    "Pavel Kotov": {
-      "asOf": "2026-05-17",
-      "sources": [
-        "Jeff Sackmann records",
-        "Jeff Sackmann point stats",
-        "TennisApi"
-      ],
-      "careerRecord": {
-        "matches": 82,
-        "wins": 36,
-        "losses": 46,
-        "bySurface": {
-          "Hard": {
-            "matches": 45,
-            "wins": 17,
-            "losses": 28
-          },
-          "Clay": {
-            "matches": 33,
-            "wins": 17,
-            "losses": 16
-          },
-          "Grass": {
-            "matches": 4,
-            "wins": 2,
-            "losses": 2
-          }
-        }
-      },
-      "seasonRecord": {
-        "matches": 0,
-        "wins": 0,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "statSamples": {
-        "matches": 82,
-        "bySurface": {
-          "Hard": 45,
-          "Clay": 33,
-          "Grass": 4
-        }
-      },
-      "latestMatchDate": "20250331",
-      "liveRank": 253,
-      "liveRankPoints": null,
-      "apiIds": {
-        "TennisApi": 203258
-      }
-    },
-    "Florent Bax": {
-      "asOf": "2026-05-17",
-      "sources": [
-        "Jeff Sackmann records",
-        "Jeff Sackmann point stats",
-        "TennisApi"
-      ],
-      "careerRecord": {
-        "matches": 0,
-        "wins": 0,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "seasonRecord": {
-        "matches": 0,
-        "wins": 0,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "statSamples": {
-        "matches": 0,
-        "bySurface": {
-          "Hard": 0,
-          "Clay": 0,
-          "Grass": 0
-        }
-      },
-      "latestMatchDate": null,
-      "liveRank": 254,
-      "liveRankPoints": null,
-      "apiIds": {
         "TennisApi": 226806
       }
     },
     "Rodrigo Pacheco Mendez": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -16652,7 +16652,7 @@
       }
     },
     "Edas Butvilas": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -16711,14 +16711,14 @@
         }
       },
       "latestMatchDate": "20260206",
-      "liveRank": 256,
+      "liveRank": 253,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 385592
       }
     },
     "Tristan Boyer": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -16777,14 +16777,14 @@
         }
       },
       "latestMatchDate": "20250825",
-      "liveRank": 257,
+      "liveRank": 201,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 232036
       }
     },
     "Henri Squire": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -16843,14 +16843,14 @@
         }
       },
       "latestMatchDate": "20240914",
-      "liveRank": 258,
+      "liveRank": 254,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 208225
       }
     },
     "Sascha Gueymard Wayenburg": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -16909,14 +16909,14 @@
         }
       },
       "latestMatchDate": null,
-      "liveRank": 259,
+      "liveRank": 265,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 340741
       }
     },
     "Miguel Damas": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -16975,14 +16975,14 @@
         }
       },
       "latestMatchDate": null,
-      "liveRank": 260,
+      "liveRank": 257,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 192862
       }
     },
     "Juncheng Shang": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17048,7 +17048,7 @@
       }
     },
     "Yosuke Watanuki": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17107,14 +17107,14 @@
         }
       },
       "latestMatchDate": "20260206",
-      "liveRank": 262,
+      "liveRank": 271,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 157302
       }
     },
     "Guido Ivan Justo": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17173,14 +17173,14 @@
         }
       },
       "latestMatchDate": null,
-      "liveRank": 263,
+      "liveRank": 249,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 255418
       }
     },
     "Murphy Cassone": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17239,14 +17239,14 @@
         }
       },
       "latestMatchDate": "20250721",
-      "liveRank": 264,
+      "liveRank": 262,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 333007
       }
     },
     "Stefan Kozlov": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17305,14 +17305,14 @@
         }
       },
       "latestMatchDate": "20220919",
-      "liveRank": 265,
+      "liveRank": 258,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 77007
       }
     },
     "Stefan Dostanic": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17378,7 +17378,7 @@
       }
     },
     "Andrej Nedic": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -17438,7 +17438,7 @@
       "latestMatchDate": "20260207"
     },
     "Andrea Collarini": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17497,14 +17497,14 @@
         }
       },
       "latestMatchDate": "20240722",
-      "liveRank": 268,
+      "liveRank": 273,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 43761
       }
     },
     "Ivan Gakhov": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17563,14 +17563,14 @@
         }
       },
       "latestMatchDate": "20250518",
-      "liveRank": 269,
+      "liveRank": 329,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 76515
       }
     },
     "Mitchell Krueger": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17629,14 +17629,14 @@
         }
       },
       "latestMatchDate": "20250714",
-      "liveRank": 270,
+      "liveRank": 337,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 52276
       }
     },
     "Daniel Elahi Galan": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17695,14 +17695,14 @@
         }
       },
       "latestMatchDate": "20250825",
-      "liveRank": 271,
+      "liveRank": 256,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 92074
       }
     },
     "Filip Cristian Jianu": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17761,14 +17761,14 @@
         }
       },
       "latestMatchDate": "20260330",
-      "liveRank": 272,
+      "liveRank": 268,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 230049
       }
     },
     "Franco Agamenone": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17827,14 +17827,14 @@
         }
       },
       "latestMatchDate": "20220725",
-      "liveRank": 273,
+      "liveRank": 269,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 65606
       }
     },
     "Franco Roncadelli": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17893,14 +17893,14 @@
         }
       },
       "latestMatchDate": "20260207",
-      "liveRank": 274,
+      "liveRank": 227,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 240797
       }
     },
     "Paul Jubb": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -17959,14 +17959,14 @@
         }
       },
       "latestMatchDate": "20240701",
-      "liveRank": 275,
+      "liveRank": 311,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 220537
       }
     },
     "Sumit Nagal": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -18025,14 +18025,14 @@
         }
       },
       "latestMatchDate": "20260413",
-      "liveRank": 276,
+      "liveRank": 275,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 131566
       }
     },
     "Andres Martin": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -18091,14 +18091,14 @@
         }
       },
       "latestMatchDate": "20240722",
-      "liveRank": 277,
+      "liveRank": 278,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 321862
       }
     },
     "Robin Bertrand": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -18157,14 +18157,14 @@
         }
       },
       "latestMatchDate": null,
-      "liveRank": 278,
+      "liveRank": 279,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 340742
       }
     },
     "Laslo Djere": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -18223,14 +18223,14 @@
         }
       },
       "latestMatchDate": "20260209",
-      "liveRank": 279,
+      "liveRank": 238,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 97231
       }
     },
     "Buvaysar Gadamauri": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -18296,7 +18296,7 @@
       }
     },
     "Mikhail Kukushkin": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -18355,14 +18355,14 @@
         }
       },
       "latestMatchDate": "20250127",
-      "liveRank": 281,
+      "liveRank": 300,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 16683
       }
     },
     "Michele Ribecai": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -18421,14 +18421,14 @@
         }
       },
       "latestMatchDate": null,
-      "liveRank": 282,
+      "liveRank": 283,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 462168
       }
     },
     "Diego Dedura Palomero": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -18488,7 +18488,7 @@
       "latestMatchDate": "20260413"
     },
     "Johannus Monday": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -18547,14 +18547,14 @@
         }
       },
       "latestMatchDate": "20250630",
-      "liveRank": 284,
+      "liveRank": 286,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 313822
       }
     },
     "Hynek Barton": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -18613,14 +18613,14 @@
         }
       },
       "latestMatchDate": null,
-      "liveRank": 285,
+      "liveRank": 304,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 372310
       }
     },
     "Jonas Forejtek": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -18679,140 +18679,14 @@
         }
       },
       "latestMatchDate": "20201109",
-      "liveRank": 286,
+      "liveRank": 288,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 269291
       }
     },
     "Antoine Ghibaudo": {
-      "asOf": "2026-05-17",
-      "sources": [
-        "Jeff Sackmann records",
-        "Jeff Sackmann point stats",
-        "TennisApi"
-      ],
-      "careerRecord": {
-        "matches": 0,
-        "wins": 0,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "seasonRecord": {
-        "matches": 0,
-        "wins": 0,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "statSamples": {
-        "matches": 0,
-        "bySurface": {
-          "Hard": 0,
-          "Clay": 0,
-          "Grass": 0
-        }
-      },
-      "latestMatchDate": null,
-      "liveRank": 287,
-      "liveRankPoints": null,
-      "apiIds": {
-        "TennisApi": 339606
-      }
-    },
-    "Duje Ajdukovic": {
-      "asOf": "2026-05-17",
-      "sources": [
-        "Jeff Sackmann records",
-        "Jeff Sackmann point stats"
-      ],
-      "careerRecord": {
-        "matches": 17,
-        "wins": 7,
-        "losses": 10,
-        "bySurface": {
-          "Hard": {
-            "matches": 6,
-            "wins": 3,
-            "losses": 3
-          },
-          "Clay": {
-            "matches": 11,
-            "wins": 4,
-            "losses": 7
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "seasonRecord": {
-        "matches": 0,
-        "wins": 0,
-        "losses": 0,
-        "bySurface": {
-          "Hard": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Clay": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          },
-          "Grass": {
-            "matches": 0,
-            "wins": 0,
-            "losses": 0
-          }
-        }
-      },
-      "statSamples": {
-        "matches": 15,
-        "bySurface": {
-          "Hard": 4,
-          "Clay": 11,
-          "Grass": 0
-        }
-      },
-      "latestMatchDate": "20250131"
-    },
-    "Keegan Smith": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -18874,11 +18748,137 @@
       "liveRank": 289,
       "liveRankPoints": null,
       "apiIds": {
+        "TennisApi": 339606
+      }
+    },
+    "Duje Ajdukovic": {
+      "asOf": "2026-05-18",
+      "sources": [
+        "Jeff Sackmann records",
+        "Jeff Sackmann point stats"
+      ],
+      "careerRecord": {
+        "matches": 17,
+        "wins": 7,
+        "losses": 10,
+        "bySurface": {
+          "Hard": {
+            "matches": 6,
+            "wins": 3,
+            "losses": 3
+          },
+          "Clay": {
+            "matches": 11,
+            "wins": 4,
+            "losses": 7
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "seasonRecord": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "statSamples": {
+        "matches": 15,
+        "bySurface": {
+          "Hard": 4,
+          "Clay": 11,
+          "Grass": 0
+        }
+      },
+      "latestMatchDate": "20250131"
+    },
+    "Keegan Smith": {
+      "asOf": "2026-05-18",
+      "sources": [
+        "Jeff Sackmann records",
+        "Jeff Sackmann point stats",
+        "TennisApi"
+      ],
+      "careerRecord": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "seasonRecord": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "bySurface": {
+          "Hard": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Clay": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          },
+          "Grass": {
+            "matches": 0,
+            "wins": 0,
+            "losses": 0
+          }
+        }
+      },
+      "statSamples": {
+        "matches": 0,
+        "bySurface": {
+          "Hard": 0,
+          "Clay": 0,
+          "Grass": 0
+        }
+      },
+      "latestMatchDate": null,
+      "liveRank": 245,
+      "liveRankPoints": null,
+      "apiIds": {
         "TennisApi": 232059
       }
     },
     "Sergey Fomin": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -18937,14 +18937,14 @@
         }
       },
       "latestMatchDate": "20250913",
-      "liveRank": 290,
+      "liveRank": 292,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 198223
       }
     },
     "Matias Soto": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -19003,14 +19003,14 @@
         }
       },
       "latestMatchDate": "20260223",
-      "liveRank": 291,
+      "liveRank": 295,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 241039
       }
     },
     "Thiago Monteiro": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -19069,14 +19069,14 @@
         }
       },
       "latestMatchDate": "20260216",
-      "liveRank": 292,
+      "liveRank": 284,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 47603
       }
     },
     "Alastair Gray": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -19135,14 +19135,14 @@
         }
       },
       "latestMatchDate": "20220627",
-      "liveRank": 293,
+      "liveRank": 287,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 222958
       }
     },
     "Daniel Michalski": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -19201,14 +19201,14 @@
         }
       },
       "latestMatchDate": "20230102",
-      "liveRank": 294,
+      "liveRank": 291,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 257091
       }
     },
     "Igor Ribeiro Marcondes": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats"
@@ -19268,7 +19268,7 @@
       "latestMatchDate": "20260216"
     },
     "Facundo Mena": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -19327,14 +19327,14 @@
         }
       },
       "latestMatchDate": "20220919",
-      "liveRank": 296,
+      "liveRank": 299,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 38180
       }
     },
     "Beibit Zhukayev": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -19393,14 +19393,14 @@
         }
       },
       "latestMatchDate": "20251013",
-      "liveRank": 297,
+      "liveRank": 298,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 232780
       }
     },
     "Tyler Zink": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -19459,14 +19459,14 @@
         }
       },
       "latestMatchDate": null,
-      "liveRank": 298,
+      "liveRank": 318,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 265147
       }
     },
     "Ryan Peniston": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -19525,14 +19525,14 @@
         }
       },
       "latestMatchDate": "20230703",
-      "liveRank": 299,
+      "liveRank": 320,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 91240
       }
     },
     "Juan Pablo Varillas": {
-      "asOf": "2026-05-17",
+      "asOf": "2026-05-18",
       "sources": [
         "Jeff Sackmann records",
         "Jeff Sackmann point stats",
@@ -19591,7 +19591,7 @@
         }
       },
       "latestMatchDate": "20260206",
-      "liveRank": 300,
+      "liveRank": 302,
       "liveRankPoints": null,
       "apiIds": {
         "TennisApi": 72248
