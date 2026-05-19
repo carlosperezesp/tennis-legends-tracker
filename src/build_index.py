@@ -19,7 +19,10 @@ import bisect
 import csv
 import json
 import math
+import re
 import sys
+import urllib.error
+import urllib.request
 from datetime import date
 from pathlib import Path
 from html import escape
@@ -28,6 +31,8 @@ SRC_DIR = Path(__file__).resolve().parent
 ROOT    = SRC_DIR.parent
 DATA_DIR    = ROOT / "data"
 EXAMPLES_DIR = ROOT / "examples"
+TA_ELO_CACHE = DATA_DIR / "_csv_cache" / "tennisabstract_atp_elo_ratings.html"
+TA_ELO_URL = "https://www.tennisabstract.com/reports/atp_elo_ratings.html"
 
 sys.path.insert(0, str(SRC_DIR))
 import stats_fetcher as sf
@@ -252,6 +257,102 @@ def _elo_strength_score(elo) -> float | None:
         return None
     # ATP Elo usually spans roughly 1450-1950 for this top-200 view.
     return round(_clamp((float(elo) - 1450) / 500 * 100), 1)
+
+
+def _normalise_player_name(name: str) -> str:
+    name = (name or "").replace("\xa0", " ")
+    name = re.sub(r"[^a-zA-ZÀ-ÿ' -]", " ", name)
+    return re.sub(r"\s+", " ", name).strip().lower()
+
+
+def _safe_float(value, default=None):
+    try:
+        return float(value) if value not in (None, "", "nan") else default
+    except (TypeError, ValueError):
+        return default
+
+
+def _load_tennisabstract_elo_cache(use_cache: bool = True) -> tuple[dict, date | None]:
+    """Read Tennis Abstract's current ATP Elo report from the local cache.
+
+    The report is updated weekly and often includes recent results before the
+    yearly Sackmann match CSV lands in this repo, so it is the freshest strength
+    anchor for the dashboard's current "Nivel" score.
+    """
+    if not use_cache or not TA_ELO_CACHE.exists():
+        try:
+            with urllib.request.urlopen(TA_ELO_URL, timeout=20) as resp:
+                raw = resp.read().decode("utf-8", errors="ignore")
+            TA_ELO_CACHE.parent.mkdir(parents=True, exist_ok=True)
+            TA_ELO_CACHE.write_text(raw, encoding="utf-8")
+        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError) as exc:
+            print(f"  Warning: could not fetch Tennis Abstract Elo: {exc}")
+
+    if not TA_ELO_CACHE.exists():
+        return {}, None
+
+    html = TA_ELO_CACHE.read_text(encoding="utf-8", errors="ignore")
+    updated = None
+    m_update = re.search(r"Last update:\s*(\d{4})-(\d{2})-(\d{2})", html)
+    if m_update:
+        try:
+            updated = date(int(m_update.group(1)), int(m_update.group(2)), int(m_update.group(3)))
+        except ValueError:
+            updated = None
+
+    rows = {}
+    for match in re.finditer(r"<tr>(.*?)</tr>", html, flags=re.S):
+        cells = re.findall(r"<td[^>]*>(.*?)</td>", match.group(1), flags=re.S)
+        if len(cells) < 11:
+            continue
+        raw_name = re.sub(r"<[^>]+>", "", cells[1]).replace("&nbsp;", " ")
+        name = re.sub(r"\s+", " ", raw_name).strip()
+        if not name:
+            continue
+
+        item = {
+            "rank": _safe_int(re.sub(r"<[^>]+>", "", cells[0]).strip(), None),
+            "elo": _safe_float(re.sub(r"<[^>]+>", "", cells[3]).strip(), None),
+            "hElo": _safe_float(re.sub(r"<[^>]+>", "", cells[6]).strip(), None),
+            "cElo": _safe_float(re.sub(r"<[^>]+>", "", cells[8]).strip(), None),
+            "gElo": _safe_float(re.sub(r"<[^>]+>", "", cells[10]).strip(), None),
+            "updated": updated.isoformat() if updated else None,
+            "source": "Tennis Abstract Elo",
+        }
+        rows[_normalise_player_name(name)] = item
+    return rows, updated
+
+
+def _apply_tennisabstract_elo(players: list[dict], elo_ratings: dict,
+                              surface_elo_ratings: dict, use_cache: bool = True) -> tuple[int, date | None]:
+    ta_elo, updated = _load_tennisabstract_elo_cache(use_cache)
+    if not ta_elo:
+        return 0, updated
+
+    applied = 0
+    for player in players:
+        facts = ta_elo.get(_normalise_player_name(player.get("name", "")))
+        if not facts:
+            continue
+        pid = player["player_id"]
+        if facts.get("elo") is not None:
+            elo_ratings[pid] = {"elo": round(facts["elo"], 0), "matches": None, "source": facts["source"]}
+        surface_map = {
+            "All": facts.get("elo"),
+            "Hard": facts.get("hElo"),
+            "Clay": facts.get("cElo"),
+            "Grass": facts.get("gElo"),
+        }
+        for surface, value in surface_map.items():
+            if value is None:
+                continue
+            surface_elo_ratings.setdefault(surface, {})[pid] = {
+                "elo": round(value, 0),
+                "matches": None,
+                "source": facts["source"],
+            }
+        applied += 1
+    return applied, updated
 
 
 def _load_player_id_lookup(use_cache: bool = True) -> dict:
@@ -2137,6 +2238,10 @@ def _grand_slam_winners(use_cache: bool = True) -> list:
 
 
 def _latest_ranking_source_date() -> date | None:
+    _, ta_updated = _load_tennisabstract_elo_cache()
+    if ta_updated:
+        return ta_updated
+
     path = DATA_DIR / "_csv_cache" / "atp_rankings_current.csv"
     if not path.exists():
         return None
@@ -4363,6 +4468,7 @@ def main():
     print("Computing Elo ratings from match history...")
     elo_ratings = ec.compute_elo_ratings()
     surface_elo_ratings = ec.compute_elo_ratings_by_surface()
+    ta_elo_count, ta_elo_date = _apply_tennisabstract_elo(players, elo_ratings, surface_elo_ratings, use_cache)
     print(
         "  Elo computed for "
         f"{len(elo_ratings)} players "
@@ -4370,6 +4476,12 @@ def main():
         f"C {len(surface_elo_ratings.get('Clay', {}))}, "
         f"G {len(surface_elo_ratings.get('Grass', {}))})"
     )
+    if ta_elo_count:
+        print(
+            "  Tennis Abstract Elo applied to "
+            f"{ta_elo_count} players"
+            + (f" (updated {_format_spanish_date(ta_elo_date)})" if ta_elo_date else "")
+        )
 
     print("Computing last-10 vs career performance metrics...")
     performance_metrics = _performance_metrics_for_players(
