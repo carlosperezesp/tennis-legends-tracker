@@ -61,7 +61,8 @@ LEGEND_GS_WIN_YEARS = {
 # Players already in our curated dataset — use known GS counts
 KNOWN_GS = {
     "Carlos Alcaraz": 7,
-    "Jannik Sinner":  3,
+    "Jannik Sinner":  4,
+    "Novak Djokovic": 24,
 }
 
 STAT_LABELS = {
