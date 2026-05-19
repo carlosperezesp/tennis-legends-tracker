@@ -93,6 +93,13 @@ ELO_REFERENCE_GROUPS = {
 
 LEGEND_PROFILE_GROUPS = [
     {
+        "name": "Perfil Sincaraz",
+        "button": "Sincaraz",
+        "group": "Arquetipo",
+        "players": ["Jannik Sinner", "Carlos Alcaraz"],
+        "gs": 10,
+    },
+    {
         "name": "Perfil Big 3",
         "button": "Big 3",
         "group": "Arquetipo",
@@ -138,6 +145,11 @@ LEGEND_COMPARISON_NAMES = [
     "Daniil Medvedev",
 ]
 
+ACTIVE_COMPARISON_NAMES = [
+    "Jannik Sinner",
+    "Carlos Alcaraz",
+]
+
 LEGEND_TOTAL_GS = {
     "Novak Djokovic": 24,
     "Rafael Nadal": 22,
@@ -155,6 +167,11 @@ LEGEND_TOTAL_GS = {
     "Marin Cilic": 1,
     "Dominic Thiem": 1,
     "Daniil Medvedev": 1,
+}
+
+ACTIVE_COMPARISON_LABELS = {
+    "Jannik Sinner": "Sinner",
+    "Carlos Alcaraz": "Alcaraz",
 }
 
 
@@ -1870,16 +1887,50 @@ def _build_legend_comparison(all_historical_stats: dict, benchmark: dict,
             "rankVsActive": ahead + 1,
             "type": "player",
         })
+    active_refs = []
+    for name in ACTIVE_COMPARISON_NAMES:
+        record = active_by_name.get(name)
+        if not record:
+            continue
+        surface_series = record.get("comparisonLevelTrendBySurface") or {}
+        yearly = [dict(point) for point in (surface_series.get("All") or record.get("comparisonLevelTrend") or [])]
+        yearly = [point for point in yearly if point.get("level") is not None and point.get("age") is not None]
+        if not yearly:
+            continue
+        yearly_by_surface = {
+            surf: [
+                dict(point) for point in (surface_series.get(surf) or [])
+                if point.get("level") is not None and point.get("age") is not None
+            ]
+            for surf in ("All", "Hard", "Clay", "Grass")
+        }
+        peak = max(yearly, key=lambda row: row["level"])
+        latest = yearly[-1]
+        current_level = (record.get("tourPctBySurface") or {}).get("All") or record.get("tourPct")
+        ahead = sum(1 for p in active_top if p["level"] is not None and current_level is not None and p["level"] > current_level)
+        active_refs.append({
+            "name": name,
+            "button": ACTIVE_COMPARISON_LABELS.get(name, name.split(" ")[-1]),
+            "group": "Activo",
+            "gs": record.get("gs"),
+            "peak": peak,
+            "latest": latest,
+            "yearly": yearly,
+            "yearlyBySurface": yearly_by_surface,
+            "rankVsActive": ahead + 1 if current_level is not None else None,
+            "type": "active",
+        })
     legends.sort(key=lambda row: row["peak"]["level"], reverse=True)
+    profile_source = active_refs + legends
     profiles = [
         profile for profile in (
-            _aggregate_legend_profile(group, legends, active_top)
+            _aggregate_legend_profile(group, profile_source, active_top)
             for group in LEGEND_PROFILE_GROUPS
         )
         if profile
     ]
     return {
-        "legends": profiles + legends,
+        "legends": active_refs + profiles + legends,
         "activeTop": active_top,
     }
 
@@ -2691,6 +2742,7 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       display: grid; grid-template-columns: minmax(0, 1fr) 72px 76px;
       gap: 12px; align-items: center; padding: 16px 18px; border-top: 1px solid var(--cloud-light);
     }}
+    .legend-row.archetype {{ background: rgba(92, 99, 77, 0.07); }}
     .legend-row:first-child {{ border-top: 0; }}
     .legend-name {{ font-weight: 700; font-size: 18px; }}
     .legend-meta {{
@@ -2733,7 +2785,10 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       padding: 8px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px;
       text-transform: uppercase; cursor: pointer;
     }}
+    .legend-picker button.archetype {{ background: rgba(92, 99, 77, 0.10); border-color: var(--olive); }}
+    .legend-picker button.player-ref {{ background: rgba(20, 20, 19, 0.025); }}
     .legend-picker button.active {{ background: var(--slate-dark); color: var(--ivory-light); }}
+    .legend-picker button.archetype.active {{ background: var(--olive); border-color: var(--olive); color: var(--ivory-light); }}
     .legend-compare-chart {{ width: 100%; height: 300px; }}
     .legend-compare-chart svg {{ width: 100%; height: 300px; display: block; overflow: visible; }}
     .legend-axis {{ stroke: var(--cloud-light); stroke-width: 1; }}
@@ -3629,7 +3684,7 @@ function compareLegendChart(legend, player) {{
       ? (legend?.yearly || [])
       : ((legend?.yearlyBySurface || {{}})[activeCompareSurface] || [])
   ).filter(d => d.age != null && d.level != null);
-  const comparesSamePlayer = legend?.type === 'player' && samePlayerName(legend?.name, player?.name);
+  const comparesSamePlayer = ['player', 'active'].includes(legend?.type) && samePlayerName(legend?.name, player?.name);
   const playerSeries = comparesSamePlayer
     ? legendSeries.map(d => ({{ ...d, current: d.year === legend?.latest?.year }}))
     : activePlayerLegendSeries(player, activeCompareSurface);
@@ -3936,12 +3991,38 @@ function renderActiveComparator() {{
   '</section>';
 }}
 
+function legendSeriesForSurface(legend, surface) {{
+  return (
+    surface === 'All'
+      ? (legend?.yearly || [])
+      : ((legend?.yearlyBySurface || {{}})[surface] || [])
+  ).filter(d => d.level != null);
+}}
+
+function legendDisplayLevel(legend, surface) {{
+  const series = legendSeriesForSurface(legend, surface);
+  if (!series.length) return -1;
+  return Math.max(...series.map(d => d.level));
+}}
+
+function sortedLegendItems(legends) {{
+  return (legends || []).slice().sort((a, b) => {{
+    const aGroup = a?.type === 'profile' ? 0 : 1;
+    const bGroup = b?.type === 'profile' ? 0 : 1;
+    if (aGroup !== bGroup) return aGroup - bGroup;
+    const levelDiff = legendDisplayLevel(b, activeCompareSurface) - legendDisplayLevel(a, activeCompareSurface);
+    if (Math.abs(levelDiff) > 0.001) return levelDiff;
+    return String(a?.name || '').localeCompare(String(b?.name || ''));
+  }});
+}}
+
 function renderLegendComparator(legends) {{
   const player = currentPlayer();
-  if (!activeLegend && legends.length) activeLegend = legends[0].name;
-  const legend = legends.find(l => l.name === activeLegend) || legends[0];
-  const buttons = legends.map(l =>
-    '<button class="' + (l.name === legend.name ? 'active' : '') + '" onclick="setActiveLegend(\\'' + l.name.replace(/'/g, "\\\\'") + '\\')">' + (l.button || l.name.split(' ').slice(-1)[0]) + '</button>'
+  const sortedLegends = sortedLegendItems(legends);
+  if (!activeLegend && sortedLegends.length) activeLegend = sortedLegends[0].name;
+  const legend = sortedLegends.find(l => l.name === activeLegend) || sortedLegends[0];
+  const buttons = sortedLegends.map(l =>
+    '<button class="' + (l.name === legend.name ? 'active ' : '') + (l.type === 'profile' ? 'archetype' : 'player-ref') + '" onclick="setActiveLegend(\\'' + l.name.replace(/'/g, "\\\\'") + '\\')">' + (l.button || l.name.split(' ').slice(-1)[0]) + '</button>'
   ).join('');
   const surfaceButtons = SURFACES.map(s =>
     '<button class="' + (activeCompareSurface === s.key ? 'active' : '') + '" onclick="setActiveCompareSurface(\\'' + s.key + '\\')">' + s.label + '</button>'
@@ -3960,13 +4041,13 @@ function renderLegends() {{
   if (!wrap) return;
   const legends = LEGEND_COMPARISON?.legends || [];
   const activeTop = LEGEND_COMPARISON?.activeTop || [];
-  const legendRows = legends.map(l => {{
+  const legendRows = sortedLegendItems(legends).map(l => {{
     const peak = l.peak || {{}};
     const latest = l.latest || {{}};
     const drift = latest.level != null && peak.level != null ? latest.level - peak.level : null;
     const driftText = drift == null ? '' : ' · final ' + Math.round(latest.level) + ' (' + (drift >= 0 ? '+' : '') + drift.toFixed(0) + ')';
     const memberText = l.type === 'profile' && l.members?.length ? ' · ' + l.members.length + ' jugadores' : '';
-    return '<div class="legend-row">' +
+    return '<div class="legend-row ' + (l.type === 'profile' ? 'archetype' : 'player-ref') + '">' +
       '<div>' +
         '<div class="legend-name">' + l.name + '</div>' +
         '<div class="legend-meta">' + l.group + memberText + ' · ' + l.gs + ' GS · pico ' + peak.year + ' · ' + peak.age + ' años · Elo ' + (peak.elo || '&#8212;') + driftText + '</div>' +
