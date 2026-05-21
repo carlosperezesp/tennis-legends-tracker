@@ -1673,9 +1673,10 @@ def _attach_comparison_level_trends(players_data: list[dict], trend_stats: dict,
                                     use_cache: bool = True) -> None:
     """Attach one comparator series per active player.
 
-    Closed seasons use the historical comparator formula. The live/current
-    point uses the same composite level shown on the player card so comparison
-    charts and profile cards agree on "actual".
+    Historical seasons use the same pct-based level shown on the player detail
+    page so the comparator chart and the level trend chart agree on scale.
+    The live/current point uses the same composite level shown on the player
+    card so comparison charts and profile cards also agree on "actual".
     """
     current_year = date.today().year
     lookup = _load_player_id_lookup(use_cache)
@@ -1685,32 +1686,40 @@ def _attach_comparison_level_trends(players_data: list[dict], trend_stats: dict,
         pid = record.get("playerId")
         born = sf.PLAYERS.get(name, {}).get("born") or lookup.get(name, {}).get("born")
         by_year = trend_stats.get(pid) if pid is not None else None
+        # Use the pct values already computed in levelTrendBySurface so the
+        # comparator and the player detail page always show the same scale.
+        pct_by_surface: dict[str, dict[int, dict]] = {}
+        for s in ("All", "Hard", "Clay", "Grass"):
+            pct_by_surface[s] = {
+                entry["year"]: entry
+                for entry in (record.get("levelTrendBySurface") or {}).get(s, [])
+                if isinstance(entry.get("year"), int) and entry.get("pct") is not None
+            }
         by_surface = {}
         for surf in ("All", "Hard", "Clay", "Grass"):
             series = []
             for year_key, surfaces in sorted((by_year or {}).items(), key=lambda item: int(item[0])):
                 year = int(year_key)
                 stats = (surfaces or {}).get(surf) or {}
-                point = _historical_level_point(
-                    stats,
-                    benchmark,
-                    valid_sims_by_surface.get(surf) or [],
-                    (elo_history.get(name) or {}).get(year),
-                    surf,
-                )
-                if not point:
+                trend_entry = pct_by_surface.get(surf, {}).get(year)
+                if not trend_entry:
                     continue
                 age = stats.get("age") or (_age_at(born, year) if born else None)
                 if age is None:
                     continue
-                point.update({
+                elo = (elo_history.get(name) or {}).get(year)
+                series.append({
+                    "level": trend_entry["pct"],
+                    "statPct": None,
+                    "sim": trend_entry.get("raw"),
+                    "elo": int(elo) if elo is not None else None,
+                    "matches": trend_entry.get("matches") or 0,
                     "year": year,
                     "age": age,
                     "surface": surf,
                     "source": "liveHistorical" if year == current_year else "historical",
                     "current": year == current_year,
                 })
-                series.append(point)
             current_level = ((record.get("tourPctBySurface") or {}).get(surf)
                              if surf != "All" else record.get("tourPct"))
             if current_level is not None and record.get("age") is not None:
@@ -2358,15 +2367,15 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       width: 100%; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
       overscroll-behavior-x: contain;
     }}
-    .tabs-track {{ display: flex; width: 500%; align-items: flex-start; }}
-    .tab-panel {{ width: 20%; min-width: 20%; scroll-snap-align: start; }}
+    .tabs-track {{ display: flex; width: 400%; align-items: flex-start; }}
+    .tab-panel {{ width: 25%; min-width: 25%; scroll-snap-align: start; }}
     .tab-panel.app-shell {{ max-width: none; margin: 0; }}
     .tab-panel.app-shell > * {{ max-width: 1200px; margin-left: auto; margin-right: auto; }}
     .app-shell {{ max-width: 1200px; margin: 0 auto; padding: 0 24px 48px; }}
     .slider-nav {{
       position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 60;
-      display: grid; grid-template-columns: repeat(5, minmax(84px, 1fr)); gap: 8px;
-      width: min(620px, calc(100vw - 24px)); padding: 8px;
+      display: grid; grid-template-columns: repeat(4, minmax(84px, 1fr)); gap: 8px;
+      width: min(500px, calc(100vw - 24px)); padding: 8px;
       background: rgba(240, 238, 230, 0.92); border: 1px solid var(--slate-dark);
       backdrop-filter: blur(10px);
     }}
@@ -2925,7 +2934,7 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
       .profile-stat-name {{ font-size: 12px; }}
       .profile-stat-val {{ font-size: 11px; }}
       .profile-stat-label {{ font-size: 9px; }}
-      .slider-nav {{ grid-template-columns: repeat(5, 1fr); gap: 5px; bottom: 8px; width: calc(100vw - 16px); padding: 6px; }}
+      .slider-nav {{ grid-template-columns: repeat(4, 1fr); gap: 5px; bottom: 8px; width: calc(100vw - 16px); padding: 6px; }}
       .slider-nav-btn {{ font-size: 9px; padding: 9px 3px; }}
       .schedule-page {{ padding-top: 28px; }}
       .schedule-hero {{ align-items: flex-start; flex-direction: column; }}
@@ -3005,17 +3014,6 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
         <section id="player-detail" class="player-card"></section>
       </main>
 
-      <main id="schedule-tab" class="tab-panel app-shell schedule-page">
-        <section class="schedule-hero">
-          <h2>Partidos</h2>
-          <div class="schedule-meta">
-            <div>Hoy y ma&ntilde;ana</div>
-            <div id="schedule-asof"></div>
-          </div>
-        </section>
-        <section id="schedule-days" class="schedule-days"></section>
-      </main>
-
       <main id="legends-tab" class="tab-panel app-shell legends-page">
         <section class="legends-hero">
           <h2>Comparador</h2>
@@ -3043,7 +3041,6 @@ def render_index(players_data: list, legend_datasets: list, recent_matches: list
   <nav class="slider-nav" aria-label="Secciones">
     <button id="nav-ranking" class="slider-nav-btn active" type="button" onclick="goToTab('ranking-tab')">Ranking</button>
     <button id="nav-player" class="slider-nav-btn" type="button" onclick="goToTab('player-tab')">Jugador</button>
-    <button id="nav-schedule" class="slider-nav-btn" type="button" onclick="goToTab('schedule-tab')">Partidos</button>
     <button id="nav-legends" class="slider-nav-btn" type="button" onclick="goToTab('legends-tab')">Comparador</button>
     <button id="nav-requests" class="slider-nav-btn" type="button" onclick="goToTab('requests-tab')">Reports</button>
   </nav>
@@ -4303,15 +4300,7 @@ function renderMatchComparison(match) {{
   '</div>';
 }}
 
-function goToMatch(ref) {{
-  goToTab('schedule-tab');
-  window.setTimeout(() => {{
-    const el = document.querySelector('[data-match-ref="' + ref + '"]');
-    if (!el) return;
-    el.open = true;
-    el.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
-  }}, 280);
-}}
+function goToMatch(_ref) {{}}
 
 function goToPlayerTab() {{
   goToTab('player-tab');
@@ -4324,7 +4313,7 @@ function goToTab(id) {{
 function updateSliderNav() {{
   const viewport = document.getElementById('tabs-viewport');
   if (!viewport) return;
-  const ids = ['ranking-tab', 'player-tab', 'schedule-tab', 'legends-tab', 'requests-tab'];
+  const ids = ['ranking-tab', 'player-tab', 'legends-tab', 'requests-tab'];
   const index = Math.max(0, Math.min(ids.length - 1, Math.round(viewport.scrollLeft / Math.max(1, viewport.clientWidth))));
   const activeId = ids[index];
   for (const id of ids) {{
@@ -4361,7 +4350,6 @@ function refresh() {{
   buildList(sortPlayers(filtered));
   renderRankingSurfaceButtons();
   renderPlayerDetail();
-  renderSchedule();
   renderLegends();
   renderRequests();
 }}
