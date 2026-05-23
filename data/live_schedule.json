@@ -9,18 +9,6 @@
       "label": "Hoy",
       "matches": [
         {
-          "time": "12:30",
-          "player1": "Ignacio Buse",
-          "player2": "Tommy Paul",
-          "tournament": "Hamburg, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "13:30",
           "player1": "Aleksandar Kovacevic",
           "player2": "Ignacio Buse",
@@ -45,14 +33,14 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "13:00",
-          "player1": "Mariano Navone",
-          "player2": "Learner Tien",
-          "tournament": "Geneva, Switzerland",
+          "time": "12:40",
+          "player1": "Ignacio Buse",
+          "player2": "Tommy Paul",
+          "tournament": "Hamburg, Germany",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Not started",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -72,6 +60,18 @@
           "time": "14:00",
           "player1": "Learner Tien",
           "player2": "Alexander Bublik",
+          "tournament": "Geneva, Switzerland",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "13:10",
+          "player1": "Mariano Navone",
+          "player2": "Learner Tien",
           "tournament": "Geneva, Switzerland",
           "level": "ATP",
           "round": "TBD",
@@ -196,18 +196,6 @@
         },
         {
           "time": "09:00",
-          "player1": "Alexander Bublik",
-          "player2": "Jan-Lennard Struff",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
           "player1": "Eliot Spizzirri",
           "player2": "Frances Tiafoe",
           "tournament": "French Open, Paris, France",
@@ -318,18 +306,6 @@
           "time": "09:00",
           "player1": "Pablo Carreño Busta",
           "player2": "Jiri Lehečka",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
-          "player1": "Alejandro Davidovich Fokina",
-          "player2": "Damir Džumhur",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -519,7 +495,7 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "10:40",
+          "time": "11:50",
           "player1": "Taylor Fritz",
           "player2": "Nishesh Basavareddy",
           "tournament": "French Open, Paris, France",
@@ -846,6 +822,30 @@
           "time": "10:10",
           "player1": "Kyrian Jacquet",
           "player2": "Marco Trungelliti",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Alexander Bublik",
+          "player2": "Jan-Lennard Struff",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Alejandro Davidovich Fokina",
+          "player2": "Damir Džumhur",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
