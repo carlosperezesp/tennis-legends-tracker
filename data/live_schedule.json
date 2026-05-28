@@ -21,57 +21,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "14:40",
-          "player1": "Francisco Comesaña",
-          "player2": "Luciano Darderi",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "10:10",
           "player1": "Alex Michelsen",
           "player2": "Rafael Jodar",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "14:40",
-          "player1": "Luca Van Assche",
-          "player2": "Brandon Nakashima",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "14:35",
-          "player1": "Felix Auger-Aliassime",
-          "player2": "Roman Andres Burruchaga",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "18:15",
-          "player1": "Arthur Rinderknech",
-          "player2": "Matteo Berrettini",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -89,18 +41,6 @@
           "round": "TBD",
           "surface": "TBD",
           "status": "Ended",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "16:25",
-          "player1": "Raphael Collignon",
-          "player2": "Ben Shelton",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -357,18 +297,6 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "14:40",
-          "player1": "Matteo Arnaldi",
-          "player2": "Stefanos Tsitsipas",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "11:20",
           "player1": "Francisco Cerundolo",
           "player2": "Hugo Gaston",
@@ -381,6 +309,18 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
+          "time": "15:15",
+          "player1": "Francisco Comesaña",
+          "player2": "Luciano Darderi",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "5th set",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
           "time": "12:05",
           "player1": "Martin Landaluce",
           "player2": "Vit Kopřiva",
@@ -388,7 +328,19 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "4th set",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "14:35",
+          "player1": "Felix Auger-Aliassime",
+          "player2": "Roman Andres Burruchaga",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -400,7 +352,55 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "16:20",
+          "player1": "Luca Van Assche",
+          "player2": "Brandon Nakashima",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
           "status": "4th set",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "17:50",
+          "player1": "Raphael Collignon",
+          "player2": "Ben Shelton",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "3rd set",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "17:50",
+          "player1": "Matteo Arnaldi",
+          "player2": "Stefanos Tsitsipas",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "2nd set",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "18:30",
+          "player1": "Arthur Rinderknech",
+          "player2": "Matteo Berrettini",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "2nd set",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
@@ -419,18 +419,6 @@
           "round": "TBD",
           "surface": "TBD",
           "status": "Walkover",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "14:40",
-          "player1": "Francisco Comesaña",
-          "player2": "Luciano Darderi",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -459,21 +447,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "14:40",
-          "player1": "Luca Van Assche",
-          "player2": "Brandon Nakashima",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "09:00",
           "player1": "Juan Manuel Cerundolo",
-          "player2": "R32P2",
+          "player2": "Martin Landaluce",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -495,21 +471,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "18:15",
-          "player1": "Arthur Rinderknech",
-          "player2": "Matteo Berrettini",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "16:25",
-          "player1": "Raphael Collignon",
-          "player2": "Ben Shelton",
+          "time": "09:00",
+          "player1": "Felix Auger-Aliassime",
+          "player2": "R32P10",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -544,8 +508,8 @@
         },
         {
           "time": "09:00",
-          "player1": "Jaime Faria",
-          "player2": "R32P6",
+          "player1": "Flavio Cobolli",
+          "player2": "Learner Tien",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -556,8 +520,20 @@
         },
         {
           "time": "09:00",
-          "player1": "Flavio Cobolli",
-          "player2": "Learner Tien",
+          "player1": "Jaime Faria",
+          "player2": "Frances Tiafoe",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "R32P3",
+          "player2": "Francisco Comesaña",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -627,14 +603,14 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "14:40",
-          "player1": "Matteo Arnaldi",
-          "player2": "Stefanos Tsitsipas",
+          "time": "15:15",
+          "player1": "Francisco Comesaña",
+          "player2": "Luciano Darderi",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Not started",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -646,7 +622,7 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "4th set",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -658,7 +634,55 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "1st set",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "16:20",
+          "player1": "Luca Van Assche",
+          "player2": "Brandon Nakashima",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "4th set",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "17:50",
+          "player1": "Raphael Collignon",
+          "player2": "Ben Shelton",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "3rd set",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "17:50",
+          "player1": "Matteo Arnaldi",
+          "player2": "Stefanos Tsitsipas",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "3rd set",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "18:30",
+          "player1": "Arthur Rinderknech",
+          "player2": "Matteo Berrettini",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "2nd set",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
