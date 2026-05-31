@@ -2,45 +2,12 @@
   "asOf": "2026-05-31",
   "timezone": "Europe/Rome",
   "source": "TennisAPI1 RapidAPI",
-  "errors": [
-    "Tennis API - ATP WTA ITF /tennis/v2/atp/matches/date/2026-06-01: HTTP Error 404: Not Found",
-    "Tennis API - ATP WTA ITF /tennis/v2/atp/calendar/2026-06-01: HTTP Error 404: Not Found",
-    "FlashScore /api/flashscore/v2/matches/list-by-date?sport_id=tennis&date=2026-06-01: HTTP Error 429: Too Many Requests",
-    "FlashScore /api/flashscore/v2/events/list?sport_id=tennis&date=2026-06-01: HTTP Error 404: Not Found",
-    "SofaScore /api/sofascore/v1/sport/tennis/scheduled-events/2026-06-01: HTTP Error 404: Not Found",
-    "SofaScore /api/sofascore/v1/events/schedule/tennis/2026-06-01: HTTP Error 404: Not Found",
-    "Tennisprodata /live-results/2026-06-01/: HTTP Error 503: Service Temporarily Unavailable",
-    "Tennisprodata /fixtures/2026-06-01/: HTTP Error 404: Not Found"
-  ],
+  "errors": [],
   "days": [
     {
       "date": "2026-05-31",
       "label": "Hoy",
       "matches": [
-        {
-          "time": "14:20",
-          "player1": "Jakub Menšik",
-          "player2": "Andrey Rublev",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "18:15",
-          "player1": "Casper Ruud",
-          "player2": "Joao Fonseca",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
         {
           "time": "13:30",
           "player1": "Felix Auger-Aliassime",
@@ -57,18 +24,6 @@
           "time": "11:20",
           "player1": "Juan Manuel Cerundolo",
           "player2": "Matteo Berrettini",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "13:30",
-          "player1": "Jesper De Jong",
-          "player2": "Alexander Zverev",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -102,9 +57,21 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "11:25",
-          "player1": "Rafael Jodar",
-          "player2": "Pablo Carreño Busta",
+          "time": "18:30",
+          "player1": "Casper Ruud",
+          "player2": "Joao Fonseca",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "1st set",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "17:25",
+          "player1": "Jakub Menšik",
+          "player2": "Andrey Rublev",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -172,13 +139,134 @@
           "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "11:25",
+          "player1": "Rafael Jodar",
+          "player2": "Pablo Carreño Busta",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "13:45",
+          "player1": "Jesper De Jong",
+          "player2": "Alexander Zverev",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
       ]
     },
     {
       "date": "2026-06-01",
       "label": "Mañana",
-      "matches": []
+      "matches": [
+        {
+          "time": "18:30",
+          "player1": "Casper Ruud",
+          "player2": "Joao Fonseca",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Rafael Jodar",
+          "player2": "Alexander Zverev",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "13:30",
+          "player1": "Felix Auger-Aliassime",
+          "player2": "Alejandro Tabilo",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "11:20",
+          "player1": "Juan Manuel Cerundolo",
+          "player2": "Matteo Berrettini",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "13:00",
+          "player1": "Frances Tiafoe",
+          "player2": "Matteo Arnaldi",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Flavio Cobolli",
+          "player2": "Zachary Svajda",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "13:45",
+          "player1": "Jesper De Jong",
+          "player2": "Alexander Zverev",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "17:25",
+          "player1": "Jakub Menšik",
+          "player2": "Andrey Rublev",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "2nd set",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        }
+      ]
     }
   ]
 }
