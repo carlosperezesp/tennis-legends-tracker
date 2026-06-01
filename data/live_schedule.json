@@ -69,14 +69,14 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "16:55",
-          "player1": "Frances Tiafoe",
-          "player2": "Matteo Arnaldi",
+          "time": "15:10",
+          "player1": "Felix Auger-Aliassime",
+          "player2": "Alejandro Tabilo",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Not started",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -88,19 +88,19 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "3rd set",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "15:10",
-          "player1": "Felix Auger-Aliassime",
-          "player2": "Alejandro Tabilo",
+          "time": "17:40",
+          "player1": "Frances Tiafoe",
+          "player2": "Matteo Arnaldi",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "2nd set",
+          "status": "3rd set",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
@@ -110,18 +110,6 @@
       "date": "2026-06-02",
       "label": "Mañana",
       "matches": [
-        {
-          "time": "18:15",
-          "player1": "Jakub Menšik",
-          "player2": "Joao Fonseca",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
         {
           "time": "11:20",
           "player1": "Rafael Jodar",
@@ -135,9 +123,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "16:55",
-          "player1": "Frances Tiafoe",
-          "player2": "Matteo Arnaldi",
+          "time": "18:15",
+          "player1": "Jakub Menšik",
+          "player2": "Joao Fonseca",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -148,8 +136,32 @@
         },
         {
           "time": "09:00",
-          "player1": "Qf3",
+          "player1": "Felix Auger-Aliassime",
           "player2": "Flavio Cobolli",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "15:10",
+          "player1": "Felix Auger-Aliassime",
+          "player2": "Alejandro Tabilo",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Matteo Berrettini",
+          "player2": "Qf2",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -166,14 +178,14 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "3rd set",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "15:10",
-          "player1": "Felix Auger-Aliassime",
-          "player2": "Alejandro Tabilo",
+          "time": "17:40",
+          "player1": "Frances Tiafoe",
+          "player2": "Matteo Arnaldi",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
