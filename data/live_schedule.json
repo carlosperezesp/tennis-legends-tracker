@@ -45,21 +45,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "11:20",
+          "time": "12:00",
           "player1": "Juan Manuel Cerundolo",
           "player2": "Matteo Berrettini",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "13:00",
-          "player1": "Frances Tiafoe",
-          "player2": "Matteo Arnaldi",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -81,21 +69,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "09:00",
-          "player1": "Flavio Cobolli",
-          "player2": "Zachary Svajda",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "1st set",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "18:30",
-          "player1": "Casper Ruud",
-          "player2": "Joao Fonseca",
+          "time": "17:25",
+          "player1": "Jakub Menšik",
+          "player2": "Andrey Rublev",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -105,9 +81,33 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "17:25",
-          "player1": "Jakub Menšik",
-          "player2": "Andrey Rublev",
+          "time": "13:40",
+          "player1": "Frances Tiafoe",
+          "player2": "Matteo Arnaldi",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Flavio Cobolli",
+          "player2": "Zachary Svajda",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "2nd set",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "18:30",
+          "player1": "Casper Ruud",
+          "player2": "Joao Fonseca",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -147,9 +147,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "13:00",
-          "player1": "Frances Tiafoe",
-          "player2": "Matteo Arnaldi",
+          "time": "13:30",
+          "player1": "Felix Auger-Aliassime",
+          "player2": "Alejandro Tabilo",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -159,9 +159,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "13:30",
-          "player1": "Felix Auger-Aliassime",
-          "player2": "Alejandro Tabilo",
+          "time": "13:25",
+          "player1": "Frances Tiafoe",
+          "player2": "Matteo Arnaldi",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
