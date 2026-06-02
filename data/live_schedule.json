@@ -45,18 +45,6 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "18:15",
-          "player1": "Jakub Menšik",
-          "player2": "Joao Fonseca",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "14:40",
           "player1": "Juan Manuel Cerundolo",
           "player2": "Matteo Berrettini",
@@ -72,6 +60,18 @@
           "time": "12:45",
           "player1": "Rafael Jodar",
           "player2": "Alexander Zverev",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "18:30",
+          "player1": "Jakub Menšik",
+          "player2": "Joao Fonseca",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
@@ -111,18 +111,6 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "18:15",
-          "player1": "Jakub Menšik",
-          "player2": "Joao Fonseca",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "12:45",
           "player1": "Rafael Jodar",
           "player2": "Alexander Zverev",
@@ -131,6 +119,18 @@
           "round": "TBD",
           "surface": "TBD",
           "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "18:30",
+          "player1": "Jakub Menšik",
+          "player2": "Joao Fonseca",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "3rd set",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
