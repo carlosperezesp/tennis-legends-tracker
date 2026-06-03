@@ -9,7 +9,7 @@
     "FlashScore /api/flashscore/v2/events/list?sport_id=tennis&date=2026-06-04: HTTP Error 404: Not Found",
     "SofaScore /api/sofascore/v1/sport/tennis/scheduled-events/2026-06-04: HTTP Error 404: Not Found",
     "SofaScore /api/sofascore/v1/events/schedule/tennis/2026-06-04: HTTP Error 404: Not Found",
-    "Tennisprodata /live-results/2026-06-04/: HTTP Error 503: Service Temporarily Unavailable",
+    "Tennisprodata /live-results/2026-06-04/: HTTP Error 401: Unauthorized",
     "Tennisprodata /fixtures/2026-06-04/: HTTP Error 404: Not Found"
   ],
   "days": [
@@ -54,14 +54,14 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "11:20",
+          "time": "14:05",
           "player1": "Felix Auger-Aliassime",
           "player2": "Flavio Cobolli",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Not started",
+          "status": "2nd set",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
