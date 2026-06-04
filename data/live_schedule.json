@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-06-03",
+  "asOf": "2026-06-04",
   "timezone": "Europe/Rome",
   "source": "TennisAPI1 RapidAPI",
   "errors": [
@@ -9,68 +9,44 @@
     "FlashScore /api/flashscore/v2/events/list?sport_id=tennis&date=2026-06-04: HTTP Error 404: Not Found",
     "SofaScore /api/sofascore/v1/sport/tennis/scheduled-events/2026-06-04: HTTP Error 404: Not Found",
     "SofaScore /api/sofascore/v1/events/schedule/tennis/2026-06-04: HTTP Error 404: Not Found",
-    "Tennisprodata /live-results/2026-06-04/: HTTP Error 401: Unauthorized",
+    "Tennisprodata /live-results/2026-06-04/: HTTP Error 503: Service Temporarily Unavailable",
     "Tennisprodata /fixtures/2026-06-04/: HTTP Error 404: Not Found"
   ],
   "days": [
     {
-      "date": "2026-06-03",
+      "date": "2026-06-04",
       "label": "Hoy",
+      "matches": []
+    },
+    {
+      "date": "2026-06-05",
+      "label": "Mañana",
       "matches": [
         {
-          "time": "12:45",
-          "player1": "Rafael Jodar",
-          "player2": "Alexander Zverev",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Ended",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "18:30",
-          "player1": "Jakub Menšik",
-          "player2": "Joao Fonseca",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Ended",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "14:05",
-          "player1": "Felix Auger-Aliassime",
+          "time": "12:30",
+          "player1": "Matteo Arnaldi",
           "player2": "Flavio Cobolli",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Ended",
+          "status": "Not started",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "18:25",
-          "player1": "Matteo Berrettini",
-          "player2": "Matteo Arnaldi",
+          "time": "12:30",
+          "player1": "Jakub Menšik",
+          "player2": "Alexander Zverev",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "2nd set",
+          "status": "Not started",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
       ]
-    },
-    {
-      "date": "2026-06-04",
-      "label": "Mañana",
-      "matches": []
     }
   ]
 }
