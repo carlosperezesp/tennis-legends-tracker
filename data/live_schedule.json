@@ -9,7 +9,7 @@
     "FlashScore /api/flashscore/v2/events/list?sport_id=tennis&date=2026-06-06: HTTP Error 404: Not Found",
     "SofaScore /api/sofascore/v1/sport/tennis/scheduled-events/2026-06-06: HTTP Error 404: Not Found",
     "SofaScore /api/sofascore/v1/events/schedule/tennis/2026-06-06: HTTP Error 404: Not Found",
-    "Tennisprodata /live-results/2026-06-06/: HTTP Error 401: Unauthorized",
+    "Tennisprodata /live-results/2026-06-06/: HTTP Error 503: Service Temporarily Unavailable",
     "Tennisprodata /fixtures/2026-06-06/: HTTP Error 404: Not Found"
   ],
   "days": [
@@ -18,14 +18,14 @@
       "label": "Hoy",
       "matches": [
         {
-          "time": "12:30",
+          "time": "12:35",
           "player1": "Jakub Menšik",
           "player2": "Alexander Zverev",
           "tournament": "French Open, Paris, France",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Not started",
+          "status": "1st set",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
