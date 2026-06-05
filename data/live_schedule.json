@@ -1,27 +1,34 @@
 {
-  "asOf": "2026-06-04",
+  "asOf": "2026-06-05",
   "timezone": "Europe/Rome",
   "source": "TennisAPI1 RapidAPI",
   "errors": [
-    "Tennis API - ATP WTA ITF /tennis/v2/atp/matches/date/2026-06-04: HTTP Error 404: Not Found",
-    "Tennis API - ATP WTA ITF /tennis/v2/atp/calendar/2026-06-04: HTTP Error 404: Not Found",
-    "FlashScore /api/flashscore/v2/matches/list-by-date?sport_id=tennis&date=2026-06-04: HTTP Error 429: Too Many Requests",
-    "FlashScore /api/flashscore/v2/events/list?sport_id=tennis&date=2026-06-04: HTTP Error 404: Not Found",
-    "SofaScore /api/sofascore/v1/sport/tennis/scheduled-events/2026-06-04: HTTP Error 404: Not Found",
-    "SofaScore /api/sofascore/v1/events/schedule/tennis/2026-06-04: HTTP Error 404: Not Found",
-    "Tennisprodata /live-results/2026-06-04/: HTTP Error 503: Service Temporarily Unavailable",
-    "Tennisprodata /fixtures/2026-06-04/: HTTP Error 404: Not Found"
+    "Tennis API - ATP WTA ITF /tennis/v2/atp/matches/date/2026-06-06: HTTP Error 404: Not Found",
+    "Tennis API - ATP WTA ITF /tennis/v2/atp/calendar/2026-06-06: HTTP Error 404: Not Found",
+    "FlashScore /api/flashscore/v2/matches/list-by-date?sport_id=tennis&date=2026-06-06: HTTP Error 429: Too Many Requests",
+    "FlashScore /api/flashscore/v2/events/list?sport_id=tennis&date=2026-06-06: HTTP Error 404: Not Found",
+    "SofaScore /api/sofascore/v1/sport/tennis/scheduled-events/2026-06-06: HTTP Error 404: Not Found",
+    "SofaScore /api/sofascore/v1/events/schedule/tennis/2026-06-06: HTTP Error 404: Not Found",
+    "Tennisprodata /live-results/2026-06-06/: HTTP Error 503: Service Temporarily Unavailable",
+    "Tennisprodata /fixtures/2026-06-06/: HTTP Error 404: Not Found"
   ],
   "days": [
     {
-      "date": "2026-06-04",
-      "label": "Hoy",
-      "matches": []
-    },
-    {
       "date": "2026-06-05",
-      "label": "Mañana",
+      "label": "Hoy",
       "matches": [
+        {
+          "time": "12:30",
+          "player1": "Jakub Menšik",
+          "player2": "Alexander Zverev",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
         {
           "time": "17:00",
           "player1": "Matteo Arnaldi",
@@ -33,20 +40,13 @@
           "status": "Not started",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "13:30",
-          "player1": "Jakub Menšik",
-          "player2": "Alexander Zverev",
-          "tournament": "French Open, Paris, France",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
       ]
+    },
+    {
+      "date": "2026-06-06",
+      "label": "Mañana",
+      "matches": []
     }
   ]
 }
