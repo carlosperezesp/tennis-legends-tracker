@@ -1,52 +1,224 @@
 {
-  "asOf": "2026-06-05",
+  "asOf": "2026-06-06",
   "timezone": "Europe/Rome",
   "source": "TennisAPI1 RapidAPI",
-  "errors": [
-    "Tennis API - ATP WTA ITF /tennis/v2/atp/matches/date/2026-06-06: HTTP Error 404: Not Found",
-    "Tennis API - ATP WTA ITF /tennis/v2/atp/calendar/2026-06-06: HTTP Error 404: Not Found",
-    "FlashScore /api/flashscore/v2/matches/list-by-date?sport_id=tennis&date=2026-06-06: HTTP Error 429: Too Many Requests",
-    "FlashScore /api/flashscore/v2/events/list?sport_id=tennis&date=2026-06-06: HTTP Error 404: Not Found",
-    "SofaScore /api/sofascore/v1/sport/tennis/scheduled-events/2026-06-06: HTTP Error 404: Not Found",
-    "SofaScore /api/sofascore/v1/events/schedule/tennis/2026-06-06: HTTP Error 404: Not Found",
-    "Tennisprodata /live-results/2026-06-06/: HTTP Error 401: Unauthorized",
-    "Tennisprodata /fixtures/2026-06-06/: HTTP Error 404: Not Found"
-  ],
+  "errors": [],
   "days": [
     {
-      "date": "2026-06-05",
+      "date": "2026-06-06",
       "label": "Hoy",
       "matches": [
         {
-          "time": "17:00",
-          "player1": "Matteo Arnaldi",
-          "player2": "Flavio Cobolli",
-          "tournament": "French Open, Paris, France",
+          "time": "10:10",
+          "player1": "Mackenzie McDonald",
+          "player2": "Niels Visker",
+          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Walkover",
+          "status": "Not started",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "12:35",
-          "player1": "Jakub Menšik",
-          "player2": "Alexander Zverev",
-          "tournament": "French Open, Paris, France",
+          "time": "09:00",
+          "player1": "Martin Damm Jr",
+          "player2": "Max Houkes",
+          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Ended",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "10:10",
+          "player1": "Michael Geerts",
+          "player2": "Elias Ymer",
+          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "11:20",
+          "player1": "Sander Jong",
+          "player2": "Shintaro Mochizuki",
+          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "11:20",
+          "player1": "Coleman Wong",
+          "player2": "James McCabe",
+          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Thijmen Loof",
+          "player2": "Juan Pablo Ficovich",
+          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "11:20",
+          "player1": "Benjamin Bonzi",
+          "player2": "Marc Polmans",
+          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "11:20",
+          "player1": "Alec Deckers",
+          "player2": "Bernard Tomic",
+          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Tom Gentzsch",
+          "player2": "Gauthier Onclin",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "12:50",
+          "player1": "Roman Safiullin",
+          "player2": "Petr Bar Biryukov",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Nikoloz Basilashvili",
+          "player2": "Marc-Andrea Huesler",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "10:30",
+          "player1": "Sho Shimabukuro",
+          "player2": "Stefanos Sakellaridis",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "10:30",
+          "player1": "Luca Castelnuovo",
+          "player2": "Jurij Rodionov",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "11:40",
+          "player1": "Pierre-Hugues Herbert",
+          "player2": "Daniil Glinka",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "11:40",
+          "player1": "Yu Hsiou Hsu",
+          "player2": "Alexis Galarneau",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "12:50",
+          "player1": "Lorenzo Sonego",
+          "player2": "Mert Alkaya",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
       ]
     },
     {
-      "date": "2026-06-06",
+      "date": "2026-06-07",
       "label": "Mañana",
-      "matches": []
+      "matches": [
+        {
+          "time": "13:00",
+          "player1": "Flavio Cobolli",
+          "player2": "Alexander Zverev",
+          "tournament": "French Open, Paris, France",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        }
+      ]
     }
   ]
 }
