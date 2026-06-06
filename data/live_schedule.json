@@ -10,30 +10,6 @@
       "matches": [
         {
           "time": "10:10",
-          "player1": "Mackenzie McDonald",
-          "player2": "Niels Visker",
-          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
-          "player1": "Martin Damm Jr",
-          "player2": "Max Houkes",
-          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "10:10",
           "player1": "Michael Geerts",
           "player2": "Elias Ymer",
           "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
@@ -57,7 +33,7 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "11:20",
+          "time": "11:40",
           "player1": "Coleman Wong",
           "player2": "James McCabe",
           "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
@@ -69,31 +45,7 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "09:00",
-          "player1": "Thijmen Loof",
-          "player2": "Juan Pablo Ficovich",
-          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "11:20",
-          "player1": "Benjamin Bonzi",
-          "player2": "Marc Polmans",
-          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "11:20",
+          "time": "12:30",
           "player1": "Alec Deckers",
           "player2": "Bernard Tomic",
           "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
@@ -105,10 +57,10 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "09:00",
-          "player1": "Tom Gentzsch",
-          "player2": "Gauthier Onclin",
-          "tournament": "Stuttgart, Germany, Qualifying",
+          "time": "12:50",
+          "player1": "Benjamin Bonzi",
+          "player2": "Marc Polmans",
+          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
@@ -117,7 +69,55 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "12:50",
+          "time": "11:50",
+          "player1": "Mackenzie McDonald",
+          "player2": "Niels Visker",
+          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Martin Damm Jr",
+          "player2": "Max Houkes",
+          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Thijmen Loof",
+          "player2": "Juan Pablo Ficovich",
+          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "10:10",
+          "player1": "Mac Visser",
+          "player2": "Elias Ymer",
+          "tournament": "S-Hertogenbosch, Netherlands, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "13:15",
           "player1": "Roman Safiullin",
           "player2": "Petr Bar Biryukov",
           "tournament": "Stuttgart, Germany, Qualifying",
@@ -130,8 +130,8 @@
         },
         {
           "time": "09:00",
-          "player1": "Nikoloz Basilashvili",
-          "player2": "Marc-Andrea Huesler",
+          "player1": "Marc-Andrea Huesler",
+          "player2": "Gauthier Onclin",
           "tournament": "Stuttgart, Germany, Qualifying",
           "level": "ATP",
           "round": "TBD",
@@ -141,9 +141,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "10:30",
-          "player1": "Sho Shimabukuro",
-          "player2": "Stefanos Sakellaridis",
+          "time": "12:55",
+          "player1": "Michalis Sakellaridis",
+          "player2": "Mert Alkaya",
           "tournament": "Stuttgart, Germany, Qualifying",
           "level": "ATP",
           "round": "TBD",
@@ -153,38 +153,38 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "10:30",
-          "player1": "Luca Castelnuovo",
-          "player2": "Jurij Rodionov",
-          "tournament": "Stuttgart, Germany, Qualifying",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "11:40",
-          "player1": "Pierre-Hugues Herbert",
-          "player2": "Daniil Glinka",
-          "tournament": "Stuttgart, Germany, Qualifying",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "11:40",
+          "time": "12:05",
           "player1": "Yu Hsiou Hsu",
           "player2": "Alexis Galarneau",
           "tournament": "Stuttgart, Germany, Qualifying",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Not started",
+          "status": "1st set",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "11:45",
+          "player1": "Pierre-Hugues Herbert",
+          "player2": "Daniil Glinka",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "1st set",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Tom Gentzsch",
+          "player2": "Gauthier Onclin",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Canceled",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -196,7 +196,55 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Not started",
+          "status": "Canceled",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Orlando Luz",
+          "player2": "Gauthier Onclin",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "10:30",
+          "player1": "Sho Shimabukuro",
+          "player2": "Stefanos Sakellaridis",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "10:30",
+          "player1": "Luca Castelnuovo",
+          "player2": "Jurij Rodionov",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Nikoloz Basilashvili",
+          "player2": "Marc-Andrea Huesler",
+          "tournament": "Stuttgart, Germany, Qualifying",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
