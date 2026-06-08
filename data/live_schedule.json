@@ -45,18 +45,6 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "09:00",
-          "player1": "Nuno Borges",
-          "player2": "Terence Atmane",
-          "tournament": "S-Hertogenbosch, Netherlands",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "08:00",
           "player1": "Tallon Griekspoor",
           "player2": "Botic Van de Zandschulp",
@@ -173,6 +161,18 @@
           "round": "TBD",
           "surface": "TBD",
           "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
+          "player1": "Nuno Borges",
+          "player2": "Terence Atmane",
+          "tournament": "S-Hertogenbosch, Netherlands",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "2nd set",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
