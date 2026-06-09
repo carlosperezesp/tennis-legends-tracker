@@ -82,6 +82,18 @@
         },
         {
           "time": "09:00",
+          "player1": "R16P9",
+          "player2": "Zhizhen Zhang",
+          "tournament": "S-Hertogenbosch, Netherlands",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
           "player1": "Nuno Borges",
           "player2": "Marin Čilić",
           "tournament": "S-Hertogenbosch, Netherlands",
@@ -105,7 +117,7 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "14:40",
+          "time": "09:00",
           "player1": "Otto Virtanen",
           "player2": "Kamil Majchrzak",
           "tournament": "S-Hertogenbosch, Netherlands",
@@ -117,21 +129,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "13:30",
+          "time": "09:00",
           "player1": "James McCabe",
           "player2": "Zizou Bergs",
-          "tournament": "S-Hertogenbosch, Netherlands",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "14:10",
-          "player1": "Thijs Boogaard",
-          "player2": "Yibing Wu",
           "tournament": "S-Hertogenbosch, Netherlands",
           "level": "ATP",
           "round": "TBD",
@@ -153,6 +153,18 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
+          "time": "14:55",
+          "player1": "Hubert Hurkacz",
+          "player2": "Marton Fucsovics",
+          "tournament": "S-Hertogenbosch, Netherlands",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Interrupted",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
           "time": "11:15",
           "player1": "Zhizhen Zhang",
           "player2": "Jenson Brooksby",
@@ -160,7 +172,7 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "3rd set",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -177,18 +189,6 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "13:30",
-          "player1": "Hubert Hurkacz",
-          "player2": "Marton Fucsovics",
-          "tournament": "S-Hertogenbosch, Netherlands",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "12:40",
           "player1": "Tallon Griekspoor",
           "player2": "Botic Van de Zandschulp",
@@ -196,38 +196,26 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "1st set",
+          "status": "Interrupted",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
           "time": "09:00",
           "player1": "Jiri Lehečka",
-          "player2": "R16P6",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
-          "player1": "R16P11",
-          "player2": "Alexander Bublik",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "14:00",
-          "player1": "Diego Dedura-Palomero",
           "player2": "James Duckworth",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "10:30",
+          "player1": "Jan-Lennard Struff",
+          "player2": "Alexander Bublik",
           "tournament": "Stuttgart, Germany",
           "level": "ATP",
           "round": "TBD",
@@ -250,20 +238,8 @@
         },
         {
           "time": "09:00",
-          "player1": "Martin Landaluce",
-          "player2": "Taylor Fritz",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
-          "player1": "Sho Shimabukuro",
-          "player2": "R16P4",
+          "player1": "Rinky Hijikata",
+          "player2": "Frances Tiafoe",
           "tournament": "Stuttgart, Germany",
           "level": "ATP",
           "round": "TBD",
@@ -309,33 +285,21 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "15:00",
-          "player1": "Nick Kyrgios",
-          "player2": "Corentin Moutet",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "13:10",
-          "player1": "Daniel Altmaier",
-          "player2": "Frances Tiafoe",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "09:00",
           "player1": "Roberto Bautista Agut",
           "player2": "Marcos Giron",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "14:25",
+          "player1": "Daniel Altmaier",
+          "player2": "Frances Tiafoe",
           "tournament": "Stuttgart, Germany",
           "level": "ATP",
           "round": "TBD",
@@ -393,18 +357,6 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "13:00",
-          "player1": "Tom Gentzsch",
-          "player2": "Rinky Hijikata",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "1st set",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "12:00",
           "player1": "Jan-Lennard Struff",
           "player2": "Alexis Galarneau",
@@ -412,7 +364,55 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "2nd set",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "13:00",
+          "player1": "Tom Gentzsch",
+          "player2": "Rinky Hijikata",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "15:30",
+          "player1": "Diego Dedura-Palomero",
+          "player2": "James Duckworth",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "13:00",
+          "player1": "Martin Landaluce",
+          "player2": "Taylor Fritz",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "17:15",
+          "player1": "Nick Kyrgios",
+          "player2": "Corentin Moutet",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
@@ -472,6 +472,18 @@
         },
         {
           "time": "09:00",
+          "player1": "R16P9",
+          "player2": "Zhizhen Zhang",
+          "tournament": "S-Hertogenbosch, Netherlands",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:00",
           "player1": "Nuno Borges",
           "player2": "Marin Čilić",
           "tournament": "S-Hertogenbosch, Netherlands",
@@ -495,7 +507,7 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "14:40",
+          "time": "09:00",
           "player1": "Otto Virtanen",
           "player2": "Kamil Majchrzak",
           "tournament": "S-Hertogenbosch, Netherlands",
@@ -507,7 +519,7 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "13:30",
+          "time": "09:00",
           "player1": "James McCabe",
           "player2": "Zizou Bergs",
           "tournament": "S-Hertogenbosch, Netherlands",
@@ -519,7 +531,7 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "14:10",
+          "time": "18:10",
           "player1": "Thijs Boogaard",
           "player2": "Yibing Wu",
           "tournament": "S-Hertogenbosch, Netherlands",
@@ -531,14 +543,14 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "13:30",
+          "time": "14:55",
           "player1": "Hubert Hurkacz",
           "player2": "Marton Fucsovics",
           "tournament": "S-Hertogenbosch, Netherlands",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Not started",
+          "status": "Interrupted",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -550,38 +562,26 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "1st set",
+          "status": "Interrupted",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
           "time": "09:00",
           "player1": "Jiri Lehečka",
-          "player2": "R16P6",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
-          "player1": "R16P11",
-          "player2": "Alexander Bublik",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "14:00",
-          "player1": "Diego Dedura-Palomero",
           "player2": "James Duckworth",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "10:30",
+          "player1": "Jan-Lennard Struff",
+          "player2": "Alexander Bublik",
           "tournament": "Stuttgart, Germany",
           "level": "ATP",
           "round": "TBD",
@@ -604,8 +604,8 @@
         },
         {
           "time": "09:00",
-          "player1": "Martin Landaluce",
-          "player2": "Taylor Fritz",
+          "player1": "Rinky Hijikata",
+          "player2": "Frances Tiafoe",
           "tournament": "Stuttgart, Germany",
           "level": "ATP",
           "round": "TBD",
@@ -617,7 +617,7 @@
         {
           "time": "09:00",
           "player1": "Sho Shimabukuro",
-          "player2": "R16P4",
+          "player2": "Nick Kyrgios",
           "tournament": "Stuttgart, Germany",
           "level": "ATP",
           "round": "TBD",
@@ -651,26 +651,14 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "15:00",
-          "player1": "Nick Kyrgios",
-          "player2": "Corentin Moutet",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "13:10",
+          "time": "14:25",
           "player1": "Daniel Altmaier",
           "player2": "Frances Tiafoe",
           "tournament": "Stuttgart, Germany",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Not started",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -682,7 +670,7 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "3rd set",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -694,7 +682,43 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "1st set",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "15:30",
+          "player1": "Diego Dedura-Palomero",
+          "player2": "James Duckworth",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "13:00",
+          "player1": "Martin Landaluce",
+          "player2": "Taylor Fritz",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "17:15",
+          "player1": "Nick Kyrgios",
+          "player2": "Corentin Moutet",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
