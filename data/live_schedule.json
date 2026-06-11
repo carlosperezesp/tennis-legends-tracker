@@ -93,9 +93,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "09:00",
-          "player1": "Ugo Humbert",
-          "player2": "Benjamin Bonzi",
+          "time": "11:40",
+          "player1": "Felix Auger-Aliassime",
+          "player2": "Marton Fucsovics",
           "tournament": "S-Hertogenbosch, Netherlands",
           "level": "ATP",
           "round": "TBD",
@@ -105,14 +105,14 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "11:40",
-          "player1": "Felix Auger-Aliassime",
-          "player2": "Marton Fucsovics",
+          "time": "09:00",
+          "player1": "Ugo Humbert",
+          "player2": "Benjamin Bonzi",
           "tournament": "S-Hertogenbosch, Netherlands",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Not started",
+          "status": "1st set",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
