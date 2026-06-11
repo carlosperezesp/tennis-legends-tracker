@@ -9,9 +9,9 @@
       "label": "Hoy",
       "matches": [
         {
-          "time": "09:00",
-          "player1": "Benjamin Bonzi",
-          "player2": "Alex de Minaur",
+          "time": "11:50",
+          "player1": "Felix Auger-Aliassime",
+          "player2": "Kamil Majchrzak",
           "tournament": "S-Hertogenbosch, Netherlands",
           "level": "ATP",
           "round": "TBD",
@@ -21,9 +21,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "09:00",
-          "player1": "Felix Auger-Aliassime",
-          "player2": "Kamil Majchrzak",
+          "time": "10:40",
+          "player1": "Benjamin Bonzi",
+          "player2": "Alex de Minaur",
           "tournament": "S-Hertogenbosch, Netherlands",
           "level": "ATP",
           "round": "TBD",
@@ -117,55 +117,31 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "13:35",
+          "time": "10:10",
           "player1": "Nuno Borges",
           "player2": "Marin Čilić",
           "tournament": "S-Hertogenbosch, Netherlands",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "2nd set",
+          "status": "Interrupted",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "14:15",
+          "time": "10:30",
           "player1": "Daniil Medvedev",
           "player2": "Thijs Boogaard",
           "tournament": "S-Hertogenbosch, Netherlands",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "2nd set",
+          "status": "Interrupted",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "09:00",
-          "player1": "Jiri Lehečka",
-          "player2": "Frances Tiafoe",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "15:55",
-          "player1": "Ben Shelton",
-          "player2": "Marcos Giron",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "09:00",
+          "time": "13:00",
           "player1": "Qf1",
           "player2": "Sho Shimabukuro",
           "tournament": "Stuttgart, Germany",
@@ -177,9 +153,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "09:00",
+          "time": "10:10",
           "player1": "Mattia Bellucci",
-          "player2": "Qf8",
+          "player2": "Taylor Fritz",
           "tournament": "Stuttgart, Germany",
           "level": "ATP",
           "round": "TBD",
@@ -244,7 +220,19 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "1st set",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "10:30",
+          "player1": "Ben Shelton",
+          "player2": "Marcos Giron",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Interrupted",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
@@ -255,7 +243,7 @@
       "label": "Mañana",
       "matches": [
         {
-          "time": "09:00",
+          "time": "15:00",
           "player1": "Jiri Lehečka",
           "player2": "Frances Tiafoe",
           "tournament": "Stuttgart, Germany",
@@ -267,9 +255,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "15:00",
-          "player1": "Ben Shelton",
-          "player2": "Marcos Giron",
+          "time": "13:00",
+          "player1": "Qf1",
+          "player2": "Sho Shimabukuro",
           "tournament": "Stuttgart, Germany",
           "level": "ATP",
           "round": "TBD",
@@ -279,9 +267,9 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "09:00",
+          "time": "10:10",
           "player1": "Mattia Bellucci",
-          "player2": "Qf8",
+          "player2": "Taylor Fritz",
           "tournament": "Stuttgart, Germany",
           "level": "ATP",
           "round": "TBD",
@@ -303,18 +291,6 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "13:20",
-          "player1": "Martin Landaluce",
-          "player2": "Taylor Fritz",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "12:30",
           "player1": "Sho Shimabukuro",
           "player2": "Nick Kyrgios",
@@ -322,7 +298,31 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "3rd set",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "14:45",
+          "player1": "Martin Landaluce",
+          "player2": "Taylor Fritz",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "17:35",
+          "player1": "Ben Shelton",
+          "player2": "Marcos Giron",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Interrupted",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
