@@ -18,9 +18,9 @@
       "label": "Hoy",
       "matches": [
         {
-          "time": "11:00",
-          "player1": "Benjamin Bonzi",
-          "player2": "Alex de Minaur",
+          "time": "13:55",
+          "player1": "Felix Auger-Aliassime",
+          "player2": "Kamil Majchrzak",
           "tournament": "S-Hertogenbosch, Netherlands",
           "level": "ATP",
           "round": "TBD",
@@ -30,9 +30,21 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "12:10",
-          "player1": "Felix Auger-Aliassime",
-          "player2": "Kamil Majchrzak",
+          "time": "15:25",
+          "player1": "Daniil Medvedev",
+          "player2": "Marin Čilić",
+          "tournament": "S-Hertogenbosch, Netherlands",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "13:00",
+          "player1": "Adrian Mannarino",
+          "player2": "WQF4",
           "tournament": "S-Hertogenbosch, Netherlands",
           "level": "ATP",
           "round": "TBD",
@@ -54,18 +66,6 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "10:10",
-          "player1": "Nuno Borges",
-          "player2": "Marin Čilić",
-          "tournament": "S-Hertogenbosch, Netherlands",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Interrupted",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "09:00",
           "player1": "Zhizhen Zhang",
           "player2": "Adrian Mannarino",
@@ -73,7 +73,19 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Not started",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "11:30",
+          "player1": "Nuno Borges",
+          "player2": "Marin Čilić",
+          "tournament": "S-Hertogenbosch, Netherlands",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Ended",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -85,7 +97,19 @@
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Interrupted",
+          "status": "Ended",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "12:55",
+          "player1": "Benjamin Bonzi",
+          "player2": "Alex de Minaur",
+          "tournament": "S-Hertogenbosch, Netherlands",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "1st set",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
@@ -102,7 +126,7 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "10:50",
+          "time": "13:20",
           "player1": "Mattia Bellucci",
           "player2": "Taylor Fritz",
           "tournament": "Stuttgart, Germany",
@@ -138,7 +162,7 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "13:00",
+          "time": "14:35",
           "player1": "Qf1",
           "player2": "Sho Shimabukuro",
           "tournament": "Stuttgart, Germany",
@@ -150,26 +174,26 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "09:00",
-          "player1": "Giovanni Mpetshi Perricard",
-          "player2": "Alexander Bublik",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "10:30",
+          "time": "13:40",
           "player1": "Ben Shelton",
           "player2": "Marcos Giron",
           "tournament": "Stuttgart, Germany",
           "level": "ATP",
           "round": "TBD",
           "surface": "TBD",
-          "status": "Interrupted",
+          "status": "3rd set",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "13:40",
+          "player1": "Giovanni Mpetshi Perricard",
+          "player2": "Alexander Bublik",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "1st set",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         }
