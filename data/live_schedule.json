@@ -5,7 +5,7 @@
   "errors": [
     "Tennis API - ATP WTA ITF /tennis/v2/atp/matches/date/2026-06-13: HTTP Error 404: Not Found",
     "Tennis API - ATP WTA ITF /tennis/v2/atp/calendar/2026-06-13: HTTP Error 404: Not Found",
-    "FlashScore /api/flashscore/v2/matches/list-by-date?sport_id=tennis&date=2026-06-13: HTTP Error 403: Forbidden",
+    "FlashScore /api/flashscore/v2/matches/list-by-date?sport_id=tennis&date=2026-06-13: HTTP Error 429: Too Many Requests",
     "FlashScore /api/flashscore/v2/events/list?sport_id=tennis&date=2026-06-13: HTTP Error 404: Not Found",
     "SofaScore /api/sofascore/v1/sport/tennis/scheduled-events/2026-06-13: HTTP Error 404: Not Found",
     "SofaScore /api/sofascore/v1/events/schedule/tennis/2026-06-13: HTTP Error 404: Not Found",
