@@ -9,7 +9,7 @@
     "FlashScore /api/flashscore/v2/events/list?sport_id=tennis&date=2026-06-14: HTTP Error 404: Not Found",
     "SofaScore /api/sofascore/v1/sport/tennis/scheduled-events/2026-06-14: HTTP Error 404: Not Found",
     "SofaScore /api/sofascore/v1/events/schedule/tennis/2026-06-14: HTTP Error 404: Not Found",
-    "Tennisprodata /live-results/2026-06-14/: HTTP Error 401: Unauthorized",
+    "Tennisprodata /live-results/2026-06-14/: HTTP Error 503: Service Temporarily Unavailable",
     "Tennisprodata /fixtures/2026-06-14/: HTTP Error 404: Not Found"
   ],
   "days": [
@@ -102,6 +102,18 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
+          "time": "10:00",
+          "player1": "Ben Shelton",
+          "player2": "Sho Shimabukuro",
+          "tournament": "Stuttgart, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Interrupted",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
           "time": "13:40",
           "player1": "Ben Shelton",
           "player2": "Marcos Giron",
@@ -146,18 +158,6 @@
           "round": "TBD",
           "surface": "TBD",
           "status": "Ended",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
-          "time": "10:00",
-          "player1": "Ben Shelton",
-          "player2": "Sho Shimabukuro",
-          "tournament": "Stuttgart, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Interrupted",
           "provider": "TennisAPI1",
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
