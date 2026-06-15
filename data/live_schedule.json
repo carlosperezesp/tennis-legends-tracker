@@ -519,18 +519,6 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "13:00",
-          "player1": "Flavio Cobolli",
-          "player2": "Frances Tiafoe",
-          "tournament": "Halle, Germany",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "09:30",
           "player1": "Zizou Bergs",
           "player2": "Taylor Fritz",
@@ -568,8 +556,8 @@
         },
         {
           "time": "09:30",
-          "player1": "Mattia Bellucci",
-          "player2": "Alexander Bublik",
+          "player1": "Alexander Zverev",
+          "player2": "Vit Kopřiva",
           "tournament": "Halle, Germany",
           "level": "ATP",
           "round": "TBD",
@@ -580,8 +568,32 @@
         },
         {
           "time": "09:30",
-          "player1": "Alexander Zverev",
-          "player2": "Vit Kopřiva",
+          "player1": "Joao Fonseca",
+          "player2": "Yannick Hanfmann",
+          "tournament": "Halle, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "13:15",
+          "player1": "Flavio Cobolli",
+          "player2": "Frances Tiafoe",
+          "tournament": "Halle, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "09:30",
+          "player1": "Mattia Bellucci",
+          "player2": "Alexander Bublik",
           "tournament": "Halle, Germany",
           "level": "ATP",
           "round": "TBD",
@@ -603,9 +615,21 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
+          "time": "12:05",
+          "player1": "Nuno Borges",
+          "player2": "Felix Auger-Aliassime",
+          "tournament": "Halle, Germany",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
           "time": "09:30",
-          "player1": "Joao Fonseca",
-          "player2": "Yannick Hanfmann",
+          "player1": "Learner Tien",
+          "player2": "R16P16",
           "tournament": "Halle, Germany",
           "level": "ATP",
           "round": "TBD",
@@ -723,18 +747,6 @@
           "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
         },
         {
-          "time": "14:00",
-          "player1": "Giovanni Mpetshi Perricard",
-          "player2": "Corentin Moutet",
-          "tournament": "London, Great Britain",
-          "level": "ATP",
-          "round": "TBD",
-          "surface": "TBD",
-          "status": "Not started",
-          "provider": "TennisAPI1",
-          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
-        },
-        {
           "time": "10:30",
           "player1": "Rinky Hijikata",
           "player2": "Alejandro Tabilo",
@@ -760,8 +772,20 @@
         },
         {
           "time": "10:30",
-          "player1": "Jenson Brooksby",
-          "player2": "Martin Damm Jr",
+          "player1": "Alex de Minaur",
+          "player2": "Gabriel Diallo",
+          "tournament": "London, Great Britain",
+          "level": "ATP",
+          "round": "TBD",
+          "surface": "TBD",
+          "status": "Not started",
+          "provider": "TennisAPI1",
+          "sourceUrl": "https://rapidapi.com/tipsters/api/tennisapi1"
+        },
+        {
+          "time": "14:00",
+          "player1": "Giovanni Mpetshi Perricard",
+          "player2": "Corentin Moutet",
           "tournament": "London, Great Britain",
           "level": "ATP",
           "round": "TBD",
@@ -772,8 +796,8 @@
         },
         {
           "time": "10:30",
-          "player1": "Alex de Minaur",
-          "player2": "Gabriel Diallo",
+          "player1": "Jenson Brooksby",
+          "player2": "Martin Damm Jr",
           "tournament": "London, Great Britain",
           "level": "ATP",
           "round": "TBD",
